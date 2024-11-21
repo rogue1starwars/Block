@@ -1,69 +1,87 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:phoneduino_block/data/block_data.dart';
+import 'package:phoneduino_block/models/block.dart';
 
-class Block {
-  final String id;
-  final List<dynamic> inputParameters;
-  final List<List<Block>> children;
-  final Function(List<dynamic>, List<List<Block>>) originalFunc;
+// class Block {
+//   final String id;
+//   final List<dynamic> inputParameters;
+//   final List<List<Block>> children;
+//   final Function(List<dynamic>, List<List<Block>>) originalFunc;
 
-  Block({
-    required this.id,
-    required this.inputParameters,
-    required this.children,
-    required this.originalFunc,
-  });
+//   Block({
+//     required this.id,
+//     required this.inputParameters,
+//     required this.children,
+//     required this.originalFunc,
+//   });
 
-  dynamic execute() {
-    return originalFunc(inputParameters, children);
-  }
+//   dynamic execute() {
+//     return originalFunc(inputParameters, children);
+//   }
 
-  Block copyWith({
-    String? id,
-    List<dynamic>? inputParameters,
-    List<List<Block>>? children,
-    Function(List<dynamic>, List<List<Block>>)? originalFunc,
-  }) {
-    return Block(
-      id: id ?? this.id,
-      inputParameters: inputParameters ?? this.inputParameters,
-      children: children ?? this.children,
-      originalFunc: originalFunc ?? this.originalFunc,
-    );
-  }
-}
+//   Block copyWith({
+//     String? id,
+//     String? name,
+//     List<dynamic>? inputParameters,
+//     List<List<Block>>? children,
+//     Function(List<dynamic>, List<List<Block>>)? originalFunc,
+//   }) {
+//     return Block(
+//       id: id ?? this.id,
+//       inputParameters: inputParameters ?? this.inputParameters,
+//       children: children ?? this.children,
+//       originalFunc: originalFunc ?? this.originalFunc,
+//     );
+//   }
+// }
 
 class BlockTreeNotifier extends StateNotifier<Block> {
-  BlockTreeNotifier()
-      : super(Block(
-            id: '0',
-            inputParameters: [],
-            children: [],
-            originalFunc:
-                (List<dynamic> inputParameters, List<List<Block>> children) {
-              for (int i = 0; i < children[0].length; i++) {
-                children[0][i].execute();
-              }
-            }));
+  BlockTreeNotifier() : super(blocks[0]('0'));
 
-  void addBlock({
+  // void input({
+  //   required Block block,
+  //   required int index,
+  //   required dynamic value,
+  // }) {
+  //   List<dynamic> newInputParameters = [
+  //     for (int i = 0; i < block.inputParameters.length; i++)
+  //       if (i == index) value else block.inputParameters[i]
+  //   ];
+  //   state.copyWith(inputParameters: newInputParameters);
+  // }
+
+  void changeValueInput({
     Block? parent,
+    required String parentId,
+    required String id,
     required Block block,
     required int index,
-    required String parentId,
   }) {
     parent ??= state;
 
     if (parent.id == parentId) {
-      List<List<Block>> newChildren = [
-        for (int i = 0; i < parent.children.length; i++)
-          if (i == index) [...parent.children[i], block] else parent.children[i]
+      // parent.children?[index].block = block;
+      parent.children?[index].copyWith(block: block);
+    }
+  }
+
+  void addStatementInput({
+    Block? parent,
+    required String parentId,
+    required Block block,
+    required int index,
+  }) {
+    parent ??= state;
+
+    if (parent.id == parentId) {
+      parent.children?[index].blocks = [
+        ...parent.children?[index].blocks!,
+        block,
       ];
-      parent.copyWith(children: newChildren);
-      return;
     } else {
-      for (int i = 0; i < parent.children.length; i++) {
-        addBlock(
-          parent: parent.children[i][0],
+      for (int i = 0; i < parent.children!.length; i++) {
+        addStatementInput(
+          parent: parent.children![i][0],
           block: block,
           index: index,
           parentId: parentId,
@@ -71,6 +89,31 @@ class BlockTreeNotifier extends StateNotifier<Block> {
       }
     }
   }
+  // void addBlock({
+  //   Block? parent, // used for searching trees recursively. Default is the state
+  //   required String parentId,
+  //   required Block block,
+  //   required int index,
+  // }) {
+  //   parent ??= state;
+
+  //   if (parent.id == parentId) {
+  //     List<List<Block>> newChildren = [
+  //       ...parent.children[index].blocks,
+  //     ];
+  //     parent.copyWith(children: newChildren);
+  //     return;
+  //   } else {
+  //     for (int i = 0; i < parent.children.length; i++) {
+  //       addBlock(
+  //         parent: parent.children[i][0],
+  //         block: block,
+  //         index: index,
+  //         parentId: parentId,
+  //       );
+  //     }
+  //   }
+  // }
 
   void removeBlock({Block? parent, required String id}) {
     parent ??= state;
