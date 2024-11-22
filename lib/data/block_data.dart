@@ -2,100 +2,169 @@ import 'package:phoneduino_block/models/block.dart';
 import 'package:phoneduino_block/models/fields.dart';
 import 'package:phoneduino_block/models/inputs.dart';
 
-// import 'package:phoneduino_block/provider/block_tree_provider.dart';
-List<Function> blocks = [
-  (String id) => MainBlock(id),
-  (String id) => ForLoop(id),
-  (String id) => Print(id),
-  (String id) => Int(id),
+List<Function> blockData = [
+  (id) => Block(
+        id: id,
+        name: 'Main',
+        children: [
+          StatementInput(
+            label: 'Do',
+            blocks: [],
+          ),
+        ],
+        returnType: 'void',
+        execute: (fields, children) {
+          children[0].blocks.forEach((block) {
+            block.execute();
+          });
+        },
+      ),
+  (id) => Block(
+        id: id,
+        name: 'For Loop',
+        fields: [
+          NumericField(label: "Times", value: 0),
+        ],
+        children: [
+          StatementInput(
+            label: 'Do',
+            blocks: [],
+          ),
+        ],
+        returnType: 'void',
+        execute: (fields, children) {
+          for (int i = 0; i < fields[0].value; i++) {
+            children[0].blocks.forEach((block) {
+              block.execute();
+            });
+          }
+        },
+      ),
+  (id) => Block(
+        id: id,
+        name: 'Print',
+        children: [
+          ValueInput(
+            label: 'Value',
+            block: null,
+          ),
+        ],
+        returnType: 'void',
+        execute: (fields, children) {
+          if (children[0].block == null) {
+            print("Print: null");
+          }
+          print(children[0].block.execute());
+        },
+      ),
+  (id) => Block(
+        id: id,
+        name: 'Int',
+        fields: [
+          NumericField(label: "Value", value: 0),
+        ],
+        children: [],
+        returnType: 'number',
+        execute: (fields, children) {
+          return fields[0].value;
+        },
+      ),
 ];
 
-class MainBlock extends Block {
-  MainBlock(String id)
-      : super(
-          id: id,
-          name: 'Main',
-          children: [
-            StatementInput(
-              label: 'Do',
-              blocks: [],
-            ),
-          ],
-          returnType: 'void',
-        );
-  @override
-  void execute() {
-    children?[0].blocks!.forEach((block) {
-      block.execute();
-    });
-  }
-}
+// // import 'package:phoneduino_block/provider/block_tree_provider.dart';
+// List<Function> blocks = [
+//   (String id) => MainBlock(id),
+//   (String id) => ForLoop(id),
+//   (String id) => Print(id),
+//   (String id) => Int(id),
+// ];
 
-class ForLoop extends Block {
-  ForLoop(String id)
-      : super(
-          id: id,
-          name: 'For Loop',
-          fields: [
-            NumericField(label: "Times", value: 0),
-          ],
-          children: [
-            StatementInput(
-              label: 'Do',
-              blocks: [],
-            ),
-          ],
-          returnType: 'void',
-        );
-  @override
-  void execute() {
-    for (int i = 0; i < fields?[0].value; i++) {
-      children?[0].blocks!.forEach((block) {
-        block.execute();
-      });
-    }
-  }
-}
+// class MainBlock extends Block {
+//   MainBlock(String id)
+//       : super(
+//           id: id,
+//           name: 'Main',
+//           children: [
+//             StatementInput(
+//               label: 'Do',
+//               blocks: [],
+//             ),
+//           ],
+//           returnType: 'void',
+//         );
+//   @override
+//   void execute() {
+//     children?[0].blocks!.forEach((block) {
+//       block.execute();
+//     });
+//   }
+// }
 
-class Print extends Block {
-  Print(String id)
-      : super(
-          id: id,
-          name: 'Print',
-          fields: [],
-          children: [
-            ValueInput(
-              label: 'Value',
-              block: null,
-            ),
-          ],
-          returnType: 'void',
-        );
-  @override
-  void execute() {
-    if (children?[0].block == null) {
-      print("Print: null");
-    }
-    print(children?[0].block!.execute());
-  }
-}
+// class ForLoop extends Block {
+//   ForLoop(String id)
+//       : super(
+//           id: id,
+//           name: 'For Loop',
+//           fields: [
+//             NumericField(label: "Times", value: 0),
+//           ],
+//           children: [
+//             StatementInput(
+//               label: 'Do',
+//               blocks: [],
+//             ),
+//           ],
+//           returnType: 'void',
+//         );
+//   @override
+//   void execute() {
+//     for (int i = 0; i < fields?[0].value; i++) {
+//       children?[0].blocks!.forEach((block) {
+//         block.execute();
+//       });
+//     }
+//   }
+// }
 
-class Int extends Block {
-  Int(String id)
-      : super(
-          id: id,
-          name: 'Int',
-          fields: [
-            NumericField(label: "Value", value: 0),
-          ],
-          children: [],
-          returnType: 'number',
-        );
-  @override
-  int execute() {
-    return fields?[0].value;
-  }
-}
+// class Print extends Block {
+//   Print(String id)
+//       : super(
+//           id: id,
+//           name: 'Print',
+//           fields: [],
+//           children: [
+//             ValueInput(
+//               label: 'Value',
+//               block: null,
+//             ),
+//           ],
+//           returnType: 'void',
+//         );
+//   @override
+//   void execute() {
+//     if (children?[0].block == null) {
+//       print("Print: null");
+//     }
+//     print(children?[0].block!.execute());
+//   }
+// }
+
+// class Int extends Block {
+//   Int(String id)
+//       : super(
+//           id: id,
+//           name: 'Int',
+//           fields: [
+//             NumericField(label: "Value", value: 0),
+//           ],
+//           children: [],
+//           returnType: 'number',
+//         );
+//   @override
+//   int execute() {
+//     return fields?[0].value;
+//   }
+// }
 
 // enum BluePrintType {
 //   name,

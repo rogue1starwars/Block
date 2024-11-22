@@ -36,7 +36,7 @@ import 'package:phoneduino_block/models/block.dart';
 // }
 
 class BlockTreeNotifier extends StateNotifier<Block> {
-  BlockTreeNotifier() : super(blocks[0]('0'));
+  BlockTreeNotifier() : super(blockData[0]('0'));
 
   // void input({
   //   required Block block,
@@ -58,10 +58,19 @@ class BlockTreeNotifier extends StateNotifier<Block> {
     required int index,
   }) {
     parent ??= state;
+    if (parent.children == null) return;
+    if (parent.children!.length <= index) return;
 
     if (parent.id == parentId) {
-      // parent.children?[index].block = block;
-      parent.children?[index].copyWith(block: block);
+      // Create new instance of a Input
+      final newChild = parent.children?[index].copyWith(block: block);
+      if (newChild == null) return;
+      final newChildren = [
+        ...parent.children!.sublist(0, index),
+        newChild,
+        ...parent.children!.sublist(index + 1),
+      ];
+      parent.copyWith(children: newChildren);
     }
   }
 
@@ -72,23 +81,25 @@ class BlockTreeNotifier extends StateNotifier<Block> {
     required int index,
   }) {
     parent ??= state;
+    if (parent.children == null) return;
+    if (parent.children!.length <= index) return;
 
     if (parent.id == parentId) {
-      parent.children?[index].blocks = [
-        ...parent.children?[index].blocks!,
+      final List<Block> newBlocks = [
+        ...(parent.children![index].blocks ?? []),
         block,
       ];
-    } else {
-      for (int i = 0; i < parent.children!.length; i++) {
-        addStatementInput(
-          parent: parent.children![i][0],
-          block: block,
-          index: index,
-          parentId: parentId,
-        );
-      }
+      final newChild = parent.children?[index].copyWith(blocks: newBlocks);
+      if (newChild == null) return;
+      final newChildren = [
+        ...parent.children!.sublist(0, index),
+        newChild,
+        ...parent.children!.sublist(index + 1),
+      ];
+      parent.copyWith(children: newChildren);
     }
   }
+
   // void addBlock({
   //   Block? parent, // used for searching trees recursively. Default is the state
   //   required String parentId,
@@ -115,26 +126,31 @@ class BlockTreeNotifier extends StateNotifier<Block> {
   //   }
   // }
 
-  void removeBlock({Block? parent, required String id}) {
-    parent ??= state;
+  // void removeBlock({Block? parent, required String id}) {
+  //   parent ??= state;
 
-    for (int i = 0; i < parent.children.length; i++) {
-      for (int j = 0; j < parent.children[i].length; j++) {
-        if (parent.children[i][j].id == id) {
-          List<List<Block>> newChildren = [
-            ...parent.children.sublist(0, i),
-            [
-              ...parent.children[i].sublist(0, j),
-              ...parent.children[i].sublist(j + 1)
-            ],
-            ...parent.children.sublist(i + 1)
-          ];
-          parent.copyWith(children: newChildren);
-          return;
-        } else {
-          removeBlock(parent: parent.children[i][0], id: id);
-        }
-      }
-    }
-  }
+  //   for (int i = 0; i < parent.children.length; i++) {
+  //     for (int j = 0; j < parent.children[i].length; j++) {
+  //       if (parent.children[i][j].id == id) {
+  //         List<List<Block>> newChildren = [
+  //           ...parent.children.sublist(0, i),
+  //           [
+  //             ...parent.children[i].sublist(0, j),
+  //             ...parent.children[i].sublist(j + 1)
+  //           ],
+  //           ...parent.children.sublist(i + 1)
+  //         ];
+  //         parent.copyWith(children: newChildren);
+  //         return;
+  //       } else {
+  //         removeBlock(parent: parent.children[i][0], id: id);
+  //       }
+  //     }
+  //   }
+  // }
 }
+
+final blockTreeProvider =
+    StateNotifierProvider<BlockTreeNotifier, Block>((ref) {
+  return BlockTreeNotifier();
+});
