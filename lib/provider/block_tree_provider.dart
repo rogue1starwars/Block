@@ -50,10 +50,49 @@ class BlockTreeNotifier extends StateNotifier<Block> {
   //   state.copyWith(inputParameters: newInputParameters);
   // }
 
+  void updateFieldInput({
+    Block? parent,
+    required String parentId,
+    required dynamic value,
+    required int index,
+  }) {
+    parent ??= state;
+    if (parent.fields == null) return;
+    if (parents.fields!.length <= index) return;
+
+    if (parent.id == parentId) {
+      final newFields = [
+        for (int i = 0; i < parent.fields!.length; i++)
+          if (i == index) parent.fields![i].copyWith(value: value)
+          else parent.fields![i]
+      ]
+    } else {
+      for (int i = 0; i < parent.children!.length; i++) {
+        if (parent.children![i].blocks == null)  {
+          updateFieldInput(
+            parent: parent.children![i].block,
+            parentId: parentId,
+            value: value,
+            index: index,
+          );
+        } else {
+          for (int j = 0; j < parent.children![i].blocks!.length; j++) {
+            updateFieldInput(
+              parent: parent.children![i].blocks![j],
+              parentId: parentId,
+              value: value,
+              index: index,
+            );
+          }
+        }
+
+      }
+    }
+  }
+
   void changeValueInput({
     Block? parent,
     required String parentId,
-    required String id,
     required Block block,
     required int index,
   }) {
@@ -71,6 +110,17 @@ class BlockTreeNotifier extends StateNotifier<Block> {
         ...parent.children!.sublist(index + 1),
       ];
       parent.copyWith(children: newChildren);
+    }
+    // TODO implement recursive search for blocks as well (switch between statement and value)
+    else {
+      for (int i = 0; i < parent.children!.length; i++) {
+        changeValueInput(
+          parent: parent.children![i].block,
+          block: block,
+          index: index,
+          parentId: parentId,
+        );
+      }
     }
   }
 
@@ -97,6 +147,17 @@ class BlockTreeNotifier extends StateNotifier<Block> {
         ...parent.children!.sublist(index + 1),
       ];
       parent.copyWith(children: newChildren);
+    }
+    // TODO implement recursive search for blocks as well (switch between statement and value)
+    else {
+      for (int i = 0; i < parent.children!.length; i++) {
+        addStatementInput(
+          parent: parent.children![i].block,
+          block: block,
+          index: index,
+          parentId: parentId,
+        );
+      }
     }
   }
 
