@@ -1,15 +1,12 @@
 import 'package:phoneduino_block/models/block.dart';
+import 'package:phoneduino_block/utils/type.dart';
 
 class Input {
   final String label;
-  final String? type;
-  // final List<Block>? blocks;
-  // final Block? block;
+  final Map<BlockTypes, bool>? filter;
   Input({
     required this.label,
-    // this.block,
-    // this.blocks,
-    this.type,
+    this.filter,
   });
 }
 
@@ -18,17 +15,17 @@ class StatementInput extends Input {
   StatementInput({
     required super.label,
     required this.blocks,
-    super.type,
+    super.filter,
   });
 
   StatementInput copyWith({
     String? label,
-    String? type,
+    Map<BlockTypes, bool>? filter,
     List<Block>? blocks,
   }) {
     return StatementInput(
       label: label ?? this.label,
-      type: type ?? this.type,
+      filter: filter ?? this.filter,
       blocks: blocks ?? this.blocks,
     );
   }
@@ -38,18 +35,18 @@ class ValueInput extends Input {
   final Block? block;
   ValueInput({
     required super.label,
-    super.type,
+    super.filter,
     required this.block,
   });
 
   ValueInput copyWith({
     String? label,
-    String? type,
+    Map<BlockTypes, bool>? filter,
     Block? block,
   }) {
     return ValueInput(
       label: label ?? this.label,
-      type: type ?? this.type,
+      filter: filter ?? this.filter,
       block: block ?? this.block,
     );
   }

@@ -1,12 +1,14 @@
+import 'package:phoneduino_block/data/block_data.dart';
 import 'package:phoneduino_block/models/fields.dart';
 import 'package:phoneduino_block/models/inputs.dart';
+import 'package:phoneduino_block/utils/type.dart';
 
 class Block {
   final String id;
   final String name;
   final List<Field>? fields;
   final List<Input>? children;
-  final String returnType;
+  final BlockTypes returnType;
   late final Function execute;
 
   Block({
@@ -20,12 +22,20 @@ class Block {
     this.execute = () => execute(fields, children);
   }
 
+  Block.fromBluePrint({required BlockBluePrint block, required this.id})
+      : name = block.name,
+        fields = block.fields,
+        children = block.children,
+        returnType = block.returnType {
+    execute = () => block.execute(fields, children);
+  }
+
   Block copyWith({
     String? id,
     String? name,
     List<Field>? fields,
     List<Input>? children,
-    String? returnType,
+    BlockTypes? returnType,
     Function? execute,
   }) {
     return Block(

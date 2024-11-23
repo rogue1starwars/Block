@@ -25,12 +25,12 @@ class NumericField extends Field {
   NumericField({
     required super.label,
     required super.value,
-  }) : super(type: 'Number');
+  }) : super(type: 'number');
 }
 
 class StringField extends Field {
   StringField({
     required super.label,
     required super.value,
-  }) : super(type: 'String');
+  }) : super(type: 'string');
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:phoneduino_block/data/block_data.dart';
 import 'package:phoneduino_block/models/block.dart';
 import 'package:phoneduino_block/models/fields.dart';
 import 'package:phoneduino_block/models/inputs.dart';
@@ -25,7 +26,11 @@ class BlockTree extends ConsumerWidget {
   final Block block;
   const BlockTree({super.key, required this.block});
 
-  Widget _handleInputs(Input input) {
+  Widget _handleInputs({
+    required Block parent,
+    required int index,
+  }) {
+    final Input input = parent.children![index];
     switch (input) {
       case ValueInput _:
         return Column(
@@ -36,7 +41,9 @@ class BlockTree extends ConsumerWidget {
             ),
             (input.block != null)
                 ? BlockTree(block: input.block!)
-                : SizedBox.shrink(), // TODO Create a add button
+                : AddButton(
+                    parentBlock: parent,
+                    index: index) // TODO Create a add button
           ],
         );
       case StatementInput _:
@@ -88,33 +95,55 @@ class BlockTree extends ConsumerWidget {
           ),
         ),
         if (block.children != null)
-          for (Input child in block.children!) _handleInputs(child),
+          for (int i = 0; i < block.children!.length; i++)
+            _handleInputs(parent: block, index: i),
       ],
     );
   }
 }
 
 class AddButton extends ConsumerWidget {
-  final String parentId;
-  final Block block;
+  final Block parentBlock;
   final int index;
   const AddButton({
     super.key,
-    required this.parentId,
-    required this.block,
+    required this.parentBlock,
     required this.index,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return IconButton(
-        onPressed: () {
-          ref.read(blockTreeProvider.notifier).addBlock(
-                parentId: parentId,
-                block: block,
-                index: index,
-              );
-        },
+        onPressed: () => _dialogBuilder(context, ref),
         icon: const Icon(Icons.add));
+  }
+
+  Future<void> _dialogBuilder(BuildContext context, WidgetRef ref) {
+    final filter = parentBlock.children![index].filter;
+
+    return showDialog<void>(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text("Add a new block"),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                for (BlockBluePrint block in filterBlockData(filter))
+                  ListTile(
+                    title: Text(block.name),
+                    onTap: () {
+                      ref.read(blockTreeProvider.notifier).addBlock(
+                            parentId: parentBlock.id,
+                            block: Block.fromBluePrint(block: block, id: ''),
+                            index: index,
+                          );
+                      Navigator.of(context).pop();
+                    },
+                  ),
+              ],
+            ),
+          );
+        });
   }
 }

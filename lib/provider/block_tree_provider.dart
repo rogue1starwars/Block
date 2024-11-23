@@ -4,7 +4,11 @@ import 'package:phoneduino_block/models/block.dart';
 import 'package:phoneduino_block/models/inputs.dart';
 
 class BlockTreeNotifier extends StateNotifier<Block> {
-  BlockTreeNotifier() : super(blockData[0]('0'));
+  BlockTreeNotifier()
+      : super(Block.fromBluePrint(
+          block: blockData[0],
+          id: '0',
+        ));
 
   void updateFieldInput({
     Block? parent,
