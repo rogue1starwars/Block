@@ -41,9 +41,7 @@ class BlockTree extends ConsumerWidget {
             ),
             (input.block != null)
                 ? BlockTree(block: input.block!)
-                : AddButton(
-                    parentBlock: parent,
-                    index: index) // TODO Create a add button
+                : AddButton(parentBlock: parent, index: index)
           ],
         );
       case StatementInput _:
@@ -54,7 +52,7 @@ class BlockTree extends ConsumerWidget {
               child: Text(input.label),
             ),
             for (var block in input.blocks) BlockTree(block: block),
-            //TODO Create a add button
+            AddButton(parentBlock: parent, index: index),
           ],
         );
       default:
