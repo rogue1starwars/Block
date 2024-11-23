@@ -1,97 +1,238 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-class Block {
-  final String id;
-  final List<dynamic> inputParameters;
-  final List<List<Block>> children;
-  final Function(List<dynamic>, List<List<Block>>) originalFunc;
-
-  Block({
-    required this.id,
-    required this.inputParameters,
-    required this.children,
-    required this.originalFunc,
-  });
-
-  dynamic execute() {
-    return originalFunc(inputParameters, children);
-  }
-
-  Block copyWith({
-    String? id,
-    List<dynamic>? inputParameters,
-    List<List<Block>>? children,
-    Function(List<dynamic>, List<List<Block>>)? originalFunc,
-  }) {
-    return Block(
-      id: id ?? this.id,
-      inputParameters: inputParameters ?? this.inputParameters,
-      children: children ?? this.children,
-      originalFunc: originalFunc ?? this.originalFunc,
-    );
-  }
-}
+import 'package:phoneduino_block/data/block_data.dart';
+import 'package:phoneduino_block/models/block.dart';
+import 'package:phoneduino_block/models/inputs.dart';
 
 class BlockTreeNotifier extends StateNotifier<Block> {
   BlockTreeNotifier()
-      : super(Block(
-            id: '0',
-            inputParameters: [],
-            children: [],
-            originalFunc:
-                (List<dynamic> inputParameters, List<List<Block>> children) {
-              for (int i = 0; i < children[0].length; i++) {
-                children[0][i].execute();
-              }
-            }));
+      : super(Block.fromBluePrint(
+          block: blockData[0],
+          id: '0',
+        ));
+
+  void updateFieldInput({
+    Block? parent,
+    required String parentId,
+    required dynamic value,
+    required int index,
+  }) {
+    parent ??= state;
+    if (parent.fields == null) return;
+    if (parent.fields!.length <= index) return;
+
+    if (parent.id == parentId) {
+      final newFields = [
+        for (int i = 0; i < parent.fields!.length; i++)
+          if (i == index)
+            parent.fields![i].copyWith(value: value)
+          else
+            parent.fields![i]
+      ];
+      parent.copyWith(fields: newFields);
+    } else {
+      recursive(
+        callback: updateFieldInput,
+        parent: parent,
+        parentId: parentId,
+        value: value,
+        index: index,
+      );
+    }
+  }
+
+  List<Input> createNewChildren({
+    required Block parent,
+    required Block block,
+    required int index,
+  }) {
+    switch (parent.children![index]) {
+      case ValueInput _:
+        final ValueInput targetChild = parent.children![index] as ValueInput;
+        final List<Input> newChildren = [
+          for (int i = 0; i < parent.children!.length; i++)
+            if (i == index)
+              targetChild.copyWith(block: block)
+            else
+              parent.children![i]
+        ];
+        return newChildren;
+      case StatementInput _:
+        final StatementInput targetChild =
+            parent.children![index] as StatementInput;
+        List<Block> newBlocks = [
+          ...(targetChild.blocks),
+          block,
+        ];
+        final List<Input> newChildren = [
+          for (int i = 0; i < parent.children!.length; i++)
+            if (i == index)
+              targetChild.copyWith(blocks: newBlocks)
+            else
+              parent.children![i]
+        ];
+        return newChildren;
+      default:
+        return [];
+    }
+  }
+
+  void recursive({
+    required Function callback,
+    required Block parent,
+    required String parentId,
+    required dynamic value,
+    required int index,
+  }) {
+    /*
+    * This function will recursively call the callback function
+    * for each child of the parent block
+    */
+    for (int i = 0; i < parent.children!.length; i++) {
+      switch (parent.children![i]) {
+        case ValueInput _:
+          final ValueInput targetChild = parent.children![i] as ValueInput;
+          callback(
+            parent: targetChild.block,
+            parentId: parentId,
+            block: value,
+            index: index,
+          );
+          break;
+        case StatementInput _:
+          final StatementInput targetChild =
+              parent.children![i] as StatementInput;
+          for (int j = 0; j < targetChild.blocks.length; j++) {
+            callback(
+              parent: targetChild.blocks[j],
+              parentId: parentId,
+              block: value,
+              index: index,
+            );
+          }
+          break;
+      }
+    }
+  }
 
   void addBlock({
     Block? parent,
+    required String parentId,
     required Block block,
     required int index,
-    required String parentId,
   }) {
     parent ??= state;
+    if (parent.children == null) return;
+    if (parent.children!.length <= index) return;
 
     if (parent.id == parentId) {
-      List<List<Block>> newChildren = [
-        for (int i = 0; i < parent.children.length; i++)
-          if (i == index) [...parent.children[i], block] else parent.children[i]
-      ];
+      final newChildren = createNewChildren(
+        parent: parent,
+        block: block,
+        index: index,
+      );
       parent.copyWith(children: newChildren);
-      return;
     } else {
-      for (int i = 0; i < parent.children.length; i++) {
-        addBlock(
-          parent: parent.children[i][0],
-          block: block,
-          index: index,
-          parentId: parentId,
-        );
-      }
+      recursive(
+        callback: addBlock,
+        parent: parent,
+        parentId: parentId,
+        value: block,
+        index: index,
+      );
     }
   }
 
-  void removeBlock({Block? parent, required String id}) {
-    parent ??= state;
+  // void changeValueInput({
+  //   Block? parent,
+  //   required String parentId,
+  //   required Block block,
+  //   required int index,
+  // }) {
+  //   parent ??= state;
+  //   if (parent.children == null) return;
+  //   if (parent.children!.length <= index) return;
 
-    for (int i = 0; i < parent.children.length; i++) {
-      for (int j = 0; j < parent.children[i].length; j++) {
-        if (parent.children[i][j].id == id) {
-          List<List<Block>> newChildren = [
-            ...parent.children.sublist(0, i),
-            [
-              ...parent.children[i].sublist(0, j),
-              ...parent.children[i].sublist(j + 1)
-            ],
-            ...parent.children.sublist(i + 1)
-          ];
-          parent.copyWith(children: newChildren);
-          return;
-        } else {
-          removeBlock(parent: parent.children[i][0], id: id);
-        }
-      }
-    }
-  }
+  //   if (parent.id == parentId) {
+  //     // Create new instance of a Input
+  //     final newChildren = [
+  //       for (int i = 0; i < parent.children!.length; i++)
+  //         if (i == index)
+  //           parent.children![i].copyWith(block: block)
+  //         else
+  //           parent.children![i]
+  //     ];
+  //     parent.copyWith(children: newChildren);
+  //   } else {
+  //     for (int i = 0; i < parent.children!.length; i++) {
+  //       if (parent.children![i].runtimeType == ValueInput) {
+  //         changeValueInput(
+  //           parent: parent.children![i].block,
+  //           parentId: parentId,
+  //           block: block,
+  //           index: index,
+  //         );
+  //       } else {
+  //         for (int j = 0; j < parent.children![i].blocks!.length; j++) {
+  //           changeValueInput(
+  //             parent: parent.children![i].blocks![j],
+  //             parentId: parentId,
+  //             block: block,
+  //             index: index,
+  //           );
+  //         }
+  //       }
+  //     }
+  //   }
+  // }
+
+  // void addStatementInput({
+  //   Block? parent,
+  //   required String parentId,
+  //   required Block block,
+  //   required int index,
+  // }) {
+  //   parent ??= state;
+  //   if (parent.children == null) return;
+  //   if (parent.children!.length <= index) return;
+
+  //   if (parent.id == parentId) {
+  //     final List<Block> newBlocks = [
+  //       ...(parent.children![index].blocks ?? []),
+  //       block,
+  //     ];
+  //     final newChild = parent.children?[index].copyWith(blocks: newBlocks);
+  //     if (newChild == null) return;
+  //     final newChildren = [
+  //       ...parent.children!.sublist(0, index),
+  //       newChild,
+  //       ...parent.children!.sublist(index + 1),
+  //     ];
+  //     parent.copyWith(children: newChildren);
+  //   } else {
+  //     for (int i = 0; i < parent.children!.length; i++) {
+  //       if (parent.children![i].runtimeType == ValueInput) {
+  //         addStatementInput(
+  //           parent: parent.children![i].block,
+  //           parentId: parentId,
+  //           block: block,
+  //           index: index,
+  //         );
+  //       } else {
+  //         for (int j = 0; j < parent.children![i].blocks!.length; j++) {
+  //           addStatementInput(
+  //             parent: parent.children![i].blocks![j],
+  //             parentId: parentId,
+  //             block: block,
+  //             index: index,
+  //           );
+  //         }
+  //       }
+  //     }
+  //   }
+  // }
 }
+
+final blockTreeProvider =
+    StateNotifierProvider<BlockTreeNotifier, Block>((ref) {
+  return BlockTreeNotifier();
+});
