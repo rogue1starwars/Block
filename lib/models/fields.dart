@@ -1,11 +1,11 @@
 class Field {
   final String label;
-  final String? type;
+  final String type;
   final dynamic value;
   Field({
     required this.label,
     required this.value,
-    this.type,
+    required this.type,
   });
 
   Field copyWith({
@@ -28,8 +28,8 @@ class NumericField extends Field {
   }) : super(type: 'Number');
 }
 
-class TextField extends Field {
-  TextField({
+class StringField extends Field {
+  StringField({
     required super.label,
     required super.value,
   }) : super(type: 'String');
