@@ -15,16 +15,18 @@ class BlockTreeNotifier extends StateNotifier<Block> {
     required dynamic value,
     required int index,
   }) {
+    print("\n\n\n");
+    print("Updating field");
+    print("Parent ID: $parentId");
+    print("Value: $value");
+    print("\n\n\n");
     Block? updateFieldHelper({
       required Block parent,
       required String parentId,
       required dynamic value,
       required int index,
     }) {
-      if (parent.fields == null) return null;
-      if (parent.fields!.length <= index) return null;
-
-      if (parent.id == parentId) {
+      if (parent.fields != null && parent.id == parentId) {
         final newFields = [
           for (int i = 0; i < parent.fields!.length; i++)
             if (i == index)

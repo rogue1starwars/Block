@@ -38,6 +38,7 @@ class BaseFieldWidget extends ConsumerWidget {
   }
 
   void onFieldChanged(String value, WidgetRef ref) {
+    print('Updating field: $value');
     ref.read(blockTreeProvider.notifier).updateField(
           parentId: parent.id,
           value: value,

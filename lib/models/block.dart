@@ -9,25 +9,26 @@ class Block {
   final List<Field>? fields;
   final List<Input>? children;
   final BlockTypes returnType;
-  late final Function execute;
+  final Function originalFunc;
 
   Block({
     required this.id,
     required this.name,
     required this.returnType,
-    required execute,
+    required this.originalFunc,
     this.fields,
     this.children,
-  }) {
-    this.execute = () => execute(fields, children);
-  }
+  });
 
   Block.fromBluePrint({required BlockBluePrint block, required this.id})
       : name = block.name,
+        returnType = block.returnType,
+        originalFunc = block.originalFunc,
         fields = block.fields,
-        children = block.children,
-        returnType = block.returnType {
-    execute = () => block.execute(fields, children);
+        children = block.children;
+
+  dynamic execute() {
+    return originalFunc(fields, children);
   }
 
   Block copyWith({
@@ -36,7 +37,7 @@ class Block {
     List<Field>? fields,
     List<Input>? children,
     BlockTypes? returnType,
-    Function? execute,
+    Function? originalFunc,
   }) {
     return Block(
       id: id ?? this.id,
@@ -44,7 +45,7 @@ class Block {
       fields: fields ?? this.fields,
       children: children ?? this.children,
       returnType: returnType ?? this.returnType,
-      execute: execute ?? this.execute,
+      originalFunc: originalFunc ?? this.originalFunc,
     );
   }
 }

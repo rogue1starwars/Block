@@ -7,12 +7,12 @@ class BlockBluePrint {
   final List<Field>? fields;
   final List<Input>? children;
   final BlockTypes returnType;
-  final Function execute;
+  final Function originalFunc;
 
   BlockBluePrint({
     required this.name,
     required this.returnType,
-    required this.execute,
+    required this.originalFunc,
     this.fields,
     this.children,
   });
@@ -50,8 +50,9 @@ List<BlockBluePrint> blockData = [
       ),
     ],
     returnType: BlockTypes.none,
-    execute: (fields, children) {
-      children[0].blocks.forEach((block) {
+    originalFunc: (List<Field>? field, List<Input> children) {
+      final statement = children[0] as StatementInput;
+      statement.blocks.forEach((block) {
         block.execute();
       });
     },
@@ -68,9 +69,10 @@ List<BlockBluePrint> blockData = [
       ),
     ],
     returnType: BlockTypes.none,
-    execute: (fields, children) {
+    originalFunc: (List<Field> fields, List<Input> children) {
+      final statement = children[0] as StatementInput;
       for (int i = 0; i < fields[0].value; i++) {
-        children[0].blocks.forEach((block) {
+        statement.blocks.forEach((block) {
           block.execute();
         });
       }
@@ -85,11 +87,12 @@ List<BlockBluePrint> blockData = [
       ),
     ],
     returnType: BlockTypes.none,
-    execute: (fields, children) {
-      if (children[0].block == null) {
+    originalFunc: (List<Field>? fields, List<Input> children) {
+      final value = children[0] as ValueInput;
+      if (value.block == null) {
         print("Print: null");
       }
-      print(children[0].block.execute());
+      print(value.block!.execute());
     },
   ),
   BlockBluePrint(
@@ -99,7 +102,7 @@ List<BlockBluePrint> blockData = [
     ],
     children: [],
     returnType: BlockTypes.number,
-    execute: (fields, children) {
+    originalFunc: (List<Field> fields, List<Input>? children) {
       return fields[0].value;
     },
   ),
@@ -127,9 +130,9 @@ List<BlockBluePrint> blockData = [
 //           returnType: 'void',
 //         );
 //   @override
-//   void execute() {
+//   void originalFunc() {
 //     children?[0].blocks!.forEach((block) {
-//       block.execute();
+//       block.originalFunc();
 //     });
 //   }
 // }
@@ -151,10 +154,10 @@ List<BlockBluePrint> blockData = [
 //           returnType: 'void',
 //         );
 //   @override
-//   void execute() {
+//   void originalFunc() {
 //     for (int i = 0; i < fields?[0].value; i++) {
 //       children?[0].blocks!.forEach((block) {
-//         block.execute();
+//         block.originalFunc();
 //       });
 //     }
 //   }
@@ -175,11 +178,11 @@ List<BlockBluePrint> blockData = [
 //           returnType: 'void',
 //         );
 //   @override
-//   void execute() {
+//   void originalFunc() {
 //     if (children?[0].block == null) {
 //       print("Print: null");
 //     }
-//     print(children?[0].block!.execute());
+//     print(children?[0].block!.originalFunc());
 //   }
 // }
 
@@ -195,7 +198,7 @@ List<BlockBluePrint> blockData = [
 //           returnType: 'number',
 //         );
 //   @override
-//   int execute() {
+//   int originalFunc() {
 //     return fields?[0].value;
 //   }
 // }
@@ -206,7 +209,7 @@ List<BlockBluePrint> blockData = [
 //   inputParameters,
 //   blockParameters,
 //   returnType,
-//   execute,
+//   originalFunc,
 // }
 
 // Map<int, Map<BluePrintType, dynamic>> bluePrints = {
@@ -216,10 +219,10 @@ List<BlockBluePrint> blockData = [
 //     BluePrintType.inputParameters: [int],
 //     BluePrintType.blockParameters: [List],
 //     BluePrintType.returnType: null,
-//     BluePrintType.execute: (List<int> inputParameters,
+//     BluePrintType.originalFunc: (List<int> inputParameters,
 //         List<List<ExecutionBlockBluePrint>> blockParameters) {
 //       for (int i = 0; i < inputParameters[0]; i++) {
-//         blockParameters[0].forEach((block) => block.execute());
+//         blockParameters[0].forEach((block) => block.originalFunc());
 //       }
 //     },
 //   },
@@ -229,11 +232,11 @@ List<BlockBluePrint> blockData = [
 //     BluePrintType.inputParameters: [],
 //     BluePrintType.blockParameters: [dynamic],
 //     BluePrintType.returnType: null,
-//     BluePrintType.execute:
+//     BluePrintType.originalFunc:
 //         (List inputParameters, List<List<ExecutionBlockBluePrint>> blockParameters) {
 //       blockParameters[0].forEach((block) {
 //         var result = 100;
-//         result = block.execute();
+//         result = block.originalFunc();
 //         print('Print: $result');
 //       });
 //     },
@@ -244,7 +247,7 @@ List<BlockBluePrint> blockData = [
 //     BluePrintType.inputParameters: [int],
 //     BluePrintType.blockParameters: [null],
 //     BluePrintType.returnType: int,
-//     BluePrintType.execute: (List<int> inputParameters,
+//     BluePrintType.originalFunc: (List<int> inputParameters,
 //         List<List<ExecutionBlockBluePrint>> blockParameters) {
 //       print('Int: ${inputParameters[0]}');
 //       return inputParameters[0];
@@ -256,21 +259,21 @@ List<BlockBluePrint> blockData = [
 //   id,
 //   inputParameters,
 //   blockParameters,
-//   execute,
+//   originalFunc,
 // }
 
-// Function executeTree(Map<TreeTypes, dynamic> blockTree) {
-//   return blockTree[TreeTypes.execute](blockTree[TreeTypes.inputParameters],
+// Function originalFuncTree(Map<TreeTypes, dynamic> blockTree) {
+//   return blockTree[TreeTypes.originalFunc](blockTree[TreeTypes.inputParameters],
 //       blockTree[TreeTypes.blockParameters]);
 // }
 
 // Map<TreeTypes, dynamic> blockTree = {
 //   TreeTypes.id: 1,
-//   TreeTypes.execute: (List<int> inputParameters,
+//   TreeTypes.originalFunc: (List<int> inputParameters,
 //       List<List<Map<TreeTypes, dynamic>>> blockParameters) {
 //     for (int i = 0; i < inputParameters[0]; i++) {
 //       blockParameters[0].forEach((tree) {
-//         executeTree(tree);
+//         originalFuncTree(tree);
 //       });
 //     }
 //   },
@@ -279,10 +282,10 @@ List<BlockBluePrint> blockData = [
 //     [
 //       {
 //         TreeTypes.id: 2,
-//         TreeTypes.execute: (List inputParameters,
+//         TreeTypes.originalFunc: (List inputParameters,
 //             List<List<Map<TreeTypes, dynamic>>> blockParameters) {
 //           blockParameters[0].forEach((tree) {
-//             print(executeTree(tree));
+//             print(originalFuncTree(tree));
 //           });
 //         },
 //         TreeTypes.inputParameters: [],
@@ -290,7 +293,7 @@ List<BlockBluePrint> blockData = [
 //           [
 //             {
 //               TreeTypes.id: 3,
-//               TreeTypes.execute: (List<int> inputParameters,
+//               TreeTypes.originalFunc: (List<int> inputParameters,
 //                   List<List<Map<TreeTypes, dynamic>>> blockParameters) {
 //                 return inputParameters[0];
 //               },
@@ -306,14 +309,14 @@ List<BlockBluePrint> blockData = [
 
 // void main() {
 //   var mainBlockBluePrint = ExecutionBlock(blockTree: blockTree);
-//   mainBlockBluePrint.execute();
+//   mainBlockBluePrint.originalFunc();
 // }
 
 // class ExecutionBlockBluePrint {
 //   final int id;
 //   final List<dynamic> inputParameters;
 //   final List<List<ExecutionBlockBluePrint>> blockParameters;
-//   late final Function() execute;
+//   late final Function() originalFunc;
 
 //   ExecutionBlockBluePrint({required Map<TreeTypes, dynamic> blockTree})
 //       : id = blockTree[TreeTypes.id],
@@ -326,8 +329,8 @@ List<BlockBluePrint> blockData = [
 //                             (block) => ExecutionBlockBluePrint(blockTree: block))
 //                         .toList())
 //                 .toList() {
-//     execute = () {
-//       return bluePrints[id]![BluePrintType.execute](
+//     originalFunc = () {
+//       return bluePrints[id]![BluePrintType.originalFunc](
 //           inputParameters, blockParameters);
 //     };
 //   }

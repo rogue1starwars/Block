@@ -18,7 +18,17 @@ class HomePage extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('PhoneDuino Block'),
       ),
-      body: BlockTree(block: root),
+      body: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+              onPressed: () {
+                root.execute();
+              },
+              icon: const Icon(Icons.play_arrow)),
+          BlockTree(block: root),
+        ],
+      ),
     );
   }
 }
@@ -61,14 +71,13 @@ class BlockTree extends ConsumerWidget {
     }
   }
 
-  Widget _handleFields(Field field) {
+  Widget _handleFields({required Block parent, required int index}) {
+    final Field field = parent.fields![index];
     switch (field) {
       case StringField _:
-        return StringFieldWidget(
-            parent: block, index: block.fields!.indexOf(field));
+        return StringFieldWidget(parent: parent, index: index);
       case NumericField _:
-        return NumericFieldWidget(
-            parent: block, index: block.fields!.indexOf(field));
+        return NumericFieldWidget(parent: parent, index: index);
       default:
         return const SizedBox.shrink();
     }
@@ -88,7 +97,8 @@ class BlockTree extends ConsumerWidget {
               children: [
                 Text(block.name),
                 if (block.fields != null)
-                  for (var field in block.fields!) _handleFields(field),
+                  for (int i = 0; i < block.fields!.length; i++)
+                    _handleFields(parent: block, index: i),
               ],
             ),
           ),
