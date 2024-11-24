@@ -1,6 +1,7 @@
 import 'package:phoneduino_block/models/fields.dart';
 import 'package:phoneduino_block/models/inputs.dart';
 import 'package:phoneduino_block/utils/type.dart';
+import 'package:uuid/uuid.dart';
 
 class BlockBluePrint {
   final String name;
@@ -107,6 +108,15 @@ List<BlockBluePrint> blockData = [
       return fields[0].value;
     },
   ),
+  BlockBluePrint(
+      name: 'UUID',
+      returnType: BlockTypes.string,
+      originalFunc: (
+        List<Field>? fields,
+        List<Input>? children,
+      ) {
+        return const Uuid().v4();
+      })
 ];
 
 // // import 'package:phoneduino_block/provider/block_tree_provider.dart';
