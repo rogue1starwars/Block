@@ -114,31 +114,116 @@ class BlockTreeNotifier extends StateNotifier<Block> {
     }
   }
 
+  Block? copyTree(Block block) {
+    Block newBlock = block.copyWith();
+    if (newBlock.children == null) return null;
+    for (int i = 0; i < newBlock.children!.length; i++) {
+      switch (newBlock.children![i]) {
+        case ValueInput _:
+          final ValueInput targetChild = newBlock.children![i] as ValueInput;
+          copyTree(targetChild.block!);
+          break;
+        case StatementInput _:
+          final StatementInput targetChild =
+              newBlock.children![i] as StatementInput;
+          for (int j = 0; j < targetChild.blocks.length; j++) {
+            copyTree(targetChild.blocks[j]);
+          }
+          break;
+      }
+    }
+    return newBlock;
+  }
+
   void addBlock({
-    Block? parent,
     required String parentId,
     required Block block,
     required int index,
   }) {
-    parent ??= state;
-    if (parent.children == null) return;
-    if (parent.children!.length <= index) return;
+    Block? _addBlockHelper({
+      required Block parent,
+      required String parentId,
+      required Block block,
+      required int index,
+    }) {
+      if (parent.children == null) return null;
+      if (parent.children!.length <= index) return null;
 
-    if (parent.id == parentId) {
-      final newChildren = createNewChildren(
-        parent: parent,
-        block: block,
-        index: index,
-      );
-      parent.copyWith(children: newChildren);
-    } else {
-      recursive(
-        callback: addBlock,
-        parent: parent,
-        parentId: parentId,
-        value: block,
-        index: index,
-      );
+      if (parent.id == parentId) {
+        print("Adding block");
+        final newChildren = createNewChildren(
+          parent: parent,
+          block: block,
+          index: index,
+        );
+        // Just for testing...
+        final newParent = parent.copyWith(children: newChildren);
+        return newParent;
+      } else {
+        // recursive(
+        //   callback: addBlock,
+        //   parent: parent,
+        //   parentId: parentId,
+        //   value: block,
+        //   index: index,
+        // );
+        for (Input input in parent.children!) {
+          switch (input) {
+            case ValueInput _:
+              if (input.block == null) return null;
+              final result = _addBlockHelper(
+                parent: input.block!,
+                parentId: parentId,
+                block: block,
+                index: index,
+              );
+              if (result != null) {
+                final List<Input> newChildren = [
+                  for (int i = 0; i < parent.children!.length; i++)
+                    if (i == index)
+                      input.copyWith(block: block)
+                    else
+                      parent.children![i]
+                ];
+                return parent.copyWith(children: newChildren);
+              }
+            case StatementInput _:
+              for (Block childBlock in input.blocks) {
+                final result = _addBlockHelper(
+                  parent: childBlock,
+                  parentId: parentId,
+                  block: block,
+                  index: index,
+                );
+                if (result != null) {
+                  final List<Block> newBlocks = [
+                    ...(input.blocks),
+                    block,
+                  ];
+                  final List<Input> newChildren = [
+                    for (int i = 0; i < parent.children!.length; i++)
+                      if (i == index)
+                        input.copyWith(blocks: newBlocks)
+                      else
+                        parent.children![i]
+                  ];
+                  return parent.copyWith(children: newChildren);
+                }
+              }
+          }
+        }
+        return null;
+      }
+    }
+
+    final newBlock = _addBlockHelper(
+      parent: state,
+      parentId: parentId,
+      block: block,
+      index: index,
+    );
+    if (newBlock != null) {
+      state = newBlock;
     }
   }
 

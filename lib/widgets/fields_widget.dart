@@ -21,7 +21,7 @@ class BaseFieldWidget extends ConsumerWidget {
     if (field == null) return const SizedBox.shrink();
 
     return TextFormField(
-      initialValue: field.value,
+      initialValue: field.value.toString(),
       decoration: buildDecoration(field),
       onChanged: (value) => onFieldChanged(value, ref),
       validator: fieldValidator,
