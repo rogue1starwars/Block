@@ -6,6 +6,7 @@ import 'package:phoneduino_block/models/fields.dart';
 import 'package:phoneduino_block/models/inputs.dart';
 import 'package:phoneduino_block/provider/block_tree_provider.dart';
 import 'package:phoneduino_block/widgets/fields_widget.dart';
+import 'package:uuid/uuid.dart';
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
@@ -131,9 +132,11 @@ class AddButton extends ConsumerWidget {
                 ListTile(
                   title: Text(block.name),
                   onTap: () {
+                    var uuid = const Uuid();
+                    final String newId = uuid.v4();
                     ref.read(blockTreeProvider.notifier).addBlock(
                           parentId: parentBlock.id,
-                          value: Block.fromBluePrint(block: block, id: ''),
+                          value: Block.fromBluePrint(block: block, id: newId),
                           index: index,
                         );
                     Navigator.of(context).pop();
