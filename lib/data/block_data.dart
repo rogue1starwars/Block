@@ -71,7 +71,8 @@ List<BlockBluePrint> blockData = [
     returnType: BlockTypes.none,
     originalFunc: (List<Field> fields, List<Input> children) {
       final statement = children[0] as StatementInput;
-      for (int i = 0; i < fields[0].value; i++) {
+      final value = int.parse(fields[0].value);
+      for (int i = 0; i < value; i++) {
         statement.blocks.forEach((block) {
           block.execute();
         });
