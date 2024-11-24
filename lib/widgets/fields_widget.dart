@@ -38,7 +38,7 @@ class BaseFieldWidget extends ConsumerWidget {
   }
 
   void onFieldChanged(String value, WidgetRef ref) {
-    ref.read(blockTreeProvider.notifier).updateFieldInput(
+    ref.read(blockTreeProvider.notifier).updateField(
           parentId: parent.id,
           value: value,
           index: index,

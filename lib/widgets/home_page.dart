@@ -120,28 +120,29 @@ class AddButton extends ConsumerWidget {
     final filter = parentBlock.children![index].filter;
 
     return showDialog<void>(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text("Add a new block"),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                for (BlockBluePrint block in filterBlockData(filter))
-                  ListTile(
-                    title: Text(block.name),
-                    onTap: () {
-                      ref.read(blockTreeProvider.notifier).addBlock(
-                            parentId: parentBlock.id,
-                            block: Block.fromBluePrint(block: block, id: ''),
-                            index: index,
-                          );
-                      Navigator.of(context).pop();
-                    },
-                  ),
-              ],
-            ),
-          );
-        });
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Add a new block"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (BlockBluePrint block in filterBlockData(filter))
+                ListTile(
+                  title: Text(block.name),
+                  onTap: () {
+                    ref.read(blockTreeProvider.notifier).addBlock(
+                          parentId: parentBlock.id,
+                          value: Block.fromBluePrint(block: block, id: ''),
+                          index: index,
+                        );
+                    Navigator.of(context).pop();
+                  },
+                ),
+            ],
+          ),
+        );
+      },
+    );
   }
 }
