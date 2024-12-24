@@ -1,3 +1,7 @@
+import 'dart:async';
+
+import 'package:flutter_compass/flutter_compass.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:phoneduino_block/models/block.dart';
 import 'package:phoneduino_block/models/fields.dart';
 import 'package:phoneduino_block/models/inputs.dart';
@@ -62,6 +66,104 @@ List<BlockBluePrint> blockData = [
     },
   ),
   BlockBluePrint(
+    name: 'Activate Orientation',
+    returnType: BlockTypes.none,
+    originalFunc: (Block block) {
+      final events = FlutterCompass.events;
+      if (events == null) {
+        print("Activate Orientation: null");
+        return;
+      }
+      StreamSubscription orientationStream = events.listen((event) {
+        Block.setVariable("_orientation", event.heading, BlockTypes.number);
+      });
+      Block.setVariable(
+          "_orientationStream", orientationStream, BlockTypes.none);
+    },
+  ),
+  BlockBluePrint(
+    name: 'Get Orientation',
+    returnType: BlockTypes.number,
+    originalFunc: (Block block) {
+      final value = Block.getVariable("_orientation");
+      if (value == null) {
+        print("Get Orientation: null");
+        return;
+      }
+      return value;
+    },
+  ),
+  BlockBluePrint(
+    name: 'Activate Geolocator',
+    returnType: BlockTypes.none,
+    originalFunc: (Block block) async {
+      bool serviceEnabled;
+      LocationPermission permission;
+
+      serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        print('Location services are disabled.');
+        return;
+      }
+
+      permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.deniedForever) {
+        print(
+            'Location permissions are permanently denied, we cannot request permissions.');
+        return;
+      }
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission != LocationPermission.whileInUse &&
+            permission != LocationPermission.always) {
+          print('Location permissions are denied (actual value: $permission).');
+          return;
+        }
+      }
+
+      print('Location services are enabled.');
+      StreamSubscription<Position> positionStream =
+          Geolocator.getPositionStream(
+        locationSettings: LocationSettings(accuracy: LocationAccuracy.best),
+      ).listen((Position? position) {
+        if (position == null) {
+          print('uknown');
+          return;
+        }
+        // print(position.latitude.toString() +
+        //     ', ' +
+        //     position.longitude.toString());
+        Block.setVariable("_lat", position.latitude, BlockTypes.number);
+        Block.setVariable("_long", position.longitude, BlockTypes.number);
+      });
+      Block.setVariable("_positionStream", positionStream, BlockTypes.none);
+    },
+  ),
+  BlockBluePrint(
+    name: 'Get Latitude',
+    returnType: BlockTypes.number,
+    originalFunc: (Block block) {
+      final value = Block.getVariable("_lat");
+      if (value == null) {
+        print("Get Latitude: null");
+        return;
+      }
+      return value;
+    },
+  ),
+  BlockBluePrint(
+    name: 'Get Longitude',
+    returnType: BlockTypes.number,
+    originalFunc: (Block block) {
+      final value = Block.getVariable("_long");
+      if (value == null) {
+        print("Get Longitude: null");
+        return;
+      }
+      return value;
+    },
+  ),
+  BlockBluePrint(
     name: 'Set Variable',
     fields: [
       StringField(label: 'Name', value: ''),
@@ -106,6 +208,31 @@ List<BlockBluePrint> blockData = [
       }
       print(value);
       return value;
+    },
+  ),
+  BlockBluePrint(
+    name: 'Interval',
+    fields: [
+      NumericField(label: "Miliseconds", value: 0),
+    ],
+    children: [
+      StatementInput(
+        label: 'Do',
+        blocks: [],
+      ),
+    ],
+    returnType: BlockTypes.none,
+    originalFunc: (Block block) {
+      if (block.fields == null) return;
+      if (block.fields!.isEmpty) return;
+
+      final statement = block.children![0] as StatementInput;
+      final value = int.parse(block.fields![0].value);
+      Timer.periodic(Duration(milliseconds: value), (timer) {
+        statement.blocks.forEach((block) {
+          block.execute();
+        });
+      });
     },
   ),
   BlockBluePrint(
