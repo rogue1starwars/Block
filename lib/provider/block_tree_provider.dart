@@ -195,6 +195,80 @@ class BlockTreeNotifier extends StateNotifier<Block> {
       state = newBlock;
     }
   }
+
+  void deleteBlock({
+    required String id,
+  }) {
+    Block? deleteBlockHelper({
+      required String id,
+      required Block parent,
+    }) {
+      if (parent.children == null) return null;
+      if (parent.id == id) {
+        return null;
+      }
+
+      for (int i = 0; i < parent.children!.length; i++) {
+        switch (parent.children![i]) {
+          case ValueInput input:
+            if (input.block == null) return null;
+            if (input.block!.id == id) {
+              final newParent = parent.copyWith(children: [
+                ...parent.children!.sublist(0, i),
+                input.copyWith(delete: true),
+                ...parent.children!.sublist(i + 1),
+              ]);
+              return newParent;
+            }
+            final result = deleteBlockHelper(
+              id: id,
+              parent: input.block!,
+            );
+            if (result == null) return null;
+            return parent.copyWith(
+              children: [
+                ...parent.children!.sublist(0, i),
+                input.copyWith(block: result),
+                ...parent.children!.sublist(i + 1),
+              ],
+            );
+          case StatementInput input:
+            for (int j = 0; j < input.blocks.length; j++) {
+              if (input.blocks[j].id == id) {
+                return parent.copyWith(children: [
+                  ...parent.children!.sublist(0, i),
+                  input.copyWith(blocks: [
+                    ...input.blocks.sublist(0, j),
+                    ...input.blocks.sublist(j + 1),
+                  ]),
+                  ...parent.children!.sublist(i + 1),
+                ]);
+              }
+              final result = deleteBlockHelper(
+                id: id,
+                parent: input.blocks[j],
+              );
+              if (result != null) {
+                return parent.copyWith(
+                  children: [
+                    ...parent.children!.sublist(0, i),
+                    input.copyWith(blocks: [
+                      ...input.blocks.sublist(0, j),
+                      result,
+                      ...input.blocks.sublist(j + 1),
+                    ]),
+                    ...parent.children!.sublist(i + 1),
+                  ],
+                );
+              }
+            }
+        }
+      }
+      return null;
+    }
+
+    state = deleteBlockHelper(id: id, parent: state) ?? state;
+  }
 }
 
 final blockTreeProvider =

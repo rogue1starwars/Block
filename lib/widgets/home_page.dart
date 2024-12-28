@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phoneduino_block/data/block_data.dart';
-import 'package:phoneduino_block/models/ble_info.dart';
+import 'package:phoneduino_block/provider/ble_info.dart';
 import 'package:phoneduino_block/models/block.dart';
 import 'package:phoneduino_block/models/fields.dart';
 import 'package:phoneduino_block/models/inputs.dart';
@@ -115,6 +115,7 @@ class BlockTree extends ConsumerWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(block.name),
+                DeleteButton(id: block.id),
                 if (block.fields != null)
                   for (int i = 0; i < block.fields!.length; i++)
                     _handleFields(parent: block, index: i),
@@ -175,6 +176,24 @@ class AddButton extends ConsumerWidget {
           ),
         );
       },
+    );
+  }
+}
+
+class DeleteButton extends ConsumerWidget {
+  final String id;
+  const DeleteButton({
+    super.key,
+    required this.id,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return IconButton(
+      onPressed: () {
+        ref.read(blockTreeProvider.notifier).deleteBlock(id: id);
+      },
+      icon: const Icon(Icons.delete),
     );
   }
 }

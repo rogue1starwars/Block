@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:phoneduino_block/models/ble_info.dart';
+import 'package:phoneduino_block/provider/ble_info.dart';
 
 class BleDevice extends ConsumerStatefulWidget {
   const BleDevice({super.key});
