@@ -5,6 +5,7 @@ import 'package:phoneduino_block/models/block.dart';
 import 'package:phoneduino_block/models/fields.dart';
 import 'package:phoneduino_block/models/inputs.dart';
 import 'package:phoneduino_block/provider/block_tree_provider.dart';
+import 'package:phoneduino_block/widgets/ble/ble_home.dart';
 import 'package:phoneduino_block/widgets/fields_widget.dart';
 import 'package:uuid/uuid.dart';
 
@@ -21,11 +22,16 @@ class HomePage extends ConsumerWidget {
       body: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          IconButton(
-              onPressed: () {
-                root.execute();
-              },
-              icon: const Icon(Icons.play_arrow)),
+          Row(
+            children: [
+              BleHome(),
+              IconButton(
+                  onPressed: () {
+                    root.execute();
+                  },
+                  icon: const Icon(Icons.play_arrow)),
+            ],
+          ),
           BlockTree(block: root),
         ],
       ),
