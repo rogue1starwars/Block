@@ -35,39 +35,6 @@ class _StartScanState extends ConsumerState<StartScan> {
     super.dispose();
   }
 
-  // Future<void> _connectToDevice(BluetoothDevice device) async {
-  //   try {
-  //     setState(() => _isConnecting = true);
-
-  //     // Listen to connection state changes
-  //     _connectionStateSubscription = device.connectionState.listen((state) {
-  //       if (state == BluetoothConnectionState.disconnected) {
-  //         setState(() => _isConnecting = false);
-  //       }
-  //     });
-
-  //     // Connect to device
-  //     await device.connect(
-  //       timeout: const Duration(seconds: 10),
-  //     );
-
-  //     // Discover services
-  //     final services = await device.discoverServices();
-
-  //     // Update UI or notify parent
-  //     if (mounted) {
-  //       setState(() => _isConnecting = false);
-  //     }
-  //   } catch (e) {
-  //     if (mounted) {
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         SnackBar(content: Text('Failed to connect: ${e.toString()}')),
-  //       );
-  //       setState(() => _isConnecting = false);
-  //     }
-  //   }
-  // }
-
   Future<void> _dialogBuilder(BuildContext context) async {
     // Show dialog first
     showDialog(
@@ -98,6 +65,8 @@ class _StartScanState extends ConsumerState<StartScan> {
                           FlutterBluePlus.stopScan();
                           ref.read(bleProvider.notifier).copyWith(
                                 device: result.device,
+                                service: null,
+                                characteristics: null,
                               );
                           Navigator.pop(context, result.device);
                         },
