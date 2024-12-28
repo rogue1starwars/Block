@@ -1,7 +1,9 @@
 import 'dart:async';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_compass/flutter_compass.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:phoneduino_block/models/ble_info.dart';
 import 'package:phoneduino_block/models/block.dart';
 import 'package:phoneduino_block/models/fields.dart';
 import 'package:phoneduino_block/models/inputs.dart';
@@ -10,6 +12,7 @@ import 'package:phoneduino_block/utils/type.dart';
 class BlockBluePrint {
   final String name;
   final List<Field>? fields;
+
   final List<Input>? children;
   final BlockTypes returnType;
   final Function(Block) originalFunc;
@@ -27,22 +30,12 @@ List<BlockBluePrint> filterBlockData(Map<BlockTypes, bool>? filter) {
   if (filter == null) {
     return blockData;
   }
-  final List<BlockBluePrint> blockDataFiltered = blockData.where((block) {
-    if (filter[BlockTypes.number] == false &&
-        block.returnType == BlockTypes.number) {
-      return false;
-    }
-    if (filter[BlockTypes.string] == false &&
-        block.returnType == BlockTypes.string) {
-      return false;
-    }
-    if (filter[BlockTypes.boolean] == false &&
-        block.returnType == BlockTypes.boolean) {
-      return false;
-    }
-    return true;
+
+  return blockData.where((block) {
+    return filter.containsKey(block.returnType)
+        ? filter[block.returnType]!
+        : true;
   }).toList();
-  return blockDataFiltered;
 }
 
 List<BlockBluePrint> blockData = [
@@ -65,6 +58,47 @@ List<BlockBluePrint> blockData = [
       });
     },
   ),
+  BlockBluePrint(
+      name: "Send Data",
+      children: [
+        ValueInput(
+            label: 'Data',
+            filter: {
+              BlockTypes.number: true,
+              BlockTypes.string: true,
+              BlockTypes.none: false,
+            },
+            block: null),
+      ],
+      returnType: BlockTypes.none,
+      originalFunc: (Block block) {
+        ScaffoldMessenger.of(Block.getVariable("_context")).showSnackBar(
+          const SnackBar(
+            content: Text('Please connect to a device first'),
+          ),
+        );
+        if (block.children == null) return;
+        if (block.children!.isEmpty) return;
+
+        final value = block.children![0] as ValueInput;
+        if (value.block == null) {
+          print("Send Data: null");
+          return;
+        }
+
+        final BleInfo bleInfo = Block.getVariable("_ble");
+        if (bleInfo == null) {
+          print("Send Data: null");
+          return;
+        }
+        if (bleInfo.characteristics == null) {
+          print("Send Data: null");
+          return;
+        }
+
+        bleInfo.characteristics!
+            .write(value.block!.execute().toString().codeUnits);
+      }),
   BlockBluePrint(
     name: 'Activate Orientation',
     returnType: BlockTypes.none,

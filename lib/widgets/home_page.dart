@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phoneduino_block/data/block_data.dart';
+import 'package:phoneduino_block/models/ble_info.dart';
 import 'package:phoneduino_block/models/block.dart';
 import 'package:phoneduino_block/models/fields.dart';
 import 'package:phoneduino_block/models/inputs.dart';
 import 'package:phoneduino_block/provider/block_tree_provider.dart';
+import 'package:phoneduino_block/utils/type.dart';
 import 'package:phoneduino_block/widgets/ble/ble_home.dart';
 import 'package:phoneduino_block/widgets/fields_widget.dart';
 import 'package:uuid/uuid.dart';
@@ -24,9 +26,20 @@ class HomePage extends ConsumerWidget {
         children: [
           Row(
             children: [
-              BleHome(),
+              const BleHome(),
               IconButton(
                   onPressed: () {
+                    final BleInfo bleInfo = ref.watch(bleProvider);
+                    Block.setVariable(
+                      "_ble",
+                      bleInfo,
+                      BlockTypes.ble,
+                    );
+                    Block.setVariable(
+                      "_context",
+                      context,
+                      BlockTypes.context,
+                    );
                     root.execute();
                   },
                   icon: const Icon(Icons.play_arrow)),
