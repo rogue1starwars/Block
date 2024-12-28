@@ -36,6 +36,7 @@ class BlockTreeNotifier extends StateNotifier<Block> {
         ];
         return parent.copyWith(fields: newFields);
       } else {
+        if (parent.children == null) return null;
         return recursive(
           callback: updateFieldHelper,
           parent: parent,

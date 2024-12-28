@@ -3,4 +3,6 @@ enum BlockTypes {
   string,
   boolean,
   none,
+  ble,
+  context,
 }
