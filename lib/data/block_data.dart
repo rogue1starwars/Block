@@ -72,26 +72,15 @@ List<BlockBluePrint> blockData = [
       ],
       returnType: BlockTypes.none,
       originalFunc: (Block block) {
-        ScaffoldMessenger.of(Block.getVariable("_context")).showSnackBar(
-          const SnackBar(
-            content: Text('Please connect to a device first'),
-          ),
-        );
-        if (block.children == null) return;
-        if (block.children!.isEmpty) return;
-
         final value = block.children![0] as ValueInput;
-        if (value.block == null) {
-          print("Send Data: null");
-          return;
-        }
 
         final BleInfo bleInfo = Block.getVariable("_ble");
-        if (bleInfo == null) {
-          print("Send Data: null");
-          return;
-        }
         if (bleInfo.characteristics == null) {
+          ScaffoldMessenger.of(Block.getVariable("_context")).showSnackBar(
+            const SnackBar(
+              content: Text('Please connect to a device first'),
+            ),
+          );
           print("Send Data: null");
           return;
         }
@@ -105,7 +94,11 @@ List<BlockBluePrint> blockData = [
     originalFunc: (Block block) {
       final events = FlutterCompass.events;
       if (events == null) {
-        print("Activate Orientation: null");
+        ScaffoldMessenger.of(Block.getVariable("_context")).showSnackBar(
+          const SnackBar(
+            content: Text('Device Orientation not available'),
+          ),
+        );
         return;
       }
       StreamSubscription orientationStream = events.listen((event) {
@@ -136,7 +129,11 @@ List<BlockBluePrint> blockData = [
 
       serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
-        print('Location services are disabled.');
+        ScaffoldMessenger.of(Block.getVariable("_context")).showSnackBar(
+          const SnackBar(
+            content: Text('Location services are disabled.'),
+          ),
+        );
         return;
       }
 
@@ -164,10 +161,6 @@ List<BlockBluePrint> blockData = [
           print('uknown');
           return;
         }
-        // print(position.latitude.toString() +
-        //     ', ' +
-        //     position.longitude.toString());
-        Block.setVariable("_lat", position.latitude, BlockTypes.number);
         Block.setVariable("_long", position.longitude, BlockTypes.number);
       });
       Block.setVariable("_positionStream", positionStream, BlockTypes.none);
@@ -208,16 +201,7 @@ List<BlockBluePrint> blockData = [
     ],
     returnType: BlockTypes.none,
     originalFunc: (Block block) {
-      if (block.children == null) return;
-      if (block.children!.isEmpty) return;
-
       final value = block.children![0] as ValueInput;
-      if (value.block == null) {
-        print("Set Variable: null");
-        return;
-      }
-      if (block.fields == null) return;
-      if (block.fields!.isEmpty) return;
       final type = BlockTypes.values.firstWhere(
           (e) => e.toString() == 'BlockTypes.' + block.fields![1].value);
       Block.setVariable(block.fields![0].value, value.block!.execute(), type);
@@ -231,9 +215,6 @@ List<BlockBluePrint> blockData = [
     children: [],
     returnType: BlockTypes.none,
     originalFunc: (Block block) {
-      if (block.fields == null) return;
-      if (block.fields!.isEmpty) return;
-
       final name = block.fields![0].value;
       final value = Block.getVariable(name);
       if (value == null) {
@@ -257,9 +238,6 @@ List<BlockBluePrint> blockData = [
     ],
     returnType: BlockTypes.none,
     originalFunc: (Block block) {
-      if (block.fields == null) return;
-      if (block.fields!.isEmpty) return;
-
       final statement = block.children![0] as StatementInput;
       final value = int.parse(block.fields![0].value);
       Timer.periodic(Duration(milliseconds: value), (timer) {
@@ -282,9 +260,6 @@ List<BlockBluePrint> blockData = [
     ],
     returnType: BlockTypes.none,
     originalFunc: (Block block) {
-      if (block.fields == null) return;
-      if (block.fields!.isEmpty) return;
-
       final statement = block.children![0] as StatementInput;
       final value = int.parse(block.fields![0].value);
       for (int i = 0; i < value; i++) {
@@ -304,14 +279,12 @@ List<BlockBluePrint> blockData = [
     ],
     returnType: BlockTypes.none,
     originalFunc: (Block block) {
-      if (block.children == null) return;
-      if (block.children!.isEmpty) return;
-
       final value = block.children![0] as ValueInput;
-      if (value.block == null) {
-        print("Print: null");
-      }
-      print("Printing from print block: ${value.block!.execute()}");
+      ScaffoldMessenger.of(Block.getVariable("_context")).showSnackBar(
+        SnackBar(
+          content: Text(value.block!.execute().toString()),
+        ),
+      );
     },
   ),
   BlockBluePrint(
@@ -322,8 +295,6 @@ List<BlockBluePrint> blockData = [
     children: [],
     returnType: BlockTypes.number,
     originalFunc: (Block block) {
-      if (block.fields == null) return;
-      if (block.fields!.isEmpty) return;
       return block.fields![0].value;
     },
   ),

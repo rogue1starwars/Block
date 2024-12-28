@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:phoneduino_block/data/block_data.dart';
 import 'package:phoneduino_block/models/fields.dart';
 import 'package:phoneduino_block/models/inputs.dart';
@@ -31,6 +32,34 @@ class Block {
         children = block.children;
 
   dynamic execute() {
+    if (children != null) {
+      for (final child in children!) {
+        switch (child) {
+          case ValueInput child:
+            final valueInput = child as ValueInput;
+            if (valueInput.block == null) {
+              ScaffoldMessenger.of(Block.getVariable("_context")).showSnackBar(
+                const SnackBar(
+                  content: Text('Please connect to a device first'),
+                ),
+              );
+              return;
+            }
+        }
+      }
+    }
+    if (fields != null) {
+      for (final field in fields!) {
+        if (field.value == null) {
+          ScaffoldMessenger.of(Block.getVariable("_context")).showSnackBar(
+            const SnackBar(
+              content: Text('Please fill in all fields'),
+            ),
+          );
+          return;
+        }
+      }
+    }
     return originalFunc(this);
   }
 
