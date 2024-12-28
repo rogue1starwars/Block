@@ -41,6 +41,7 @@ class BleNotifier extends StateNotifier<BleInfo> {
     BluetoothCharacteristic? characteristics,
   }) {
     if (device != null) {
+      _connectionStateSubscription?.cancel();
       _connectionStateSubscription =
           device.connectionState.listen((connectionState) {
         if (connectionState == BluetoothConnectionState.connected) {
