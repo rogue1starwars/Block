@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phoneduino_block/data/block_data.dart';
 import 'package:phoneduino_block/models/block.dart';
 import 'package:phoneduino_block/models/inputs.dart';
+import 'package:uuid/uuid.dart';
 
 class BlockTreeNotifier extends StateNotifier<Block> {
   BlockTreeNotifier()
@@ -149,6 +150,163 @@ class BlockTreeNotifier extends StateNotifier<Block> {
     return null;
   }
 
+  Block? findBlock({required String id}) {
+    Block? findBlockHelper({
+      required String id,
+      required Block parent,
+    }) {
+      if (parent.children == null) return null;
+      if (parent.children!.isEmpty) return null;
+
+      if (parent.id == id) {
+        return parent;
+      }
+
+      for (int i = 0; i < parent.children!.length; i++) {
+        switch (parent.children![i]) {
+          case ValueInput input:
+            if (input.block == null) continue;
+            if (input.block!.id == id) {
+              return input.block;
+            }
+            final result = findBlockHelper(
+              id: id,
+              parent: input.block!,
+            );
+            if (result != null) return result;
+            break;
+          case StatementInput input:
+            for (int j = 0; j < input.blocks.length; j++) {
+              if (input.blocks[j].id == id) {
+                return input.blocks[j];
+              }
+              final result = findBlockHelper(
+                id: id,
+                parent: input.blocks[j],
+              );
+              if (result != null) return result;
+            }
+        }
+      }
+      return null;
+    }
+
+    final result = findBlockHelper(id: id, parent: state);
+    if (result != null) {
+      return result;
+    }
+    return null;
+  }
+
+  void moveBlock({
+    required String id,
+    required String siblingId,
+  }) {
+    Block? targetBlock = findBlock(id: id);
+    if (targetBlock == null) return;
+
+    targetBlock = targetBlock.copyWith(id: const Uuid().v4());
+
+    bool inserted = insertBlock(siblingId: siblingId, value: targetBlock);
+    if (inserted) deleteBlock(id: id);
+    targetBlock = state;
+  }
+
+  bool insertBlock({
+    required String siblingId,
+    required Block value,
+  }) {
+    Block? insertBlockHelper({
+      required Block parent,
+      required String siblingId,
+      required Block value,
+    }) {
+      if (parent.children == null) return null;
+      if (parent.id == siblingId) {
+        return null;
+      }
+
+      for (int i = 0; i < parent.children!.length; i++) {
+        switch (parent.children![i]) {
+          case ValueInput input:
+            if (input.block == null) return null;
+            if (input.block!.id == siblingId) {
+              if (input.filter != null) {
+                if (input.filter!.containsKey(value.returnType)) {
+                  if (input.filter![value.returnType] == false) {
+                    continue;
+                  }
+                }
+              }
+              final newParent = parent.copyWith(children: [
+                ...parent.children!.sublist(0, i),
+                input.copyWith(block: value),
+                ...parent.children!.sublist(i + 1),
+              ]);
+              return newParent;
+            }
+            final result = insertBlockHelper(
+              siblingId: siblingId,
+              value: value,
+              parent: input.block!,
+            );
+            if (result == null) continue;
+            return parent.copyWith(
+              children: [
+                ...parent.children!.sublist(0, i),
+                input.copyWith(block: result),
+                ...parent.children!.sublist(i + 1),
+              ],
+            );
+          case StatementInput input:
+            for (int j = 0; j < input.blocks.length; j++) {
+              if (input.blocks[j].id == siblingId) {
+                return parent.copyWith(children: [
+                  ...parent.children!.sublist(0, i),
+                  input.copyWith(blocks: [
+                    ...input.blocks.sublist(0, j),
+                    value,
+                    ...input.blocks.sublist(j),
+                  ]),
+                  ...parent.children!.sublist(i + 1),
+                ]);
+              }
+              final result = insertBlockHelper(
+                siblingId: siblingId,
+                value: value,
+                parent: input.blocks[j],
+              );
+              if (result != null) {
+                return parent.copyWith(
+                  children: [
+                    ...parent.children!.sublist(0, i),
+                    input.copyWith(blocks: [
+                      ...input.blocks.sublist(0, j),
+                      result,
+                      ...input.blocks.sublist(j + 1),
+                    ]),
+                    ...parent.children!.sublist(i + 1),
+                  ],
+                );
+              }
+            }
+        }
+      }
+      return null;
+    }
+
+    final newBlock = insertBlockHelper(
+      parent: state,
+      siblingId: siblingId,
+      value: value,
+    );
+    if (newBlock != null) {
+      state = newBlock;
+      return true;
+    }
+    return false;
+  }
+
   void addBlock({
     required String parentId,
     required Block value,
@@ -211,7 +369,7 @@ class BlockTreeNotifier extends StateNotifier<Block> {
       for (int i = 0; i < parent.children!.length; i++) {
         switch (parent.children![i]) {
           case ValueInput input:
-            if (input.block == null) return null;
+            if (input.block == null) continue;
             if (input.block!.id == id) {
               final newParent = parent.copyWith(children: [
                 ...parent.children!.sublist(0, i),
@@ -224,7 +382,7 @@ class BlockTreeNotifier extends StateNotifier<Block> {
               id: id,
               parent: input.block!,
             );
-            if (result == null) return null;
+            if (result == null) continue;
             return parent.copyWith(
               children: [
                 ...parent.children!.sublist(0, i),

@@ -26,18 +26,6 @@ class BlockBluePrint {
   });
 }
 
-List<BlockBluePrint> filterBlockData(Map<BlockTypes, bool>? filter) {
-  if (filter == null) {
-    return blockData;
-  }
-
-  return blockData.where((block) {
-    return filter.containsKey(block.returnType)
-        ? filter[block.returnType]!
-        : true;
-  }).toList();
-}
-
 List<BlockBluePrint> blockData = [
   BlockBluePrint(
     name: 'Main',

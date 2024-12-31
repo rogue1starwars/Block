@@ -7,6 +7,7 @@ import 'package:phoneduino_block/models/fields.dart';
 import 'package:phoneduino_block/models/inputs.dart';
 import 'package:phoneduino_block/provider/block_tree_provider.dart';
 import 'package:phoneduino_block/utils/type.dart';
+import 'package:phoneduino_block/utils/fildter.dart';
 import 'package:phoneduino_block/widgets/ble/ble_home.dart';
 import 'package:phoneduino_block/widgets/fields_widget.dart';
 import 'package:uuid/uuid.dart';
@@ -21,32 +22,34 @@ class HomePage extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('PhoneDuino Block'),
       ),
-      body: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            children: [
-              const BleHome(),
-              IconButton(
-                  onPressed: () {
-                    final BleInfo bleInfo = ref.watch(bleProvider);
-                    Block.setVariable(
-                      "_ble",
-                      bleInfo,
-                      BlockTypes.ble,
-                    );
-                    Block.setVariable(
-                      "_context",
-                      context,
-                      BlockTypes.context,
-                    );
-                    root.execute();
-                  },
-                  icon: const Icon(Icons.play_arrow)),
-            ],
-          ),
-          BlockTree(block: root),
-        ],
+      body: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              children: [
+                const BleHome(),
+                IconButton(
+                    onPressed: () {
+                      final BleInfo bleInfo = ref.watch(bleProvider);
+                      Block.setVariable(
+                        "_ble",
+                        bleInfo,
+                        BlockTypes.ble,
+                      );
+                      Block.setVariable(
+                        "_context",
+                        context,
+                        BlockTypes.context,
+                      );
+                      root.execute();
+                    },
+                    icon: const Icon(Icons.play_arrow)),
+              ],
+            ),
+            BlockTree(block: root),
+          ],
+        ),
       ),
     );
   }
@@ -102,30 +105,67 @@ class BlockTree extends ConsumerWidget {
     }
   }
 
+  Widget _block() => ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: double.infinity),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Card(
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(block.name),
+                    DeleteButton(id: block.id),
+                    if (block.fields != null)
+                      for (int i = 0; i < block.fields!.length; i++)
+                        _handleFields(parent: block, index: i),
+                  ],
+                ),
+              ),
+            ),
+            if (block.children != null)
+              for (int i = 0; i < block.children!.length; i++)
+                _handleInputs(parent: block, index: i),
+          ],
+        ),
+      );
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Card(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(block.name),
-                DeleteButton(id: block.id),
-                if (block.fields != null)
-                  for (int i = 0; i < block.fields!.length; i++)
-                    _handleFields(parent: block, index: i),
-              ],
+        DragTarget(
+          builder: (context, candidateData, rejectedData) {
+            return SizedBox(height: 50);
+          },
+          onAcceptWithDetails: (detail) {
+            final id = detail.data as String;
+            ref.read(blockTreeProvider.notifier).moveBlock(
+                  siblingId: block.id,
+                  id: id,
+                );
+          },
+        ),
+        LongPressDraggable(
+          data: block.id,
+          // dragAnchorStrategy: pointerDragAnchorStrategy,
+          feedback: Material(
+            color: Colors.transparent,
+            child: SizedBox(
+              width: MediaQuery.of(context).size.width,
+              child: _block(),
             ),
           ),
+          child: _block(),
+          onDragCompleted: () {
+            print("Drag completed");
+          },
         ),
-        if (block.children != null)
-          for (int i = 0; i < block.children!.length; i++)
-            _handleInputs(parent: block, index: i),
       ],
     );
   }
@@ -142,9 +182,31 @@ class AddButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return IconButton(
+    return DragTarget(
+      builder: (context, candidateData, rejectedData) => IconButton(
         onPressed: () => _dialogBuilder(context, ref),
-        icon: const Icon(Icons.add));
+        icon: const Icon(Icons.add),
+      ),
+      onAcceptWithDetails: (details) {
+        final id = details.data as String;
+        Block? targetBlock =
+            ref.read(blockTreeProvider.notifier).findBlock(id: id);
+        if (targetBlock == null) return;
+        targetBlock = targetBlock.copyWith(
+          id: const Uuid().v4(),
+        );
+
+        ref.read(blockTreeProvider.notifier).addBlock(
+              parentId: parentBlock.id,
+              value: targetBlock,
+              index: index,
+            );
+        ref.read(blockTreeProvider.notifier).deleteBlock(id: id);
+      },
+    );
+    // return IconButton(
+    //     onPressed: () => _dialogBuilder(context, ref),
+    //     icon: const Icon(Icons.add));
   }
 
   Future<void> _dialogBuilder(BuildContext context, WidgetRef ref) {
@@ -155,24 +217,26 @@ class AddButton extends ConsumerWidget {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text("Add a new block"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              for (BlockBluePrint block in filterBlockData(filter))
-                ListTile(
-                  title: Text(block.name),
-                  onTap: () {
-                    var uuid = const Uuid();
-                    final String newId = uuid.v4();
-                    ref.read(blockTreeProvider.notifier).addBlock(
-                          parentId: parentBlock.id,
-                          value: Block.fromBluePrint(block: block, id: newId),
-                          index: index,
-                        );
-                    Navigator.of(context).pop();
-                  },
-                ),
-            ],
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                for (BlockBluePrint block in filterBlockData(filter))
+                  ListTile(
+                    title: Text(block.name),
+                    onTap: () {
+                      var uuid = const Uuid();
+                      final String newId = uuid.v4();
+                      ref.read(blockTreeProvider.notifier).addBlock(
+                            parentId: parentBlock.id,
+                            value: Block.fromBluePrint(block: block, id: newId),
+                            index: index,
+                          );
+                      Navigator.of(context).pop();
+                    },
+                  ),
+              ],
+            ),
           ),
         );
       },
