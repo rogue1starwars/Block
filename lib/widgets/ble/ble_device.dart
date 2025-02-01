@@ -13,44 +13,6 @@ class BleDevice extends ConsumerStatefulWidget {
 }
 
 class _BleDeviceState extends ConsumerState<BleDevice> {
-  Future<void> _discoverServices() async {
-    int retryCount = 0;
-
-    BluetoothDevice? device = ref.watch(bleProvider).device;
-    if (device == null) {
-      return;
-    }
-
-    try {
-      final List<BluetoothService> services = await device.discoverServices();
-      final primaryService = services.firstWhere((service) =>
-          service.serviceUuid == Guid("6E400001-B5A3-F393-E0A9-E50E24DCCA9E"));
-
-      // Discover characteristics
-      final characteristic = primaryService.characteristics.firstWhere(
-          (characteristic) =>
-              characteristic.uuid ==
-              Guid("6E400002-B5A3-F393-E0A9-E50E24DCCA9E"));
-
-      ref.read(bleProvider.notifier).updateDevice(
-            service: primaryService,
-            characteristics: characteristic,
-          );
-    } catch (e) {
-      if (retryCount < 3) {
-        retryCount++;
-        await Future.delayed(const Duration(milliseconds: 1000));
-        rethrow;
-      } else {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to discover services: $e')),
-          );
-        }
-      }
-    }
-  }
-
   Future<void> _connectToDevice(BluetoothDevice device) async {
     try {
       await device.connect(
@@ -60,15 +22,6 @@ class _BleDeviceState extends ConsumerState<BleDevice> {
       );
 
       await Future.delayed(const Duration(milliseconds: 1000));
-
-      if (ref.watch(bleProvider).connected == false) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Failed to connect')),
-          );
-        }
-        return;
-      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -86,39 +39,6 @@ class _BleDeviceState extends ConsumerState<BleDevice> {
       return const Text("No Device");
     }
 
-    if (bleInfo.connected) {
-      return Row(
-        children: [
-          Text(
-            bleInfo.device!.advName.isEmpty
-                ? bleInfo.device!.remoteId.toString()
-                : bleInfo.device!.advName,
-          ),
-          IconButton(
-            onPressed: () async {
-              await bleInfo.device!.disconnect();
-            },
-            icon: const Icon(Icons.close),
-          ),
-          if (bleInfo.service == null)
-            IconButton(
-              onPressed: () {
-                final scaffoldMessenger = ScaffoldMessenger.of(context);
-                _discoverServices().catchError((e) {
-                  if (mounted) {
-                    scaffoldMessenger.showSnackBar(
-                      SnackBar(
-                          content: Text('Failed to discover services: $e')),
-                    );
-                  }
-                });
-              },
-              icon: const Icon(Icons.refresh),
-            ),
-        ],
-      );
-    }
-
     return Row(
       children: [
         Text(
@@ -126,11 +46,20 @@ class _BleDeviceState extends ConsumerState<BleDevice> {
               ? bleInfo.device!.remoteId.toString()
               : bleInfo.device!.advName,
         ),
+        if (!bleInfo.connected)
+          TextButton(
+            onPressed: () async {
+              await _connectToDevice(bleInfo.device!);
+            },
+            child: const Text("Connect"),
+          )
+        else if (bleInfo.service == null)
+          const CircularProgressIndicator(),
         IconButton(
           onPressed: () async {
-            await _connectToDevice(bleInfo.device!);
+            await bleInfo.device!.disconnect();
           },
-          icon: const Icon(Icons.bluetooth),
+          icon: const Icon(Icons.close),
         ),
       ],
     );

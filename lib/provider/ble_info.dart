@@ -54,6 +54,7 @@ class BleNotifier extends StateNotifier<BleInfo> {
     }
 
     try {
+      if (!state.connected) return (null, null);
       final List<BluetoothService> services =
           await state.device!.discoverServices();
       final primaryService = services.firstWhere((service) =>
@@ -72,7 +73,6 @@ class BleNotifier extends StateNotifier<BleInfo> {
         await Future.delayed(const Duration(milliseconds: 1000));
         rethrow;
       } else {
-        // TODO: Show error message
         return (null, null);
       }
     }
@@ -83,6 +83,9 @@ class BleNotifier extends StateNotifier<BleInfo> {
     BluetoothService? service,
     BluetoothCharacteristic? characteristics,
   }) {
+    state = state.copyWith(
+      device: device,
+    );
     if (device != null) {
       _connectionStateSubscription?.cancel();
       _connectionStateSubscription =
@@ -126,9 +129,6 @@ class BleNotifier extends StateNotifier<BleInfo> {
         );
       });
     }
-    state = state.copyWith(
-      device: device,
-    );
   }
 }
 

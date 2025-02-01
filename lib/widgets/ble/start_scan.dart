@@ -104,7 +104,7 @@ class _StartScanState extends ConsumerState<StartScan> {
                             _isConnecting
                                 ? const CircularProgressIndicator()
                                 : TextButton(
-                                    child: Text("Connect"),
+                                    child: const Text("Connect"),
                                     onPressed: () =>
                                         _handleDeviceConnection(result)),
                           ],
