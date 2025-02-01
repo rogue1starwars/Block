@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phoneduino_block/data/block_data.dart';
 import 'package:phoneduino_block/models/fields.dart';
 import 'package:phoneduino_block/models/inputs.dart';
@@ -13,7 +14,7 @@ class Block {
   final List<Field>? fields;
   final List<Input>? children;
   final BlockTypes returnType;
-  final Function(Block) originalFunc;
+  final Function(WidgetRef, Block) originalFunc;
 
   Block({
     required this.id,
@@ -31,7 +32,7 @@ class Block {
         fields = block.fields,
         children = block.children;
 
-  dynamic execute() {
+  dynamic execute(WidgetRef ref) {
     if (children != null) {
       for (final child in children!) {
         switch (child) {
@@ -40,7 +41,7 @@ class Block {
             if (valueInput.block == null) {
               ScaffoldMessenger.of(Block.getVariable("_context")).showSnackBar(
                 const SnackBar(
-                  content: Text('Please connect to a device first'),
+                  content: Text('Please fill in all fields'),
                 ),
               );
               return;
@@ -60,7 +61,7 @@ class Block {
         }
       }
     }
-    return originalFunc(this);
+    return originalFunc(ref, this);
   }
 
   static bool hasVariable(String name) {
@@ -103,7 +104,7 @@ class Block {
     List<Field>? fields,
     List<Input>? children,
     BlockTypes? returnType,
-    Function(Block)? originalFunc,
+    Function(WidgetRef, Block)? originalFunc,
   }) {
     return Block(
       id: id ?? this.id,

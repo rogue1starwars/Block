@@ -37,7 +37,7 @@ class HomePage extends ConsumerWidget {
                         context,
                         BlockTypes.context,
                       );
-                      root.execute();
+                      root.execute(ref);
                     },
                     icon: const Icon(Icons.play_arrow)),
               ],

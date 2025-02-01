@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_compass/flutter_compass.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:phoneduino_block/provider/ble_info.dart';
 import 'package:phoneduino_block/models/block.dart';
@@ -15,7 +16,7 @@ class BlockBluePrint {
 
   final List<Input>? children;
   final BlockTypes returnType;
-  final Function(Block) originalFunc;
+  final Function(WidgetRef, Block) originalFunc;
 
   BlockBluePrint({
     required this.name,
@@ -36,13 +37,13 @@ List<BlockBluePrint> blockData = [
       ),
     ],
     returnType: BlockTypes.none,
-    originalFunc: (Block block) {
+    originalFunc: (WidgetRef ref, Block block) {
       if (block.children == null) return;
       if (block.children!.isEmpty) return;
 
       final statement = block.children![0] as StatementInput;
       for (var block in statement.blocks) {
-        block.execute();
+        block.execute(ref);
       }
     },
   ),
@@ -59,10 +60,10 @@ List<BlockBluePrint> blockData = [
             block: null),
       ],
       returnType: BlockTypes.none,
-      originalFunc: (Block block) {
+      originalFunc: (WidgetRef ref, Block block) {
         final value = block.children![0] as ValueInput;
 
-        final BleInfo bleInfo = Block.getVariable("_ble");
+        final BleInfo bleInfo = ref.read(bleProvider);
         if (bleInfo.characteristics == null) {
           ScaffoldMessenger.of(Block.getVariable("_context")).showSnackBar(
             const SnackBar(
@@ -74,12 +75,12 @@ List<BlockBluePrint> blockData = [
         }
 
         bleInfo.characteristics!
-            .write(value.block!.execute().toString().codeUnits);
+            .write(value.block!.execute(ref).toString().codeUnits);
       }),
   BlockBluePrint(
     name: 'Activate Orientation',
     returnType: BlockTypes.none,
-    originalFunc: (Block block) {
+    originalFunc: (WidgetRef ref, Block block) {
       final events = FlutterCompass.events;
       if (events == null) {
         ScaffoldMessenger.of(Block.getVariable("_context")).showSnackBar(
@@ -99,7 +100,7 @@ List<BlockBluePrint> blockData = [
   BlockBluePrint(
     name: 'Get Orientation',
     returnType: BlockTypes.number,
-    originalFunc: (Block block) {
+    originalFunc: (WidgetRef ref, Block block) {
       final value = Block.getVariable("_orientation");
       if (value == null) {
         print("Get Orientation: null");
@@ -111,7 +112,7 @@ List<BlockBluePrint> blockData = [
   BlockBluePrint(
     name: 'Activate Geolocator',
     returnType: BlockTypes.none,
-    originalFunc: (Block block) async {
+    originalFunc: (WidgetRef ref, Block block) async {
       bool serviceEnabled;
       LocationPermission permission;
 
@@ -158,7 +159,7 @@ List<BlockBluePrint> blockData = [
   BlockBluePrint(
     name: 'Get Latitude',
     returnType: BlockTypes.number,
-    originalFunc: (Block block) {
+    originalFunc: (WidgetRef ref, Block block) {
       final value = Block.getVariable("_lat");
       if (value == null) {
         print("Get Latitude: null");
@@ -170,7 +171,7 @@ List<BlockBluePrint> blockData = [
   BlockBluePrint(
     name: 'Get Longitude',
     returnType: BlockTypes.number,
-    originalFunc: (Block block) {
+    originalFunc: (WidgetRef ref, Block block) {
       final value = Block.getVariable("_long");
       if (value == null) {
         print("Get Longitude: null");
@@ -189,11 +190,12 @@ List<BlockBluePrint> blockData = [
       ValueInput(label: 'Value', block: null),
     ],
     returnType: BlockTypes.none,
-    originalFunc: (Block block) {
+    originalFunc: (WidgetRef ref, Block block) {
       final value = block.children![0] as ValueInput;
       final type = BlockTypes.values.firstWhere(
           (e) => e.toString() == 'BlockTypes.' + block.fields![1].value);
-      Block.setVariable(block.fields![0].value, value.block!.execute(), type);
+      Block.setVariable(
+          block.fields![0].value, value.block!.execute(ref), type);
     },
   ),
   BlockBluePrint(
@@ -203,7 +205,7 @@ List<BlockBluePrint> blockData = [
     ],
     children: [],
     returnType: BlockTypes.none,
-    originalFunc: (Block block) {
+    originalFunc: (WidgetRef ref, Block block) {
       final name = block.fields![0].value;
       final value = Block.getVariable(name);
       if (value == null) {
@@ -226,12 +228,12 @@ List<BlockBluePrint> blockData = [
       ),
     ],
     returnType: BlockTypes.none,
-    originalFunc: (Block block) {
+    originalFunc: (WidgetRef ref, Block block) {
       final statement = block.children![0] as StatementInput;
       final value = int.parse(block.fields![0].value);
       Timer.periodic(Duration(milliseconds: value), (timer) {
         for (var block in statement.blocks) {
-          block.execute();
+          block.execute(ref);
         }
       });
     },
@@ -248,12 +250,12 @@ List<BlockBluePrint> blockData = [
       ),
     ],
     returnType: BlockTypes.none,
-    originalFunc: (Block block) {
+    originalFunc: (WidgetRef ref, Block block) {
       final statement = block.children![0] as StatementInput;
       final value = int.parse(block.fields![0].value);
       for (int i = 0; i < value; i++) {
         for (var block in statement.blocks) {
-          block.execute();
+          block.execute(ref);
         }
       }
     },
@@ -267,11 +269,11 @@ List<BlockBluePrint> blockData = [
       ),
     ],
     returnType: BlockTypes.none,
-    originalFunc: (Block block) {
+    originalFunc: (WidgetRef ref, Block block) {
       final value = block.children![0] as ValueInput;
       ScaffoldMessenger.of(Block.getVariable("_context")).showSnackBar(
         SnackBar(
-          content: Text(value.block!.execute().toString()),
+          content: Text(value.block!.execute(ref).toString()),
         ),
       );
     },
@@ -283,7 +285,7 @@ List<BlockBluePrint> blockData = [
     ],
     children: [],
     returnType: BlockTypes.number,
-    originalFunc: (Block block) {
+    originalFunc: (WidgetRef ref, Block block) {
       return block.fields![0].value;
     },
   ),
