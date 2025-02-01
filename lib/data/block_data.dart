@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_compass/flutter_compass.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:phoneduino_block/models/ble_info.dart';
+import 'package:phoneduino_block/provider/ble_info.dart';
 import 'package:phoneduino_block/models/block.dart';
 import 'package:phoneduino_block/models/fields.dart';
 import 'package:phoneduino_block/models/inputs.dart';
@@ -26,18 +26,6 @@ class BlockBluePrint {
   });
 }
 
-List<BlockBluePrint> filterBlockData(Map<BlockTypes, bool>? filter) {
-  if (filter == null) {
-    return blockData;
-  }
-
-  return blockData.where((block) {
-    return filter.containsKey(block.returnType)
-        ? filter[block.returnType]!
-        : true;
-  }).toList();
-}
-
 List<BlockBluePrint> blockData = [
   BlockBluePrint(
     name: 'Main',
@@ -53,9 +41,9 @@ List<BlockBluePrint> blockData = [
       if (block.children!.isEmpty) return;
 
       final statement = block.children![0] as StatementInput;
-      statement.blocks.forEach((block) {
+      for (var block in statement.blocks) {
         block.execute();
-      });
+      }
     },
   ),
   BlockBluePrint(
@@ -155,7 +143,8 @@ List<BlockBluePrint> blockData = [
       print('Location services are enabled.');
       StreamSubscription<Position> positionStream =
           Geolocator.getPositionStream(
-        locationSettings: LocationSettings(accuracy: LocationAccuracy.best),
+        locationSettings:
+            const LocationSettings(accuracy: LocationAccuracy.best),
       ).listen((Position? position) {
         if (position == null) {
           print('uknown');
@@ -241,9 +230,9 @@ List<BlockBluePrint> blockData = [
       final statement = block.children![0] as StatementInput;
       final value = int.parse(block.fields![0].value);
       Timer.periodic(Duration(milliseconds: value), (timer) {
-        statement.blocks.forEach((block) {
+        for (var block in statement.blocks) {
           block.execute();
-        });
+        }
       });
     },
   ),
@@ -263,9 +252,9 @@ List<BlockBluePrint> blockData = [
       final statement = block.children![0] as StatementInput;
       final value = int.parse(block.fields![0].value);
       for (int i = 0; i < value; i++) {
-        statement.blocks.forEach((block) {
+        for (var block in statement.blocks) {
           block.execute();
-        });
+        }
       }
     },
   ),
