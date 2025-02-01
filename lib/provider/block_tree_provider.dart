@@ -205,7 +205,8 @@ class BlockTreeNotifier extends StateNotifier<Block> {
     Block? targetBlock = findBlock(id: id);
     if (targetBlock == null) return;
 
-    targetBlock = targetBlock.copyWith(id: const Uuid().v4());
+    targetBlock =
+        targetBlock.copyWith(id: const Uuid().v4()); // copy with new id
 
     bool inserted = insertBlock(siblingId: siblingId, value: targetBlock);
     if (inserted) deleteBlock(id: id);
@@ -328,9 +329,7 @@ class BlockTreeNotifier extends StateNotifier<Block> {
           value: value,
           index: index,
         );
-        // Just for testing...
-        final newParent = parent.copyWith(children: newChildren);
-        return newParent;
+        return parent.copyWith(children: newChildren);
       } else {
         return recursive(
           callback: addBlockHelper,
@@ -339,7 +338,6 @@ class BlockTreeNotifier extends StateNotifier<Block> {
           value: value,
           index: index,
         );
-        // return null;
       }
     }
 
