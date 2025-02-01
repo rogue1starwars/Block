@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phoneduino_block/provider/ble_info.dart';
 import 'package:phoneduino_block/models/block.dart';
 import 'package:phoneduino_block/provider/block_tree_provider.dart';
+import 'package:phoneduino_block/provider/ui_provider.dart';
 import 'package:phoneduino_block/utils/type.dart';
 import 'package:phoneduino_block/widgets/ble/ble_home.dart';
 import 'package:phoneduino_block/widgets/block_tree.dart';
@@ -13,6 +14,20 @@ class HomePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     Block root = ref.watch(blockTreeProvider);
+    ref.listen<UiState>(uiProvider, (previous, next) {
+      if (next.messageQueue.isNotEmpty) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(
+              SnackBar(
+                content: Text(next.messageQueue.first),
+              ),
+            )
+            .closed
+            .then((_) {
+          ref.read(uiProvider.notifier).removeMessage();
+        });
+      }
+    });
     return Scaffold(
       appBar: AppBar(
         title: const Text('PhoneDuino Block'),

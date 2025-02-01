@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
 import 'package:flutter_compass/flutter_compass.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
@@ -8,6 +7,7 @@ import 'package:phoneduino_block/provider/ble_info.dart';
 import 'package:phoneduino_block/models/block.dart';
 import 'package:phoneduino_block/models/fields.dart';
 import 'package:phoneduino_block/models/inputs.dart';
+import 'package:phoneduino_block/provider/ui_provider.dart';
 import 'package:phoneduino_block/utils/type.dart';
 
 class BlockBluePrint {
@@ -65,11 +65,9 @@ List<BlockBluePrint> blockData = [
 
         final BleInfo bleInfo = ref.read(bleProvider);
         if (bleInfo.characteristics == null) {
-          ScaffoldMessenger.of(Block.getVariable("_context")).showSnackBar(
-            const SnackBar(
-              content: Text('Please connect to a device first'),
-            ),
-          );
+          ref.read(uiProvider.notifier).showMessage(
+                'Please connect to a device first',
+              );
           print("Send Data: null");
           return;
         }
@@ -83,11 +81,9 @@ List<BlockBluePrint> blockData = [
     originalFunc: (WidgetRef ref, Block block) {
       final events = FlutterCompass.events;
       if (events == null) {
-        ScaffoldMessenger.of(Block.getVariable("_context")).showSnackBar(
-          const SnackBar(
-            content: Text('Device Orientation not available'),
-          ),
-        );
+        ref.read(uiProvider.notifier).showMessage(
+              'Orientation sensor not available',
+            );
         return;
       }
       StreamSubscription orientationStream = events.listen((event) {
@@ -118,11 +114,9 @@ List<BlockBluePrint> blockData = [
 
       serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
-        ScaffoldMessenger.of(Block.getVariable("_context")).showSnackBar(
-          const SnackBar(
-            content: Text('Location services are disabled.'),
-          ),
-        );
+        ref.read(uiProvider.notifier).showMessage(
+              'Location services are disabled',
+            );
         return;
       }
 
@@ -271,11 +265,9 @@ List<BlockBluePrint> blockData = [
     returnType: BlockTypes.none,
     originalFunc: (WidgetRef ref, Block block) {
       final value = block.children![0] as ValueInput;
-      ScaffoldMessenger.of(Block.getVariable("_context")).showSnackBar(
-        SnackBar(
-          content: Text(value.block!.execute(ref).toString()),
-        ),
-      );
+      ref.read(uiProvider.notifier).showMessage(
+            value.block!.execute(ref).toString(),
+          );
     },
   ),
   BlockBluePrint(

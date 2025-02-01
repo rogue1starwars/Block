@@ -2,6 +2,7 @@
 
 ## TODOs
 
+- Termination
 - Finalize UI
 - Saving projects
 - additional sensors
