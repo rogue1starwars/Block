@@ -104,17 +104,16 @@ class _BleDeviceState extends ConsumerState<BleDevice> {
           ),
           if (bleInfo.service == null)
             IconButton(
-              onPressed: () async {
-                try {
-                  await _discoverServices();
-                } catch (e) {
+              onPressed: () {
+                final scaffoldMessenger = ScaffoldMessenger.of(context);
+                _discoverServices().catchError((e) {
                   if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
+                    scaffoldMessenger.showSnackBar(
                       SnackBar(
                           content: Text('Failed to discover services: $e')),
                     );
                   }
-                }
+                });
               },
               icon: const Icon(Icons.refresh),
             ),
