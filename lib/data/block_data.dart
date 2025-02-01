@@ -32,19 +32,38 @@ List<BlockBluePrint> blockData = [
     name: 'Main',
     children: [
       StatementInput(
-        label: 'Do',
+        label: 'Setup',
+        blocks: [],
+      ),
+      StatementInput(
+        label: 'Loop',
         blocks: [],
       ),
     ],
+    fields: [
+      NumericField(
+        value: 100,
+        label: 'Period (ms)',
+      )
+    ],
     returnType: BlockTypes.none,
     originalFunc: (WidgetRef ref, Block block) {
-      if (block.children == null) return;
-      if (block.children!.isEmpty) return;
-
-      final statement = block.children![0] as StatementInput;
-      for (var block in statement.blocks) {
+      // Setup
+      final setupStatement = block.children![0] as StatementInput;
+      for (var block in setupStatement.blocks) {
         block.execute(ref);
       }
+
+      // loop
+      final loopStatement = block.children![1] as StatementInput;
+      Timer.periodic(
+        const Duration(milliseconds: 100),
+        (timer) {
+          for (var block in loopStatement.blocks) {
+            block.execute(ref);
+          }
+        },
+      );
     },
   ),
   BlockBluePrint(
