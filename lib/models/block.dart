@@ -36,7 +36,7 @@ class Block {
       for (final child in children!) {
         switch (child) {
           case ValueInput child:
-            final valueInput = child as ValueInput;
+            final valueInput = child;
             if (valueInput.block == null) {
               ScaffoldMessenger.of(Block.getVariable("_context")).showSnackBar(
                 const SnackBar(

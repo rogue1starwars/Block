@@ -43,11 +43,12 @@ class ValueInput extends Input {
     String? label,
     Map<BlockTypes, bool>? filter,
     Block? block,
+    bool delete = false,
   }) {
     return ValueInput(
       label: label ?? this.label,
       filter: filter ?? this.filter,
-      block: block ?? this.block,
+      block: delete ? null : (block ?? this.block),
     );
   }
 }

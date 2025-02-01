@@ -79,9 +79,9 @@ class _BleHomeState extends ConsumerState<BleHome> {
     return Expanded(
       child: Row(children: [
         _adapterState == BluetoothAdapterState.on
-            ? StartScan()
+            ? const StartScan()
             : Text(errorMessage),
-        BleDevice(),
+        const BleDevice(),
       ]),
     );
   }
