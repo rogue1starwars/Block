@@ -3,6 +3,8 @@
 ## TODOs
 
 - Termination
+  - When clicking button, terminate
+  - When error happening, re-run whole script
 - Finalize UI
 - Saving projects
 - additional sensors
