@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phoneduino_block/models/block.dart';
 import 'package:phoneduino_block/provider/block_tree_provider.dart';
+import 'package:phoneduino_block/provider/intervals_provider.dart';
 import 'package:phoneduino_block/provider/ui_provider.dart';
 import 'package:phoneduino_block/widgets/ble/ble_home.dart';
 import 'package:phoneduino_block/widgets/block_tree.dart';
@@ -12,6 +13,7 @@ class HomePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     Block root = ref.watch(blockTreeProvider);
+    IntervalList intervals = ref.watch(intervalProvider);
     ref.listen<UiState>(uiProvider, (previous, next) {
       if (next.messageQueue.isNotEmpty) {
         ScaffoldMessenger.of(context)
@@ -27,23 +29,26 @@ class HomePage extends ConsumerWidget {
       }
     });
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('PhoneDuino Block'),
-      ),
+      appBar: AppBar(title: const Text('PhoneDuino Block'), actions: [
+        IconButton(
+          onPressed: () {
+            root.execute(ref);
+          },
+          icon: const Icon(Icons.play_arrow),
+        ),
+        IconButton(
+          onPressed: () {
+            ref.read(intervalProvider.notifier).clearInterval();
+            print(intervals.intervals[0]);
+          },
+          icon: const Icon(Icons.stop),
+        ),
+      ]),
       body: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Row(
-              children: [
-                const BleHome(),
-                IconButton(
-                    onPressed: () {
-                      root.execute(ref);
-                    },
-                    icon: const Icon(Icons.play_arrow)),
-              ],
-            ),
+            const BleHome(),
             BlockTree(block: root),
           ],
         ),

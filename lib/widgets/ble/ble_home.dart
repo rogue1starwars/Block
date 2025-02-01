@@ -76,13 +76,11 @@ class _BleHomeState extends ConsumerState<BleHome> {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Row(children: [
-        _adapterState == BluetoothAdapterState.on
-            ? const StartScan()
-            : Text(errorMessage),
-        const BleDevice(),
-      ]),
-    );
+    return Row(children: [
+      _adapterState == BluetoothAdapterState.on
+          ? const StartScan()
+          : Text(errorMessage),
+      const BleDevice(),
+    ]);
   }
 }

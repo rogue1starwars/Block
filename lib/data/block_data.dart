@@ -7,6 +7,7 @@ import 'package:phoneduino_block/provider/ble_info.dart';
 import 'package:phoneduino_block/models/block.dart';
 import 'package:phoneduino_block/models/fields.dart';
 import 'package:phoneduino_block/models/inputs.dart';
+import 'package:phoneduino_block/provider/intervals_provider.dart';
 import 'package:phoneduino_block/provider/ui_provider.dart';
 import 'package:phoneduino_block/utils/type.dart';
 
@@ -56,7 +57,7 @@ List<BlockBluePrint> blockData = [
 
       // loop
       final loopStatement = block.children![1] as StatementInput;
-      Timer.periodic(
+      final mainTimer = Timer.periodic(
         const Duration(milliseconds: 100),
         (timer) {
           for (var block in loopStatement.blocks) {
@@ -64,6 +65,7 @@ List<BlockBluePrint> blockData = [
           }
         },
       );
+      ref.read(intervalProvider.notifier).addInterval(mainTimer);
     },
   ),
   BlockBluePrint(
@@ -244,11 +246,13 @@ List<BlockBluePrint> blockData = [
     originalFunc: (WidgetRef ref, Block block) {
       final statement = block.children![0] as StatementInput;
       final value = int.parse(block.fields![0].value);
-      Timer.periodic(Duration(milliseconds: value), (timer) {
+      final interval = Timer.periodic(Duration(milliseconds: value), (timer) {
         for (var block in statement.blocks) {
           block.execute(ref);
         }
       });
+
+      ref.watch(intervalProvider.notifier).addInterval(interval);
     },
   ),
   BlockBluePrint(
