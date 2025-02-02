@@ -2,7 +2,7 @@ import 'package:hive/hive.dart';
 
 part 'fields.g.dart';
 
-@HiveType(typeId: 5)
+@HiveType(typeId: 6)
 class Field {
   @HiveField(0)
   final String label;
@@ -30,7 +30,7 @@ class Field {
   }
 }
 
-@HiveType(typeId: 6)
+@HiveType(typeId: 7)
 class NumericField extends Field {
   NumericField({
     required super.label,
@@ -50,7 +50,7 @@ class NumericField extends Field {
   }
 }
 
-@HiveType(typeId: 7)
+@HiveType(typeId: 8)
 class StringField extends Field {
   StringField({
     required super.label,

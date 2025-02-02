@@ -8,7 +8,7 @@ part of 'fields.dart';
 
 class FieldAdapter extends TypeAdapter<Field> {
   @override
-  final int typeId = 5;
+  final int typeId = 6;
 
   @override
   Field read(BinaryReader reader) {
@@ -48,7 +48,7 @@ class FieldAdapter extends TypeAdapter<Field> {
 
 class NumericFieldAdapter extends TypeAdapter<NumericField> {
   @override
-  final int typeId = 6;
+  final int typeId = 7;
 
   @override
   NumericField read(BinaryReader reader) {
@@ -87,7 +87,7 @@ class NumericFieldAdapter extends TypeAdapter<NumericField> {
 
 class StringFieldAdapter extends TypeAdapter<StringField> {
   @override
-  final int typeId = 7;
+  final int typeId = 8;
 
   @override
   StringField read(BinaryReader reader) {

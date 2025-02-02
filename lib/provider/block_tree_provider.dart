@@ -11,6 +11,12 @@ class BlockTreeNotifier extends StateNotifier<Block> {
           id: '0',
         ));
 
+  void updateRoot({
+    required Block root,
+  }) {
+    state = root;
+  }
+
   void updateField({
     required String parentId,
     required dynamic value,

@@ -5,7 +5,7 @@ import 'package:phoneduino_block/data/block_data.dart';
 import 'package:phoneduino_block/models/fields.dart';
 import 'package:phoneduino_block/models/inputs.dart';
 import 'package:phoneduino_block/models/variables.dart';
-import 'package:phoneduino_block/utils/type.dart';
+import 'package:phoneduino_block/models/blockTypes.dart';
 
 part 'block.g.dart';
 

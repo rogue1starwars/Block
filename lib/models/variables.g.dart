@@ -8,7 +8,7 @@ part of 'variables.dart';
 
 class VariableAdapter extends TypeAdapter<Variable> {
   @override
-  final int typeId = 3;
+  final int typeId = 4;
 
   @override
   Variable read(BinaryReader reader) {

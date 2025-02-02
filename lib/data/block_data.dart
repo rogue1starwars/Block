@@ -9,7 +9,7 @@ import 'package:phoneduino_block/models/fields.dart';
 import 'package:phoneduino_block/models/inputs.dart';
 import 'package:phoneduino_block/provider/intervals_provider.dart';
 import 'package:phoneduino_block/provider/ui_provider.dart';
-import 'package:phoneduino_block/utils/type.dart';
+import 'package:phoneduino_block/models/blockTypes.dart';
 
 class BlockBluePrint {
   final String name;

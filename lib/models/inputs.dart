@@ -1,5 +1,5 @@
 import 'package:phoneduino_block/models/block.dart';
-import 'package:phoneduino_block/utils/type.dart';
+import 'package:phoneduino_block/models/blockTypes.dart';
 import 'package:hive/hive.dart';
 
 part 'inputs.g.dart';

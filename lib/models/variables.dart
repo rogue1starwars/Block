@@ -1,10 +1,10 @@
-import 'package:phoneduino_block/utils/type.dart';
+import 'package:phoneduino_block/models/blockTypes.dart';
 
 import 'package:hive/hive.dart';
 
 part 'variables.g.dart';
 
-@HiveType(typeId: 3)
+@HiveType(typeId: 4)
 class Variable {
   @HiveField(0)
   dynamic value;
