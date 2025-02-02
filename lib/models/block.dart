@@ -39,7 +39,7 @@ class Block {
         ],
         "children": [
         // Statement
-          [
+          "setup": [
             {
               "id": "2",
               "name": "Serial Begin",
@@ -59,9 +59,16 @@ class Block {
               ],
             }
           ]
-          {
-            "label": "Loop",
-            "blocks": []
+          "loop": [
+            {
+              "id": "4",
+              "name": "Serial Print",
+              "fields": [
+                {
+                  "value": "Hello World",
+                }
+              ],
+            }
           }
         ]
       }
@@ -74,47 +81,75 @@ class Block {
       * children
         *blocks...
     */
-    try {
-      for (final block in blockData) {
-        if (block.name == json['name']) {
-          final Block root = Block(
-            id: json['id'],
-            name: block.name,
-            returnType: block.returnType,
-            originalFunc: block.originalFunc,
-            fields: List<Field>.from(
-              block.fields.asMap().entries.map((entry) {
-                return Field(
-                  type: entry.value.type,
-                  label: entry.value.label,
-                  value: json['fields'][entry.key],
+    for (final block in blockData) {
+      if (block.name == json['name']) {
+        final Block root = Block(
+          id: json['id'],
+          name: block.name,
+          returnType: block.returnType,
+          originalFunc: block.originalFunc,
+          fields: block.fields
+              .map((field) => Field(
+                    label: field.label,
+                    type: field.type,
+                    value: json['fields'][field.label],
+                  ))
+              .toList(),
+          children: block.children.map((child) {
+            switch (child) {
+              case StatementInput init:
+                final dynamic rawChildren = json['children'][child.label];
+                if (rawChildren == null) {
+                  return StatementInput(
+                    label: init.label,
+                    blocks: [],
+                  );
+                }
+
+                if (rawChildren is! List) {
+                  throw FormatException(
+                      'Expected List for children of ${child.label}');
+                }
+
+                final List<Map<String, dynamic>> blockListJson =
+                    (rawChildren as List).map((item) {
+                  if (item is! Map) {
+                    throw FormatException('Expected Map in children list');
+                  }
+                  return Map<String, dynamic>.from(item);
+                }).toList();
+
+                return StatementInput.fromJson(
+                  init: init,
+                  json: blockListJson,
                 );
-              }),
-            ),
-            children:
-                List<Input>.from(block.children.asMap().entries.map((entry) {
-              switch (entry.value) {
-                case StatementInput init:
-                  return StatementInput.fromJson(
-                    init: init,
-                    json: json['children'][entry.key] ?? [],
+              case ValueInput init:
+                final dynamic rawChildren = json['children'][child.label];
+                if (rawChildren == null) {
+                  return ValueInput(
+                    label: init.label,
+                    block: null,
                   );
-                case ValueInput init:
-                  return ValueInput.fromJson(
-                    init: init,
-                    json: json['children'][entry.key] ?? {},
-                  );
-              }
-            })),
-          );
-          return root;
-        }
+                }
+                if (rawChildren is! Map) {
+                  throw FormatException(
+                      'Expected Map for children of ${child.label}');
+                }
+                final Map<String, dynamic> blockJson =
+                    Map<String, dynamic>.from(rawChildren);
+                return ValueInput.fromJson(
+                  init: init,
+                  json: blockJson,
+                );
+              default:
+                throw 'Invalid input type';
+            }
+          }).toList(),
+        );
+        return root;
       }
-      throw 'Block not found';
-    } catch (e) {
-      print(e);
-      return Block.fromBluePrint(block: blockData[0], id: '0');
     }
+    throw 'Block not found';
   }
 
   Block.fromBluePrint({required BlockBluePrint block, required this.id})
@@ -128,15 +163,25 @@ class Block {
     final Map<String, dynamic> json = {
       'id': id,
       'name': name,
-      'fields': fields.map((field) => field.toJson()).toList(),
-      'children': children.map((child) {
+      'fields': fields.fold(
+        <String, dynamic>{},
+        (acc, field) {
+          acc[field.label] = field.value;
+          return acc;
+        },
+      ),
+      'children': children.fold(<String, dynamic>{}, (acc, child) {
         switch (child) {
           case StatementInput child:
-            return child.toJson();
+            acc[child.label] = child.toJson();
+            return acc;
           case ValueInput child:
-            return child.toJson();
+            acc[child.label] = child.toJson();
+            return acc;
+          default:
+            throw 'Invalid input type';
         }
-      }).toList(),
+      }),
     };
     return json;
   }

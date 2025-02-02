@@ -113,9 +113,9 @@ class ValueInput extends Input {
     required this.block,
   });
 
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic>? toJson() {
     if (block == null) {
-      return {};
+      return null;
     }
     return block!.toJson();
   }
