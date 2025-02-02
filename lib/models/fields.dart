@@ -1,6 +1,8 @@
+import 'package:phoneduino_block/utils/type.dart';
+
 class Field {
   final String label;
-  final String type;
+  final BlockTypes type;
   final dynamic value;
 
   Field({
@@ -26,71 +28,13 @@ class Field {
 
   Field copyWith({
     String? label,
-    String? type,
+    BlockTypes? type,
     dynamic value,
   }) {
     return Field(
       label: label ?? this.label,
       value: value ?? this.value,
       type: type ?? this.type,
-    );
-  }
-}
-
-class NumericField extends Field {
-  NumericField({
-    required super.label,
-    required super.value,
-  }) : super(type: 'number');
-
-  @override
-  factory NumericField.fromJson({
-    required init,
-    required dynamic value,
-  }) {
-    return NumericField(
-      label: init.label,
-      value: value,
-    );
-  }
-  @override
-  NumericField copyWith({
-    String? label,
-    String? type,
-    dynamic value,
-  }) {
-    return NumericField(
-      label: label ?? this.label,
-      value: value ?? this.value,
-    );
-  }
-}
-
-class StringField extends Field {
-  StringField({
-    required super.label,
-    required super.value,
-  }) : super(type: 'string');
-
-  @override
-  factory StringField.fromJson({
-    required init,
-    required dynamic value,
-  }) {
-    return StringField(
-      label: init.label,
-      value: value,
-    );
-  }
-  @override
-  StringField copyWith({
-    String? label,
-    String? type,
-    dynamic value,
-  }) {
-    return StringField(
-      label: label ?? this.label,
-      value: value ?? this.value,
     );
   }
 }

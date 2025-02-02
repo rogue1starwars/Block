@@ -85,17 +85,20 @@ class Block {
             fields: List<Field>.from(
               block.fields.asMap().entries.map((entry) {
                 switch (entry.value.type) {
-                  case 'number':
-                    return NumericField(
+                  case BlockTypes.number:
+                    return Field(
+                      type: entry.value.type,
                       label: entry.value.label,
                       value: json['fields'][entry.key],
                     );
-                  case 'string':
+                  case BlockTypes.string:
                     return Field(
                       label: entry.value.label,
                       value: json['fields'][entry.key],
                       type: entry.value.type,
                     );
+                  default:
+                    throw 'Field type not found';
                 }
               }),
             ),
