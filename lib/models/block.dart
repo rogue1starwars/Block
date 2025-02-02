@@ -1,9 +1,11 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phoneduino_block/data/block_data.dart';
 import 'package:phoneduino_block/models/fields.dart';
 import 'package:phoneduino_block/models/inputs.dart';
 import 'package:phoneduino_block/models/variables.dart';
+import 'package:phoneduino_block/provider/block_tree_provider.dart';
+import 'package:phoneduino_block/provider/intervals_provider.dart';
+import 'package:phoneduino_block/provider/ui_provider.dart';
 import 'package:phoneduino_block/utils/type.dart';
 
 class Block {
@@ -11,8 +13,8 @@ class Block {
 
   final String id;
   final String name;
-  final List<Field>? fields;
-  final List<Input>? children;
+  final List<Field> fields;
+  final List<Input> children;
   final BlockTypes returnType;
   final Function(WidgetRef, Block) originalFunc;
 
@@ -21,9 +23,107 @@ class Block {
     required this.name,
     required this.returnType,
     required this.originalFunc,
-    this.fields,
-    this.children,
+    required this.fields,
+    required this.children,
   });
+
+  factory Block.fromJson(Map<String, dynamic> json) {
+    /*
+      json format
+      {
+        "id": "1",
+        "name": "Main",
+        "fields": [
+            100,
+            'abc',
+        ],
+        "children": [
+        // Statement
+          [
+            {
+              "id": "2",
+              "name": "Serial Begin",
+              "fields": [
+                {
+                  "value": 9600,
+                }
+              ],
+            }
+            {
+              "id": "3",
+              "name": "Serial Begin",
+              "fields": [
+                {
+                  "value": 9600,
+                }
+              ],
+            }
+          ]
+          {
+            "label": "Loop",
+            "blocks": []
+          }
+        ]
+      }
+
+      block: 
+      * id
+      * name
+      * fields
+        * value
+      * children
+        *blocks...
+    */
+    try {
+      for (final block in blockData) {
+        if (block.name == json['name']) {
+          final Block root = Block(
+            id: json['id'],
+            name: block.name,
+            returnType: block.returnType,
+            originalFunc: block.originalFunc,
+            fields: List<Field>.from(
+              block.fields.asMap().entries.map((entry) {
+                switch (entry.value.type) {
+                  case 'number':
+                    return NumericField(
+                      label: entry.value.label,
+                      value: json['fields'][entry.key],
+                    );
+                  case 'string':
+                    return Field(
+                      label: entry.value.label,
+                      value: json['fields'][entry.key],
+                      type: entry.value.type,
+                    );
+                }
+              }),
+            ),
+            children:
+                List<Input>.from(block.children.asMap().entries.map((entry) {
+              switch (entry.value) {
+                case StatementInput init:
+                  return StatementInput.fromJson(
+                    init: init,
+                    json: json['children'][entry.key] ?? [],
+                  );
+                case ValueInput init:
+                  return ValueInput.fromJson(
+                    init: init,
+                    json: json['children'][entry.key] ?? {},
+                  );
+              }
+            })),
+          );
+          return root;
+        }
+      }
+      throw 'Block not found';
+    } catch (e) {
+      print(e);
+      return Block.fromBluePrint(block: blockData[0], id: '0');
+    }
+  }
 
   Block.fromBluePrint({required BlockBluePrint block, required this.id})
       : name = block.name,
@@ -32,36 +132,59 @@ class Block {
         fields = block.fields,
         children = block.children;
 
-  dynamic execute(WidgetRef ref) {
-    if (children != null) {
-      for (final child in children!) {
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> json = {
+      'id': id,
+      'name': name,
+      'fields': fields.map((field) => field.toJson()).toList(),
+      'children': children.map((child) {
         switch (child) {
+          case StatementInput child:
+            return child.toJson();
           case ValueInput child:
-            final valueInput = child;
-            if (valueInput.block == null) {
-              ScaffoldMessenger.of(Block.getVariable("_context")).showSnackBar(
-                const SnackBar(
-                  content: Text('Please fill in all fields'),
-                ),
-              );
-              return;
-            }
+            return child.toJson();
         }
+      }).toList(),
+    };
+    return json;
+  }
+
+  void rerun(WidgetRef ref) {
+    ref.read(intervalProvider.notifier).clearInterval();
+    Block root = ref.read(blockTreeProvider);
+    root.execute(ref);
+  }
+
+  dynamic execute(WidgetRef ref) {
+    for (final child in children) {
+      switch (child) {
+        case ValueInput child:
+          final valueInput = child;
+          if (valueInput.block == null) {
+            ref.read(uiProvider.notifier).showMessage(
+                  'Please fill in all blocks',
+                );
+            return;
+          }
       }
     }
-    if (fields != null) {
-      for (final field in fields!) {
-        if (field.value == null) {
-          ScaffoldMessenger.of(Block.getVariable("_context")).showSnackBar(
-            const SnackBar(
-              content: Text('Please fill in all fields'),
-            ),
+    for (final field in fields) {
+      if (field.value == null) {
+        ref.read(uiProvider.notifier).showMessage(
+              'Please fill in all fields',
+            );
+        return;
+      }
+    }
+    try {
+      return originalFunc(ref, this);
+    } catch (e) {
+      ref.read(uiProvider.notifier).showMessage(
+            'Error: $e',
           );
-          return;
-        }
-      }
+      // Re running entire program
+      rerun(ref);
     }
-    return originalFunc(ref, this);
   }
 
   static bool hasVariable(String name) {

@@ -9,6 +9,21 @@ class Field {
     required this.type,
   });
 
+  factory Field.fromJson({
+    required init,
+    required dynamic value,
+  }) {
+    return Field(
+      label: init.label,
+      value: value,
+      type: init.type,
+    );
+  }
+
+  dynamic toJson() {
+    return value;
+  }
+
   Field copyWith({
     String? label,
     String? type,
@@ -29,6 +44,16 @@ class NumericField extends Field {
   }) : super(type: 'number');
 
   @override
+  factory NumericField.fromJson({
+    required init,
+    required dynamic value,
+  }) {
+    return NumericField(
+      label: init.label,
+      value: value,
+    );
+  }
+  @override
   NumericField copyWith({
     String? label,
     String? type,
@@ -47,6 +72,16 @@ class StringField extends Field {
     required super.value,
   }) : super(type: 'string');
 
+  @override
+  factory StringField.fromJson({
+    required init,
+    required dynamic value,
+  }) {
+    return StringField(
+      label: init.label,
+      value: value,
+    );
+  }
   @override
   StringField copyWith({
     String? label,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:phoneduino_block/models/block.dart';
 import 'package:phoneduino_block/provider/block_tree_provider.dart';
 import 'package:phoneduino_block/provider/intervals_provider.dart';
@@ -30,6 +31,24 @@ class HomePage extends ConsumerWidget {
     });
     return Scaffold(
       appBar: AppBar(title: const Text('PhoneDuino Block'), actions: [
+        IconButton(
+          onPressed: () {
+            final box = Hive.box('block_tree');
+            print(root.toJson());
+            box.put('block_tree', root.toJson());
+          },
+          icon: const Icon(Icons.save),
+        ),
+        IconButton(
+          onPressed: () {
+            final box = Hive.box('block_tree');
+            final json = box.get('block_tree');
+            final data = Map<String, dynamic>.from(json);
+            Block root = Block.fromJson(data);
+            ref.read(blockTreeProvider.notifier).updateRoot(root);
+          },
+          icon: const Icon(Icons.restore),
+        ),
         IconButton(
           onPressed: () {
             root.execute(ref);

@@ -23,7 +23,7 @@ class _BlockTreeState extends ConsumerState<BlockTree> {
     required Block parent,
     required int index,
   }) {
-    final Input input = parent.children![index];
+    final Input input = parent.children[index];
     switch (input) {
       case ValueInput _:
         return Column(
@@ -54,7 +54,7 @@ class _BlockTreeState extends ConsumerState<BlockTree> {
   }
 
   Widget _handleFields({required Block parent, required int index}) {
-    final Field field = parent.fields![index];
+    final Field field = parent.fields[index];
     switch (field) {
       case StringField _:
         return StringFieldWidget(parent: parent, index: index);
@@ -80,16 +80,14 @@ class _BlockTreeState extends ConsumerState<BlockTree> {
                   children: [
                     Text(widget.block.name),
                     DeleteButton(id: widget.block.id),
-                    if (widget.block.fields != null)
-                      for (int i = 0; i < widget.block.fields!.length; i++)
-                        _handleFields(parent: widget.block, index: i),
+                    for (int i = 0; i < widget.block.fields!.length; i++)
+                      _handleFields(parent: widget.block, index: i),
                   ],
                 ),
               ),
             ),
-            if (widget.block.children != null)
-              for (int i = 0; i < widget.block.children!.length; i++)
-                _handleInputs(parent: widget.block, index: i),
+            for (int i = 0; i < widget.block.children!.length; i++)
+              _handleInputs(parent: widget.block, index: i),
           ],
         ),
       );

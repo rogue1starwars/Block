@@ -13,9 +13,9 @@ import 'package:phoneduino_block/utils/type.dart';
 
 class BlockBluePrint {
   final String name;
-  final List<Field>? fields;
+  final List<Field> fields;
 
-  final List<Input>? children;
+  final List<Input> children;
   final BlockTypes returnType;
   final Function(WidgetRef, Block) originalFunc;
 
@@ -23,8 +23,8 @@ class BlockBluePrint {
     required this.name,
     required this.returnType,
     required this.originalFunc,
-    this.fields,
-    this.children,
+    required this.fields,
+    required this.children,
   });
 }
 
@@ -50,13 +50,13 @@ List<BlockBluePrint> blockData = [
     returnType: BlockTypes.none,
     originalFunc: (WidgetRef ref, Block block) {
       // Setup
-      final setupStatement = block.children![0] as StatementInput;
+      final setupStatement = block.children[0] as StatementInput;
       for (var block in setupStatement.blocks) {
         block.execute(ref);
       }
 
       // loop
-      final loopStatement = block.children![1] as StatementInput;
+      final loopStatement = block.children[1] as StatementInput;
       final mainTimer = Timer.periodic(
         const Duration(milliseconds: 100),
         (timer) {
@@ -70,6 +70,7 @@ List<BlockBluePrint> blockData = [
   ),
   BlockBluePrint(
       name: "Send Data",
+      fields: [],
       children: [
         ValueInput(
             label: 'Data',
@@ -82,7 +83,7 @@ List<BlockBluePrint> blockData = [
       ],
       returnType: BlockTypes.none,
       originalFunc: (WidgetRef ref, Block block) {
-        final value = block.children![0] as ValueInput;
+        final value = block.children[0] as ValueInput;
 
         final BleInfo bleInfo = ref.read(bleProvider);
         print("BleInfo: ${bleInfo.characteristics}");
@@ -105,6 +106,8 @@ List<BlockBluePrint> blockData = [
       }),
   BlockBluePrint(
     name: 'Activate Orientation',
+    fields: [],
+    children: [],
     returnType: BlockTypes.none,
     originalFunc: (WidgetRef ref, Block block) {
       final events = FlutterCompass.events;
@@ -123,6 +126,8 @@ List<BlockBluePrint> blockData = [
   ),
   BlockBluePrint(
     name: 'Get Orientation',
+    fields: [],
+    children: [],
     returnType: BlockTypes.number,
     originalFunc: (WidgetRef ref, Block block) {
       final value = Block.getVariable("_orientation");
@@ -135,6 +140,8 @@ List<BlockBluePrint> blockData = [
   ),
   BlockBluePrint(
     name: 'Activate Geolocator',
+    fields: [],
+    children: [],
     returnType: BlockTypes.none,
     originalFunc: (WidgetRef ref, Block block) async {
       bool serviceEnabled;
@@ -180,6 +187,8 @@ List<BlockBluePrint> blockData = [
   ),
   BlockBluePrint(
     name: 'Get Latitude',
+    fields: [],
+    children: [],
     returnType: BlockTypes.number,
     originalFunc: (WidgetRef ref, Block block) {
       final value = Block.getVariable("_lat");
@@ -192,6 +201,8 @@ List<BlockBluePrint> blockData = [
   ),
   BlockBluePrint(
     name: 'Get Longitude',
+    fields: [],
+    children: [],
     returnType: BlockTypes.number,
     originalFunc: (WidgetRef ref, Block block) {
       final value = Block.getVariable("_long");
@@ -213,11 +224,10 @@ List<BlockBluePrint> blockData = [
     ],
     returnType: BlockTypes.none,
     originalFunc: (WidgetRef ref, Block block) {
-      final value = block.children![0] as ValueInput;
+      final value = block.children[0] as ValueInput;
       final type = BlockTypes.values.firstWhere(
-          (e) => e.toString() == 'BlockTypes.' + block.fields![1].value);
-      Block.setVariable(
-          block.fields![0].value, value.block!.execute(ref), type);
+          (e) => e.toString() == 'BlockTypes.' + block.fields[1].value);
+      Block.setVariable(block.fields[0].value, value.block!.execute(ref), type);
     },
   ),
   BlockBluePrint(
@@ -228,7 +238,7 @@ List<BlockBluePrint> blockData = [
     children: [],
     returnType: BlockTypes.none,
     originalFunc: (WidgetRef ref, Block block) {
-      final name = block.fields![0].value;
+      final name = block.fields[0].value;
       final value = Block.getVariable(name);
       if (value == null) {
         print("Get Variable: null");
@@ -251,8 +261,8 @@ List<BlockBluePrint> blockData = [
     ],
     returnType: BlockTypes.none,
     originalFunc: (WidgetRef ref, Block block) {
-      final statement = block.children![0] as StatementInput;
-      final value = int.parse(block.fields![0].value);
+      final statement = block.children[0] as StatementInput;
+      final value = int.parse(block.fields[0].value);
       final interval = Timer.periodic(Duration(milliseconds: value), (timer) {
         for (var block in statement.blocks) {
           block.execute(ref);
@@ -275,8 +285,8 @@ List<BlockBluePrint> blockData = [
     ],
     returnType: BlockTypes.none,
     originalFunc: (WidgetRef ref, Block block) {
-      final statement = block.children![0] as StatementInput;
-      final value = int.parse(block.fields![0].value);
+      final statement = block.children[0] as StatementInput;
+      final value = int.parse(block.fields[0].value);
       for (int i = 0; i < value; i++) {
         for (var block in statement.blocks) {
           block.execute(ref);
@@ -286,6 +296,7 @@ List<BlockBluePrint> blockData = [
   ),
   BlockBluePrint(
     name: 'Print',
+    fields: [],
     children: [
       ValueInput(
         label: 'Value',
@@ -294,7 +305,7 @@ List<BlockBluePrint> blockData = [
     ],
     returnType: BlockTypes.none,
     originalFunc: (WidgetRef ref, Block block) {
-      final value = block.children![0] as ValueInput;
+      final value = block.children[0] as ValueInput;
       ref.read(uiProvider.notifier).showMessage(
             value.block!.execute(ref).toString(),
           );
@@ -308,7 +319,7 @@ List<BlockBluePrint> blockData = [
     children: [],
     returnType: BlockTypes.number,
     originalFunc: (WidgetRef ref, Block block) {
-      return block.fields![0].value;
+      return block.fields[0].value;
     },
   ),
 ];
