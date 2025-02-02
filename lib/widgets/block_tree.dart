@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phoneduino_block/models/block.dart';
+import 'package:phoneduino_block/utils/type.dart';
 import 'package:phoneduino_block/models/fields.dart';
 import 'package:phoneduino_block/models/inputs.dart';
 import 'package:phoneduino_block/provider/block_tree_provider.dart';
@@ -55,10 +56,10 @@ class _BlockTreeState extends ConsumerState<BlockTree> {
 
   Widget _handleFields({required Block parent, required int index}) {
     final Field field = parent.fields[index];
-    switch (field) {
-      case StringField _:
+    switch (field.type) {
+      case BlockTypes.string:
         return StringFieldWidget(parent: parent, index: index);
-      case NumericField _:
+      case BlockTypes.number:
         return NumericFieldWidget(parent: parent, index: index);
       default:
         return const SizedBox.shrink();
