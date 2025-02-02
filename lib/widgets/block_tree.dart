@@ -81,13 +81,13 @@ class _BlockTreeState extends ConsumerState<BlockTree> {
                   children: [
                     Text(widget.block.name),
                     DeleteButton(id: widget.block.id),
-                    for (int i = 0; i < widget.block.fields!.length; i++)
+                    for (int i = 0; i < widget.block.fields.length; i++)
                       _handleFields(parent: widget.block, index: i),
                   ],
                 ),
               ),
             ),
-            for (int i = 0; i < widget.block.children!.length; i++)
+            for (int i = 0; i < widget.block.children.length; i++)
               _handleInputs(parent: widget.block, index: i),
           ],
         ),

@@ -17,8 +17,8 @@ class BaseFieldWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    if (index >= parent.fields.length) return const SizedBox.shrink();
     final field = parent.fields[index];
-    if (field == null) return const SizedBox.shrink();
 
     return TextFormField(
       initialValue: field.value.toString(),
