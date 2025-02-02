@@ -42,9 +42,10 @@ List<BlockBluePrint> blockData = [
       ),
     ],
     fields: [
-      NumericField(
+      Field(
         value: 100,
         label: 'Period (ms)',
+        type: BlockTypes.number,
       )
     ],
     returnType: BlockTypes.none,
@@ -216,8 +217,16 @@ List<BlockBluePrint> blockData = [
   BlockBluePrint(
     name: 'Set Variable',
     fields: [
-      StringField(label: 'Name', value: ''),
-      StringField(label: 'Type', value: ''),
+      Field(
+        type: BlockTypes.string,
+        label: 'Name',
+        value: '',
+      ),
+      Field(
+        type: BlockTypes.string,
+        label: 'Type',
+        value: '',
+      ),
     ],
     children: [
       ValueInput(label: 'Value', block: null),
@@ -233,7 +242,11 @@ List<BlockBluePrint> blockData = [
   BlockBluePrint(
     name: 'Get Variable',
     fields: [
-      StringField(label: 'Name', value: ''),
+      Field(
+        type: BlockTypes.string,
+        label: 'Name',
+        value: '',
+      ),
     ],
     children: [],
     returnType: BlockTypes.none,
@@ -251,7 +264,11 @@ List<BlockBluePrint> blockData = [
   BlockBluePrint(
     name: 'Interval',
     fields: [
-      NumericField(label: "Miliseconds", value: 0),
+      Field(
+        type: BlockTypes.number,
+        label: "Miliseconds",
+        value: 0,
+      ),
     ],
     children: [
       StatementInput(
@@ -275,7 +292,11 @@ List<BlockBluePrint> blockData = [
   BlockBluePrint(
     name: 'For Loop',
     fields: [
-      NumericField(label: "Times", value: 0),
+      Field(
+        type: BlockTypes.number,
+        label: "Times",
+        value: 0,
+      ),
     ],
     children: [
       StatementInput(
@@ -314,7 +335,11 @@ List<BlockBluePrint> blockData = [
   BlockBluePrint(
     name: 'Int',
     fields: [
-      NumericField(label: "Value", value: 0),
+      Field(
+        type: BlockTypes.number,
+        label: "Value",
+        value: 0,
+      ),
     ],
     children: [],
     returnType: BlockTypes.number,

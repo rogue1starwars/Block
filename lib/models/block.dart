@@ -86,7 +86,8 @@ class Block {
               block.fields.asMap().entries.map((entry) {
                 switch (entry.value.type) {
                   case BlockTypes.number:
-                    return NumericField(
+                    return Field(
+                      type: entry.value.type,
                       label: entry.value.label,
                       value: json['fields'][entry.key],
                     );
