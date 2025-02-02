@@ -85,6 +85,7 @@ List<BlockBluePrint> blockData = [
         final value = block.children![0] as ValueInput;
 
         final BleInfo bleInfo = ref.read(bleProvider);
+        print("BleInfo: ${bleInfo.characteristics}");
         if (bleInfo.characteristics == null) {
           ref.read(uiProvider.notifier).showMessage(
                 'Please connect to a device first',
@@ -93,8 +94,14 @@ List<BlockBluePrint> blockData = [
           return;
         }
 
-        bleInfo.characteristics!
-            .write(value.block!.execute(ref).toString().codeUnits);
+        try {
+          bleInfo.characteristics!
+              .write(value.block!.execute(ref).toString().codeUnits);
+        } catch (e) {
+          ref.read(uiProvider.notifier).showMessage(
+                'Failed to send data',
+              );
+        }
       }),
   BlockBluePrint(
     name: 'Activate Orientation',

@@ -14,6 +14,7 @@ class StartScan extends ConsumerStatefulWidget {
 
 class _StartScanState extends ConsumerState<StartScan> {
   bool _isScanning = false;
+  bool _isConnecting = false;
   late StreamSubscription<bool> _isScanningSubscription;
 
   @override
@@ -33,6 +34,34 @@ class _StartScanState extends ConsumerState<StartScan> {
   void dispose() {
     _isScanningSubscription.cancel();
     super.dispose();
+  }
+
+  Future<void> _handleDeviceConnection(ScanResult result) async {
+    if (_isConnecting) return;
+
+    try {
+      setState(() => _isConnecting = true);
+      FlutterBluePlus.stopScan();
+      ref.read(bleProvider.notifier).updateDevice(
+            device: result.device,
+            service: null,
+            characteristics: null,
+          );
+      await result.device.connect(
+        autoConnect: true,
+        mtu: null,
+        timeout: const Duration(seconds: 10),
+      );
+      if (mounted) Navigator.pop(context, result.device);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to connect to device: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isConnecting = false);
+    }
   }
 
   Future<void> _dialogBuilder(BuildContext context) async {
@@ -61,19 +90,24 @@ class _StartScanState extends ConsumerState<StartScan> {
               ),
               children: snapshot.data!
                   .map((result) => SimpleDialogOption(
-                        onPressed: () {
-                          FlutterBluePlus.stopScan();
-                          ref.read(bleProvider.notifier).copyWith(
-                                device: result.device,
-                                service: null,
-                                characteristics: null,
-                              );
-                          Navigator.pop(context, result.device);
-                        },
-                        child: Text(
-                          result.device.advName.isEmpty
-                              ? result.device.remoteId.toString()
-                              : result.device.advName,
+                        // onPressed: _isConnecting
+                        //     ? null
+                        //     : () => _handleDeviceConnection(result),
+                        child: Row(
+                          children: [
+                            Text(
+                              result.device.advName.isEmpty
+                                  ? result.device.remoteId.toString()
+                                  : result.device.advName,
+                            ),
+                            const Spacer(),
+                            _isConnecting
+                                ? const CircularProgressIndicator()
+                                : TextButton(
+                                    child: const Text("Connect"),
+                                    onPressed: () =>
+                                        _handleDeviceConnection(result)),
+                          ],
                         ),
                       ))
                   .toList(),
