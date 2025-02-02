@@ -1,6 +1,14 @@
+import 'package:hive/hive.dart';
+
+part 'fields.g.dart';
+
+@HiveType(typeId: 5)
 class Field {
+  @HiveField(0)
   final String label;
+  @HiveField(1)
   final String type;
+  @HiveField(2)
   final dynamic value;
 
   Field({
@@ -22,6 +30,7 @@ class Field {
   }
 }
 
+@HiveType(typeId: 6)
 class NumericField extends Field {
   NumericField({
     required super.label,
@@ -41,6 +50,7 @@ class NumericField extends Field {
   }
 }
 
+@HiveType(typeId: 7)
 class StringField extends Field {
   StringField({
     required super.label,

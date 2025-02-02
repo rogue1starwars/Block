@@ -1,8 +1,14 @@
 import 'package:phoneduino_block/models/block.dart';
 import 'package:phoneduino_block/utils/type.dart';
+import 'package:hive/hive.dart';
 
+part 'inputs.g.dart';
+
+@HiveType(typeId: 1)
 class Input {
+  @HiveField(0)
   final String label;
+  @HiveField(1)
   final Map<BlockTypes, bool>? filter;
   Input({
     required this.label,
@@ -10,7 +16,9 @@ class Input {
   });
 }
 
+@HiveType(typeId: 2)
 class StatementInput extends Input {
+  @HiveField(2)
   final List<Block> blocks;
   StatementInput({
     required super.label,
@@ -31,7 +39,9 @@ class StatementInput extends Input {
   }
 }
 
+@HiveType(typeId: 3)
 class ValueInput extends Input {
+  @HiveField(2)
   final Block? block;
   ValueInput({
     required super.label,

@@ -1,19 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hive/hive.dart';
 import 'package:phoneduino_block/data/block_data.dart';
 import 'package:phoneduino_block/models/fields.dart';
 import 'package:phoneduino_block/models/inputs.dart';
 import 'package:phoneduino_block/models/variables.dart';
 import 'package:phoneduino_block/utils/type.dart';
 
+part 'block.g.dart';
+
+@HiveType(typeId: 0)
 class Block {
   static final Map<String, Variable> _globalVariables = {};
 
+  @HiveField(0)
   final String id;
+  @HiveField(1)
   final String name;
+  @HiveField(2)
   final List<Field>? fields;
+  @HiveField(3)
   final List<Input>? children;
+  @HiveField(4)
   final BlockTypes returnType;
+  @HiveField(5)
   final Function(WidgetRef, Block) originalFunc;
 
   Block({
