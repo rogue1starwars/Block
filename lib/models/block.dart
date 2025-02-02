@@ -84,22 +84,11 @@ class Block {
             originalFunc: block.originalFunc,
             fields: List<Field>.from(
               block.fields.asMap().entries.map((entry) {
-                switch (entry.value.type) {
-                  case BlockTypes.number:
-                    return Field(
-                      type: entry.value.type,
-                      label: entry.value.label,
-                      value: json['fields'][entry.key],
-                    );
-                  case BlockTypes.string:
-                    return Field(
-                      label: entry.value.label,
-                      value: json['fields'][entry.key],
-                      type: entry.value.type,
-                    );
-                  default:
-                    throw 'Field type not found';
-                }
+                return Field(
+                  type: entry.value.type,
+                  label: entry.value.label,
+                  value: json['fields'][entry.key],
+                );
               }),
             ),
             children:
