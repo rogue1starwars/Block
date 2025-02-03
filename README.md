@@ -9,6 +9,8 @@
 - Finalize UI
   - printing
   - dragging
+- Field Inputs variety
+  - Setting variables...
 - Immutability
 - Saving projects
 - additional sensors
