@@ -122,6 +122,16 @@ class BleNotifier extends StateNotifier<BleInfo> {
           state = state.copyWith(
             disconnected: true,
           );
+          Future.delayed(
+            const Duration(milliseconds: 1000),
+            () {
+              device.connect(
+                autoConnect: true,
+                timeout: const Duration(seconds: 10),
+                mtu: null,
+              );
+            },
+          );
         }
       }, onError: (e) {
         state = state.copyWith(
