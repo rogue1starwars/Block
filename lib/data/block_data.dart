@@ -9,6 +9,7 @@ import 'package:phoneduino_block/models/fields.dart';
 import 'package:phoneduino_block/models/inputs.dart';
 import 'package:phoneduino_block/provider/intervals_provider.dart';
 import 'package:phoneduino_block/provider/ui_provider.dart';
+import 'package:phoneduino_block/utils/file_logger.dart';
 import 'package:phoneduino_block/utils/type.dart';
 
 class BlockBluePrint {
@@ -105,6 +106,33 @@ List<BlockBluePrint> blockData = [
               );
         }
       }),
+  BlockBluePrint(
+    name: 'Logger',
+    fields: [],
+    children: [
+      ValueInput(
+        label: 'Value',
+        block: null,
+        filter: {
+          BlockTypes.string: true,
+          BlockTypes.number: true,
+        },
+      ),
+    ],
+    returnType: BlockTypes.none,
+    originalFunc: (WidgetRef ref, Block block) {
+      // print("Logger");
+      final value = block.children[0] as ValueInput;
+      final valueToLog = value.block!.execute(ref);
+      if (valueToLog is! String && valueToLog is! num) {
+        ref.read(uiProvider.notifier).showMessage(
+              'Invalid value to log',
+            );
+        return;
+      }
+      writeLog(valueToLog, ref);
+    },
+  ),
   BlockBluePrint(
     name: 'Activate Orientation',
     fields: [],

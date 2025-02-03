@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'dart:math';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,6 +9,8 @@ import 'package:phoneduino_block/models/block.dart';
 import 'package:phoneduino_block/provider/block_tree_provider.dart';
 import 'package:phoneduino_block/provider/intervals_provider.dart';
 import 'package:phoneduino_block/provider/ui_provider.dart';
+import 'package:phoneduino_block/screens/logger_screen.dart';
+import 'package:phoneduino_block/utils/file_logger.dart';
 import 'package:phoneduino_block/widgets/ble/ble_home.dart';
 import 'package:phoneduino_block/widgets/block_tree.dart';
 
@@ -34,6 +38,18 @@ class HomePage extends ConsumerWidget {
     });
     return Scaffold(
       appBar: AppBar(title: const Text('PhoneDuino Block'), actions: [
+        IconButton(
+            onPressed: () {
+              clearLog(ref);
+            },
+            icon: const Icon(Icons.add)),
+        IconButton(
+            onPressed: () async {
+              Navigator.push(context, MaterialPageRoute(builder: (context) {
+                return const LoggerScreen();
+              }));
+            },
+            icon: const Icon(Icons.save_alt)),
         IconButton(
           onPressed: () {
             try {
