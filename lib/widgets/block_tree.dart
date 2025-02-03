@@ -47,18 +47,22 @@ class _BlockTreeState extends ConsumerState<BlockTree> {
           ),
         );
       case StatementInput _:
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-              child: Text(input.label,
-                  style: const TextStyle(fontWeight: FontWeight.bold)),
-            ),
-            for (var block in input.blocks) BlockTree(block: block),
-            AddButton(parentBlock: parent, index: index),
-          ],
+        return Padding(
+          padding: const EdgeInsets.only(left: 20.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                child: Text(input.label,
+                    style: const TextStyle(fontWeight: FontWeight.bold)),
+              ),
+              for (var block in input.blocks) BlockTree(block: block),
+              AddButton(parentBlock: parent, index: index),
+            ],
+          ),
         );
       default:
         return const SizedBox.shrink();
