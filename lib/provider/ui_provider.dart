@@ -1,21 +1,27 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class UiState {
-  final List<String> messageQueue;
-  const UiState({this.messageQueue = const []});
+  final List<String> messageDequeue;
+  const UiState({this.messageDequeue = const []});
 }
 
 class UiNotifier extends StateNotifier<UiState> {
   UiNotifier() : super(const UiState());
 
   void showMessage(String message) {
-    state = UiState(messageQueue: [...state.messageQueue, message]);
+    final newMessages = [message, ...state.messageDequeue];
+    state = UiState(
+        messageDequeue:
+            newMessages.length > 10 ? newMessages.sublist(0, 10) : newMessages);
+  }
+
+  void clearMessage() {
+    state = const UiState(messageDequeue: []);
   }
 
   void removeMessage() {
-    if (state.messageQueue.isNotEmpty) {
-      state = UiState(messageQueue: state.messageQueue.sublist(1));
-    }
+    if (state.messageDequeue.isEmpty) return;
+    state = UiState(messageDequeue: state.messageDequeue.sublist(1));
   }
 }
 

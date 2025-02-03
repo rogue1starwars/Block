@@ -12,6 +12,7 @@ class IntervalNotifier extends StateNotifier<IntervalList> {
 
   void addInterval(Timer interval) {
     state = IntervalList(intervals: [...state.intervals, interval]);
+    print('Interval added');
   }
 
   void removeInterval(Timer interval) {
