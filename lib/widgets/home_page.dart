@@ -7,6 +7,7 @@ import 'package:phoneduino_block/models/block.dart';
 import 'package:phoneduino_block/provider/block_tree_provider.dart';
 import 'package:phoneduino_block/provider/intervals_provider.dart';
 import 'package:phoneduino_block/provider/ui_provider.dart';
+import 'package:phoneduino_block/screens/logger_screen.dart';
 import 'package:phoneduino_block/widgets/ble/ble_home.dart';
 import 'package:phoneduino_block/widgets/block_tree.dart';
 import 'package:phoneduino_block/widgets/print_board.dart';
@@ -38,6 +39,13 @@ class HomePage extends ConsumerWidget {
     });
     return Scaffold(
       appBar: AppBar(title: const Text('PhoneDuino Block'), actions: [
+        IconButton(
+            onPressed: () async {
+              Navigator.push(context, MaterialPageRoute(builder: (context) {
+                return const LoggerScreen();
+              }));
+            },
+            icon: const Icon(Icons.list)),
         IconButton(
           onPressed: () {
             try {

@@ -9,6 +9,7 @@ import 'package:phoneduino_block/models/fields.dart';
 import 'package:phoneduino_block/models/inputs.dart';
 import 'package:phoneduino_block/provider/intervals_provider.dart';
 import 'package:phoneduino_block/provider/ui_provider.dart';
+import 'package:phoneduino_block/utils/file_logger.dart';
 import 'package:phoneduino_block/utils/type.dart';
 
 class BlockBluePrint {
@@ -115,6 +116,84 @@ List<BlockBluePrint> blockData = [
         }
       }),
   BlockBluePrint(
+      name: 'Logger',
+      fields: [
+        Field(
+          type: BlockTypes.number,
+          label: 'Interval (ms)',
+          value: 1000,
+        )
+      ],
+      children: [
+        StatementInput(
+          label: 'Data',
+          blocks: [],
+        )
+      ],
+      returnType: BlockTypes.none,
+      originalFunc: (WidgetRef ref, Block block) {
+        final statement = block.children[0] as StatementInput;
+        final value = block.fields[0].value;
+        if (value is! int) {
+          ref.read(uiProvider.notifier).showMessage(
+                'Invalid interval',
+              );
+          return;
+        }
+        if (value < 1000) {
+          ref.read(uiProvider.notifier).showMessage(
+                'Interval must be at least 1000ms',
+              );
+          return;
+        }
+        final interval = Timer.periodic(
+          Duration(milliseconds: value),
+          (timer) {
+            String logTotal = '';
+            for (var block in statement.blocks) {
+              final valueToLog = block.execute(ref);
+              if (valueToLog is! String && valueToLog is! num) {
+                ref.read(uiProvider.notifier).showMessage(
+                      'Invalid value to log',
+                    );
+                continue;
+              }
+              logTotal += '$valueToLog, ';
+            }
+            writeLog(logTotal, ref);
+          },
+        );
+
+        ref.watch(intervalProvider.notifier).addInterval(interval);
+      }),
+  BlockBluePrint(
+    name: 'Log',
+    fields: [],
+    children: [
+      ValueInput(
+        label: 'Value',
+        block: null,
+        filter: {
+          BlockTypes.string: true,
+          BlockTypes.number: true,
+        },
+      ),
+    ],
+    returnType: BlockTypes.none,
+    originalFunc: (WidgetRef ref, Block block) {
+      // print("Logger");
+      final value = block.children[0] as ValueInput;
+      final valueToLog = value.block!.execute(ref);
+      if (valueToLog is! String && valueToLog is! num) {
+        ref.read(uiProvider.notifier).showMessage(
+              'Invalid value to log',
+            );
+        return;
+      }
+      writeLog(valueToLog, ref);
+    },
+  ),
+  BlockBluePrint(
     name: 'Activate Orientation',
     fields: [],
     children: [],
@@ -125,6 +204,10 @@ List<BlockBluePrint> blockData = [
         ref.read(uiProvider.notifier).showMessage(
               'Orientation sensor not available',
             );
+        return;
+      }
+      if (Block.getVariable("_orientationStream") != null) {
+        print("Orientation Stream already active");
         return;
       }
       StreamSubscription orientationStream = events.listen((event) {
@@ -180,6 +263,11 @@ List<BlockBluePrint> blockData = [
         }
       }
 
+      if (Block.getVariable("_positionStream") != null) {
+        print("Position Stream already active");
+        return;
+      }
+
       print('Location services are enabled.');
       StreamSubscription<Position> positionStream =
           Geolocator.getPositionStream(
@@ -191,6 +279,7 @@ List<BlockBluePrint> blockData = [
           return;
         }
         Block.setVariable("_long", position.longitude, BlockTypes.number);
+        Block.setVariable("_lat", position.latitude, BlockTypes.number);
       });
       Block.setVariable("_positionStream", positionStream, BlockTypes.none);
     },
@@ -288,7 +377,13 @@ List<BlockBluePrint> blockData = [
     returnType: BlockTypes.none,
     originalFunc: (WidgetRef ref, Block block) {
       final statement = block.children[0] as StatementInput;
-      final value = int.parse(block.fields[0].value);
+      final value = block.fields[0].value;
+      if (value is! int) {
+        ref.read(uiProvider.notifier).showMessage(
+              'Invalid interval',
+            );
+        return;
+      }
       final interval = Timer.periodic(Duration(milliseconds: value), (timer) {
         for (var block in statement.blocks) {
           block.execute(ref);
