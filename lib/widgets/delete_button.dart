@@ -15,7 +15,7 @@ class DeleteButton extends ConsumerWidget {
       onPressed: () {
         ref.read(blockTreeProvider.notifier).deleteBlock(id: id);
       },
-      icon: const Icon(Icons.delete),
+      icon: const Icon(Icons.close_rounded),
     );
   }
 }

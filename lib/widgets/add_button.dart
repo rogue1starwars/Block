@@ -29,20 +29,30 @@ class _AddButtonState extends ConsumerState<AddButton> {
       builder: (BuildContext context, BoxConstraints constraints) => Stack(
         children: [
           DragTarget(
-            builder: (context, candidateData, rejectedData) =>
-                AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              height: 100,
-              width: constraints.maxWidth,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                  color: _isHovering ? Colors.blue : Colors.transparent,
-                  width: 2,
+            builder: (context, candidateData, rejectedData) => Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: GestureDetector(
+                onTap: () => _dialogBuilder(context),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  height: 60,
+                  width: constraints.maxWidth,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: _isHovering
+                          ? Colors.blue
+                          : Colors.black.withOpacity(0.1),
+                      width: 2,
+                    ),
+                    color: _isHovering
+                        ? Colors.blue.withOpacity(0.3)
+                        : Colors.black.withOpacity(0.05),
+                  ),
+                  child: const Center(
+                    child: Icon(Icons.add),
+                  ),
                 ),
-                color: _isHovering
-                    ? Colors.blue.withOpacity(0.3)
-                    : Colors.transparent,
               ),
             ),
             onMove: (_) => setState(() => _isHovering = true),
@@ -65,12 +75,6 @@ class _AddButtonState extends ConsumerState<AddButton> {
               ref.read(blockTreeProvider.notifier).deleteBlock(id: id);
             },
           ),
-          Center(
-            child: IconButton(
-              onPressed: () => _dialogBuilder(context),
-              icon: const Icon(Icons.add),
-            ),
-          )
         ],
       ),
     );

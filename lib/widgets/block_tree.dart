@@ -28,23 +28,33 @@ class _BlockTreeState extends ConsumerState<BlockTree> {
     final Input input = parent.children[index];
     switch (input) {
       case ValueInput _:
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Card(
-              child: Text(input.label),
-            ),
-            (input.block != null)
-                ? BlockTree(block: input.block!)
-                : AddButton(parentBlock: parent, index: index)
-          ],
+        return Padding(
+          padding: const EdgeInsets.only(left: 40.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 5, horizontal: 20),
+                child: Text(input.label,
+                    style: const TextStyle(fontWeight: FontWeight.bold)),
+              ),
+              (input.block != null)
+                  ? BlockTree(block: input.block!)
+                  : AddButton(parentBlock: parent, index: index)
+            ],
+          ),
         );
       case StatementInput _:
         return Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Card(
-              child: Text(input.label),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+              child: Text(input.label,
+                  style: const TextStyle(fontWeight: FontWeight.bold)),
             ),
             for (var block in input.blocks) BlockTree(block: block),
             AddButton(parentBlock: parent, index: index),
@@ -67,31 +77,36 @@ class _BlockTreeState extends ConsumerState<BlockTree> {
     }
   }
 
-  Widget _block() => ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: double.infinity),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Card(
+  Widget _block() => Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Card(
               child: Container(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(widget.block.name),
-                    DeleteButton(id: widget.block.id),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(widget.block.name),
+                        DeleteButton(id: widget.block.id),
+                      ],
+                    ),
                     for (int i = 0; i < widget.block.fields.length; i++)
                       _handleFields(parent: widget.block, index: i),
                   ],
                 ),
               ),
             ),
-            for (int i = 0; i < widget.block.children.length; i++)
-              _handleInputs(parent: widget.block, index: i),
-          ],
-        ),
+          ),
+          for (int i = 0; i < widget.block.children.length; i++)
+            _handleInputs(parent: widget.block, index: i),
+        ],
       );
 
   @override
