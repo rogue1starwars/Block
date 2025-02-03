@@ -9,6 +9,7 @@ import 'package:phoneduino_block/provider/intervals_provider.dart';
 import 'package:phoneduino_block/provider/ui_provider.dart';
 import 'package:phoneduino_block/widgets/ble/ble_home.dart';
 import 'package:phoneduino_block/widgets/block_tree.dart';
+import 'package:phoneduino_block/widgets/print_board.dart';
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
@@ -18,7 +19,6 @@ class HomePage extends ConsumerWidget {
     Block root = ref.watch(blockTreeProvider);
     final Box<dynamic> box = Hive.box('block_tree');
     IntervalList intervals = ref.watch(intervalProvider);
-    final uiState = ref.watch(uiProvider);
     ref.listen<UiState>(uiProvider, (previous, next) {
       if (intervals.intervals.isNotEmpty) {
         return;
@@ -87,14 +87,7 @@ class HomePage extends ConsumerWidget {
           const BleHome(),
           Expanded(
             child: intervals.intervals.isNotEmpty
-                ? ListView.builder(
-                    itemCount: uiState.messageDequeue.length,
-                    itemBuilder: (context, index) {
-                      return ListTile(
-                        title: Text(uiState.messageDequeue[index]),
-                      );
-                    },
-                  )
+                ? const PrintBoard()
                 : SingleChildScrollView(
                     child: BlockTree(block: root),
                   ),
