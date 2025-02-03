@@ -18,12 +18,16 @@ class HomePage extends ConsumerWidget {
     Block root = ref.watch(blockTreeProvider);
     final Box<dynamic> box = Hive.box('block_tree');
     IntervalList intervals = ref.watch(intervalProvider);
+    final uiState = ref.watch(uiProvider);
     ref.listen<UiState>(uiProvider, (previous, next) {
-      if (next.messageQueue.isNotEmpty) {
+      if (intervals.intervals.isNotEmpty) {
+        return;
+      }
+      if (next.messageDequeue.isNotEmpty) {
         ScaffoldMessenger.of(context)
             .showSnackBar(
               SnackBar(
-                content: Text(next.messageQueue.first),
+                content: Text(next.messageDequeue.first),
               ),
             )
             .closed
@@ -73,19 +77,29 @@ class HomePage extends ConsumerWidget {
         IconButton(
           onPressed: () {
             ref.read(intervalProvider.notifier).clearInterval();
-            print(intervals.intervals[0]);
+            ref.read(uiProvider.notifier).clearMessage();
           },
           icon: const Icon(Icons.stop),
         ),
       ]),
-      body: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const BleHome(),
-            BlockTree(block: root),
-          ],
-        ),
+      body: Column(
+        children: [
+          const BleHome(),
+          Expanded(
+            child: intervals.intervals.isNotEmpty
+                ? ListView.builder(
+                    itemCount: uiState.messageDequeue.length,
+                    itemBuilder: (context, index) {
+                      return ListTile(
+                        title: Text(uiState.messageDequeue[index]),
+                      );
+                    },
+                  )
+                : SingleChildScrollView(
+                    child: BlockTree(block: root),
+                  ),
+          ),
+        ],
       ),
     );
   }
