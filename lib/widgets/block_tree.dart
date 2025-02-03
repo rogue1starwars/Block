@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phoneduino_block/models/block.dart';
+import 'package:phoneduino_block/provider/is_dragging_provider.dart';
 import 'package:phoneduino_block/utils/type.dart';
 import 'package:phoneduino_block/models/fields.dart';
 import 'package:phoneduino_block/models/inputs.dart';
@@ -95,61 +96,83 @@ class _BlockTreeState extends ConsumerState<BlockTree> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        DragTarget(
-          builder: (context, candidateData, rejectedData) {
-            return AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              height: _isHovering ? 100 : 50,
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: _isHovering ? Colors.blue : Colors.transparent,
-                  width: 2,
-                ),
-              ),
-            );
-          },
-          onMove: (data) {
-            setState(() => _isHovering = true);
-          },
-          onLeave: (data) {
-            setState(() => _isHovering = false);
-          },
-          onAcceptWithDetails: (detail) {
-            setState(() => _isHovering = false);
-            final id = detail.data as String;
-            ref.read(blockTreeProvider.notifier).moveBlock(
-                  siblingId: widget.block.id,
-                  id: id,
-                );
-          },
-        ),
-        LongPressDraggable(
-          data: widget.block.id,
-          dragAnchorStrategy: pointerDragAnchorStrategy,
-          feedback: Material(
-            color: Colors.transparent,
-            child: SizedBox(
-              width: MediaQuery.of(context).size.width,
-              child: Text(
-                widget.block.name,
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  height: -5,
+    final bool isDragging = ref.watch(isDraggingProvider);
+    if (widget.block.id == '0') {
+      return _block();
+    }
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) => Stack(
+        clipBehavior: Clip.none,
+        children: [
+          LongPressDraggable(
+            data: widget.block.id,
+            dragAnchorStrategy: pointerDragAnchorStrategy,
+            hitTestBehavior: HitTestBehavior.translucent,
+            feedback: Material(
+              color: Colors.transparent,
+              child: SizedBox(
+                width: constraints.maxWidth,
+                child: Text(
+                  widget.block.name,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    height: -5,
+                  ),
                 ),
               ),
             ),
+            child: _block(),
+            onDragStarted: () {
+              ref.read(isDraggingProvider.notifier).state = true;
+            },
+            onDragEnd: (details) {
+              ref.read(isDraggingProvider.notifier).state = false;
+            },
+            onDragCompleted: () {
+              print("Drag completed");
+            },
           ),
-          child: _block(),
-          onDragCompleted: () {
-            print("Drag completed");
-          },
-        ),
-      ],
+          Positioned(
+            top: -50,
+            child: IgnorePointer(
+                ignoring: !isDragging,
+                child: DragTarget(
+                  builder: (context, candidateData, rejectedData) {
+                    return AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      height: 100,
+                      width: constraints.maxWidth,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: _isHovering ? Colors.blue : Colors.transparent,
+                          width: 2,
+                        ),
+                        color: _isHovering
+                            ? Colors.blue.withOpacity(0.3)
+                            : Colors.transparent,
+                      ),
+                    );
+                  },
+                  onMove: (data) {
+                    setState(() => _isHovering = true);
+                  },
+                  onLeave: (data) {
+                    setState(() => _isHovering = false);
+                  },
+                  onAcceptWithDetails: (detail) {
+                    setState(() => _isHovering = false);
+                    final id = detail.data as String;
+                    ref.read(blockTreeProvider.notifier).moveBlock(
+                          siblingId: widget.block.id,
+                          id: id,
+                        );
+                  },
+                )),
+          )
+        ],
+      ),
     );
   }
 }
