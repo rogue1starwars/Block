@@ -20,11 +20,6 @@ class BlockTreeNotifier extends StateNotifier<Block> {
     required dynamic value,
     required int index,
   }) {
-    print("\n\n\n");
-    print("Updating field");
-    print("Parent ID: $parentId");
-    print("Value: $value");
-    print("\n\n\n");
     Block? updateFieldHelper({
       required Block parent,
       required String parentId,

@@ -124,7 +124,13 @@ List<BlockBluePrint> blockData = [
       returnType: BlockTypes.none,
       originalFunc: (WidgetRef ref, Block block) {
         final statement = block.children[0] as StatementInput;
-        final value = int.parse(block.fields[0].value);
+        final value = block.fields[0].value;
+        if (value is! int) {
+          ref.read(uiProvider.notifier).showMessage(
+                'Invalid interval',
+              );
+          return;
+        }
         if (value < 1000) {
           ref.read(uiProvider.notifier).showMessage(
                 'Interval must be at least 1000ms',
@@ -362,7 +368,13 @@ List<BlockBluePrint> blockData = [
     returnType: BlockTypes.none,
     originalFunc: (WidgetRef ref, Block block) {
       final statement = block.children[0] as StatementInput;
-      final value = int.parse(block.fields[0].value);
+      final value = block.fields[0].value;
+      if (value is! int) {
+        ref.read(uiProvider.notifier).showMessage(
+              'Invalid interval',
+            );
+        return;
+      }
       final interval = Timer.periodic(Duration(milliseconds: value), (timer) {
         for (var block in statement.blocks) {
           block.execute(ref);

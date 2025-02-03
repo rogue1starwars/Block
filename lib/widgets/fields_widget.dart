@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phoneduino_block/models/block.dart';
 import 'package:phoneduino_block/models/fields.dart';
 import 'package:phoneduino_block/provider/block_tree_provider.dart';
+import 'package:phoneduino_block/provider/ui_provider.dart';
 
 // Base field widget
 class BaseFieldWidget extends ConsumerWidget {
@@ -76,11 +77,27 @@ class NumericFieldWidget extends BaseFieldWidget {
   TextInputType getKeyboardType() => TextInputType.number;
 
   @override
+  void onFieldChanged(String value, WidgetRef ref) {
+    final num parsedValue;
+    try {
+      parsedValue = num.parse(value);
+    } catch (e) {
+      ref.read(uiProvider.notifier).showMessage('Failed to parse number: $e');
+      return;
+    }
+    ref.read(blockTreeProvider.notifier).updateField(
+          parentId: parent.id,
+          value: parsedValue,
+          index: index,
+        );
+  }
+
+  @override
   String? fieldValidator(String? value) {
     final baseValidation = super.fieldValidator(value);
     if (baseValidation != null) return baseValidation;
 
-    if (double.tryParse(value!) == null) {
+    if (num.tryParse(value!) == null) {
       return 'Please enter a valid number';
     }
     return null;
