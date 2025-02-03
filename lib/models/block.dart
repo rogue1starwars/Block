@@ -164,6 +164,7 @@ class Block {
     try {
       return originalFunc(ref, this);
     } catch (e) {
+      print('Error: $e');
       ref.read(uiProvider.notifier).showMessage(
             'Error: $e',
           );
