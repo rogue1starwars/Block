@@ -168,7 +168,7 @@ class Block {
             'Error: $e',
           );
       // Re running entire program
-      rerun(ref);
+      // rerun(ref);
     }
   }
 

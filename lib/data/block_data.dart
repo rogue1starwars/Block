@@ -58,8 +58,14 @@ List<BlockBluePrint> blockData = [
 
       // loop
       final loopStatement = block.children[1] as StatementInput;
+      late final int interval;
+      try {
+        interval = int.parse(block.fields[0].value);
+      } catch (e) {
+        throw const FormatException('Invalid period');
+      }
       final mainTimer = Timer.periodic(
-        const Duration(milliseconds: 100),
+        Duration(milliseconds: interval),
         (timer) {
           for (var block in loopStatement.blocks) {
             block.execute(ref);
