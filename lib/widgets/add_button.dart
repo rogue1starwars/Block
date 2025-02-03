@@ -45,7 +45,7 @@ class AddButton extends ConsumerWidget {
   }
 
   Future<void> _dialogBuilder(BuildContext context, WidgetRef ref) {
-    final filter = parentBlock.children![index].filter;
+    final filter = parentBlock.children[index].filter;
 
     return showDialog<void>(
       context: context,

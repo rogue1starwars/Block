@@ -11,6 +11,10 @@ class BlockTreeNotifier extends StateNotifier<Block> {
           id: '0',
         ));
 
+  void updateRoot(Block value) {
+    state = value;
+  }
+
   void updateField({
     required String parentId,
     required dynamic value,
@@ -27,17 +31,16 @@ class BlockTreeNotifier extends StateNotifier<Block> {
       required dynamic value,
       required int index,
     }) {
-      if (parent.fields != null && parent.id == parentId) {
+      if (parent.id == parentId) {
         final newFields = [
-          for (int i = 0; i < parent.fields!.length; i++)
+          for (int i = 0; i < parent.fields.length; i++)
             if (i == index)
-              parent.fields![i].copyWith(value: value)
+              parent.fields[i].copyWith(value: value)
             else
-              parent.fields![i]
+              parent.fields[i]
         ];
         return parent.copyWith(fields: newFields);
       } else {
-        if (parent.children == null) return null;
         return recursive(
           callback: updateFieldHelper,
           parent: parent,
@@ -65,30 +68,30 @@ class BlockTreeNotifier extends StateNotifier<Block> {
     required Block value,
     required int index,
   }) {
-    switch (parent.children![index]) {
+    switch (parent.children[index]) {
       case ValueInput _:
-        final ValueInput targetChild = parent.children![index] as ValueInput;
+        final ValueInput targetChild = parent.children[index] as ValueInput;
         final List<Input> newChildren = [
-          for (int i = 0; i < parent.children!.length; i++)
+          for (int i = 0; i < parent.children.length; i++)
             if (i == index)
               targetChild.copyWith(block: value)
             else
-              parent.children![i]
+              parent.children[i]
         ];
         return newChildren;
       case StatementInput _:
         final StatementInput targetChild =
-            parent.children![index] as StatementInput;
+            parent.children[index] as StatementInput;
         List<Block> newBlocks = [
           ...(targetChild.blocks),
           value,
         ];
         final List<Input> newChildren = [
-          for (int i = 0; i < parent.children!.length; i++)
+          for (int i = 0; i < parent.children.length; i++)
             if (i == index)
               targetChild.copyWith(blocks: newBlocks)
             else
-              parent.children![i]
+              parent.children[i]
         ];
         return newChildren;
       default:
@@ -103,8 +106,8 @@ class BlockTreeNotifier extends StateNotifier<Block> {
     required dynamic value,
     required int index,
   }) {
-    for (int i = 0; i < parent.children!.length; i++) {
-      switch (parent.children![i]) {
+    for (int i = 0; i < parent.children.length; i++) {
+      switch (parent.children[i]) {
         case ValueInput input:
           if (input.block != null) {
             final result = callback(
@@ -116,9 +119,9 @@ class BlockTreeNotifier extends StateNotifier<Block> {
             if (result != null) {
               return parent.copyWith(
                 children: [
-                  ...parent.children!.sublist(0, i),
+                  ...parent.children.sublist(0, i),
                   input.copyWith(block: result),
-                  ...parent.children!.sublist(i + 1),
+                  ...parent.children.sublist(i + 1),
                 ],
               );
             }
@@ -134,13 +137,13 @@ class BlockTreeNotifier extends StateNotifier<Block> {
             if (result != null) {
               return parent.copyWith(
                 children: [
-                  ...parent.children!.sublist(0, i),
+                  ...parent.children.sublist(0, i),
                   input.copyWith(blocks: [
                     ...input.blocks.sublist(0, j),
                     result,
                     ...input.blocks.sublist(j + 1),
                   ]),
-                  ...parent.children!.sublist(i + 1),
+                  ...parent.children.sublist(i + 1),
                 ],
               );
             }
@@ -155,15 +158,14 @@ class BlockTreeNotifier extends StateNotifier<Block> {
       required String id,
       required Block parent,
     }) {
-      if (parent.children == null) return null;
-      if (parent.children!.isEmpty) return null;
+      if (parent.children.isEmpty) return null;
 
       if (parent.id == id) {
         return parent;
       }
 
-      for (int i = 0; i < parent.children!.length; i++) {
-        switch (parent.children![i]) {
+      for (int i = 0; i < parent.children.length; i++) {
+        switch (parent.children[i]) {
           case ValueInput input:
             if (input.block == null) continue;
             if (input.block!.id == id) {
@@ -222,13 +224,12 @@ class BlockTreeNotifier extends StateNotifier<Block> {
       required String siblingId,
       required Block value,
     }) {
-      if (parent.children == null) return null;
       if (parent.id == siblingId) {
         return null;
       }
 
-      for (int i = 0; i < parent.children!.length; i++) {
-        switch (parent.children![i]) {
+      for (int i = 0; i < parent.children.length; i++) {
+        switch (parent.children[i]) {
           case ValueInput input:
             if (input.block == null) return null;
             if (input.block!.id == siblingId) {
@@ -240,9 +241,9 @@ class BlockTreeNotifier extends StateNotifier<Block> {
                 }
               }
               final newParent = parent.copyWith(children: [
-                ...parent.children!.sublist(0, i),
+                ...parent.children.sublist(0, i),
                 input.copyWith(block: value),
-                ...parent.children!.sublist(i + 1),
+                ...parent.children.sublist(i + 1),
               ]);
               return newParent;
             }
@@ -254,22 +255,22 @@ class BlockTreeNotifier extends StateNotifier<Block> {
             if (result == null) continue;
             return parent.copyWith(
               children: [
-                ...parent.children!.sublist(0, i),
+                ...parent.children.sublist(0, i),
                 input.copyWith(block: result),
-                ...parent.children!.sublist(i + 1),
+                ...parent.children.sublist(i + 1),
               ],
             );
           case StatementInput input:
             for (int j = 0; j < input.blocks.length; j++) {
               if (input.blocks[j].id == siblingId) {
                 return parent.copyWith(children: [
-                  ...parent.children!.sublist(0, i),
+                  ...parent.children.sublist(0, i),
                   input.copyWith(blocks: [
                     ...input.blocks.sublist(0, j),
                     value,
                     ...input.blocks.sublist(j),
                   ]),
-                  ...parent.children!.sublist(i + 1),
+                  ...parent.children.sublist(i + 1),
                 ]);
               }
               final result = insertBlockHelper(
@@ -280,13 +281,13 @@ class BlockTreeNotifier extends StateNotifier<Block> {
               if (result != null) {
                 return parent.copyWith(
                   children: [
-                    ...parent.children!.sublist(0, i),
+                    ...parent.children.sublist(0, i),
                     input.copyWith(blocks: [
                       ...input.blocks.sublist(0, j),
                       result,
                       ...input.blocks.sublist(j + 1),
                     ]),
-                    ...parent.children!.sublist(i + 1),
+                    ...parent.children.sublist(i + 1),
                   ],
                 );
               }
@@ -319,8 +320,7 @@ class BlockTreeNotifier extends StateNotifier<Block> {
       required Block value,
       required int index,
     }) {
-      if (parent.children == null) return null;
-      if (parent.children!.length <= index) return null;
+      if (parent.children.length <= index) return null;
 
       if (parent.id == parentId) {
         print("Adding block");
@@ -359,20 +359,19 @@ class BlockTreeNotifier extends StateNotifier<Block> {
       required String id,
       required Block parent,
     }) {
-      if (parent.children == null) return null;
       if (parent.id == id) {
         return null;
       }
 
-      for (int i = 0; i < parent.children!.length; i++) {
-        switch (parent.children![i]) {
+      for (int i = 0; i < parent.children.length; i++) {
+        switch (parent.children[i]) {
           case ValueInput input:
             if (input.block == null) continue;
             if (input.block!.id == id) {
               final newParent = parent.copyWith(children: [
-                ...parent.children!.sublist(0, i),
+                ...parent.children.sublist(0, i),
                 input.copyWith(delete: true),
-                ...parent.children!.sublist(i + 1),
+                ...parent.children.sublist(i + 1),
               ]);
               return newParent;
             }
@@ -383,21 +382,21 @@ class BlockTreeNotifier extends StateNotifier<Block> {
             if (result == null) continue;
             return parent.copyWith(
               children: [
-                ...parent.children!.sublist(0, i),
+                ...parent.children.sublist(0, i),
                 input.copyWith(block: result),
-                ...parent.children!.sublist(i + 1),
+                ...parent.children.sublist(i + 1),
               ],
             );
           case StatementInput input:
             for (int j = 0; j < input.blocks.length; j++) {
               if (input.blocks[j].id == id) {
                 return parent.copyWith(children: [
-                  ...parent.children!.sublist(0, i),
+                  ...parent.children.sublist(0, i),
                   input.copyWith(blocks: [
                     ...input.blocks.sublist(0, j),
                     ...input.blocks.sublist(j + 1),
                   ]),
-                  ...parent.children!.sublist(i + 1),
+                  ...parent.children.sublist(i + 1),
                 ]);
               }
               final result = deleteBlockHelper(
@@ -407,13 +406,13 @@ class BlockTreeNotifier extends StateNotifier<Block> {
               if (result != null) {
                 return parent.copyWith(
                   children: [
-                    ...parent.children!.sublist(0, i),
+                    ...parent.children.sublist(0, i),
                     input.copyWith(blocks: [
                       ...input.blocks.sublist(0, j),
                       result,
                       ...input.blocks.sublist(j + 1),
                     ]),
-                    ...parent.children!.sublist(i + 1),
+                    ...parent.children.sublist(i + 1),
                   ],
                 );
               }
