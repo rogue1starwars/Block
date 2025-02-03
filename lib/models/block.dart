@@ -28,59 +28,6 @@ class Block {
   });
 
   factory Block.fromJson(Map<String, dynamic> json) {
-    /*
-      json format
-      {
-        "id": "1",
-        "name": "Main",
-        "fields": [
-            100,
-            'abc',
-        ],
-        "children": [
-        // Statement
-          "setup": [
-            {
-              "id": "2",
-              "name": "Serial Begin",
-              "fields": [
-                {
-                  "value": 9600,
-                }
-              ],
-            }
-            {
-              "id": "3",
-              "name": "Serial Begin",
-              "fields": [
-                {
-                  "value": 9600,
-                }
-              ],
-            }
-          ]
-          "loop": [
-            {
-              "id": "4",
-              "name": "Serial Print",
-              "fields": [
-                {
-                  "value": "Hello World",
-                }
-              ],
-            }
-          }
-        ]
-      }
-
-      block: 
-      * id
-      * name
-      * fields
-        * value
-      * children
-        *blocks...
-    */
     for (final block in blockData) {
       if (block.name == json['name']) {
         final Block root = Block(
@@ -96,9 +43,9 @@ class Block {
                   ))
               .toList(),
           children: block.children.map((child) {
+            final dynamic rawChildren = json['children'][child.label];
             switch (child) {
               case StatementInput init:
-                final dynamic rawChildren = json['children'][child.label];
                 if (rawChildren == null) {
                   return StatementInput(
                     label: init.label,
@@ -112,9 +59,10 @@ class Block {
                 }
 
                 final List<Map<String, dynamic>> blockListJson =
-                    (rawChildren as List).map((item) {
+                    rawChildren.map((item) {
                   if (item is! Map) {
-                    throw FormatException('Expected Map in children list');
+                    throw const FormatException(
+                        'Expected Map in children list');
                   }
                   return Map<String, dynamic>.from(item);
                 }).toList();
