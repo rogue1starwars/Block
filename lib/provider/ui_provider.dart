@@ -20,6 +20,7 @@ class UiNotifier extends StateNotifier<UiState> {
   }
 
   void removeMessage() {
+    if (state.messageDequeue.isEmpty) return;
     state = UiState(messageDequeue: state.messageDequeue.sublist(1));
   }
 }
