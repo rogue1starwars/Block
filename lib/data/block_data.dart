@@ -107,7 +107,52 @@ List<BlockBluePrint> blockData = [
         }
       }),
   BlockBluePrint(
-    name: 'Logger',
+      name: 'Logger',
+      fields: [
+        Field(
+          type: BlockTypes.number,
+          label: 'Interval (ms)',
+          value: 1000,
+        )
+      ],
+      children: [
+        StatementInput(
+          label: 'Data',
+          blocks: [],
+        )
+      ],
+      returnType: BlockTypes.none,
+      originalFunc: (WidgetRef ref, Block block) {
+        final statement = block.children[0] as StatementInput;
+        final value = int.parse(block.fields[0].value);
+        if (value < 1000) {
+          ref.read(uiProvider.notifier).showMessage(
+                'Interval must be at least 1000ms',
+              );
+          return;
+        }
+        final interval = Timer.periodic(
+          Duration(milliseconds: value),
+          (timer) {
+            String logTotal = '';
+            for (var block in statement.blocks) {
+              final valueToLog = block.execute(ref);
+              if (valueToLog is! String && valueToLog is! num) {
+                ref.read(uiProvider.notifier).showMessage(
+                      'Invalid value to log',
+                    );
+                continue;
+              }
+              logTotal += '$valueToLog, ';
+            }
+            writeLog(logTotal, ref);
+          },
+        );
+
+        ref.watch(intervalProvider.notifier).addInterval(interval);
+      }),
+  BlockBluePrint(
+    name: 'Log',
     fields: [],
     children: [
       ValueInput(
@@ -144,6 +189,10 @@ List<BlockBluePrint> blockData = [
         ref.read(uiProvider.notifier).showMessage(
               'Orientation sensor not available',
             );
+        return;
+      }
+      if (Block.getVariable("_orientationStream") != null) {
+        print("Orientation Stream already active");
         return;
       }
       StreamSubscription orientationStream = events.listen((event) {
@@ -199,6 +248,11 @@ List<BlockBluePrint> blockData = [
         }
       }
 
+      if (Block.getVariable("_positionStream") != null) {
+        print("Position Stream already active");
+        return;
+      }
+
       print('Location services are enabled.');
       StreamSubscription<Position> positionStream =
           Geolocator.getPositionStream(
@@ -210,6 +264,7 @@ List<BlockBluePrint> blockData = [
           return;
         }
         Block.setVariable("_long", position.longitude, BlockTypes.number);
+        Block.setVariable("_lat", position.latitude, BlockTypes.number);
       });
       Block.setVariable("_positionStream", positionStream, BlockTypes.none);
     },
