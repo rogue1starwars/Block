@@ -29,7 +29,7 @@ class _BlockTreeState extends ConsumerState<BlockTree> {
     switch (input) {
       case ValueInput _:
         return Padding(
-          padding: const EdgeInsets.only(left: 40.0),
+          padding: const EdgeInsets.only(left: 20.0),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
