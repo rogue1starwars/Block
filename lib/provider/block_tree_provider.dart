@@ -55,27 +55,25 @@ class BlockTreeNotifier extends StateNotifier<Block> {
             if (result == null) continue;
             newChildren[i] = input.copyWith(block: result);
           case StatementInput input:
+            List<Block> newStatementBlocks = [];
             for (int j = 0; j < input.blocks.length; j++) {
               final bool isInField =
                   removeVariableInFields(input.blocks[j].fields);
               if (isInField) {
-                newChildren[i] = input.copyWith(blocks: [
-                  ...input.blocks.sublist(0, j),
-                  ...input.blocks.sublist(j + 1),
-                ]);
                 continue;
               }
               final result = removeVariableHelper(
                 name: name,
                 parent: input.blocks[j],
               );
-              if (result == null) continue;
-              newChildren[i] = input.copyWith(blocks: [
-                ...input.blocks.sublist(0, j),
-                result,
-                ...input.blocks.sublist(j + 1),
-              ]);
+              if (result == null) {
+                newStatementBlocks = [...newStatementBlocks, input.blocks[j]];
+                continue;
+              }
+              newStatementBlocks = [...newStatementBlocks, result];
             }
+
+            newChildren[i] = input.copyWith(blocks: newStatementBlocks);
         }
       }
       if (newChildren.isEmpty) return null;
@@ -142,7 +140,9 @@ class BlockTreeNotifier extends StateNotifier<Block> {
 
             newChildren[i] =
                 input.copyWith(block: newBlock.copyWith(fields: newFields));
+
           case StatementInput input:
+            List<Block> newStatementBlocks = [];
             for (int j = 0; j < input.blocks.length; j++) {
               // new fields which can be null, or has a new value when update needed
               final List<Field>? newFields =
@@ -152,14 +152,17 @@ class BlockTreeNotifier extends StateNotifier<Block> {
                 newName: newName,
                 parent: input.blocks[j],
               );
-              if (result == null && newFields == null) continue;
+              if (result == null && newFields == null) {
+                newStatementBlocks = [...newStatementBlocks, input.blocks[j]];
+                continue;
+              }
               final newBlock = result ?? input.blocks[j];
-              newChildren[i] = input.copyWith(blocks: [
-                ...input.blocks.sublist(0, j),
-                newBlock.copyWith(fields: newFields),
-                ...input.blocks.sublist(j + 1),
-              ]);
+              newStatementBlocks = [
+                ...newStatementBlocks,
+                newBlock.copyWith(fields: newFields)
+              ];
             }
+            newChildren[i] = input.copyWith(blocks: newStatementBlocks);
         }
       }
       if (newChildren.isEmpty) return null;
