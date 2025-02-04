@@ -46,7 +46,7 @@ List<BlockBluePrint> blockData = [
       Field(
         value: 100,
         label: 'Period (ms)',
-        type: BlockTypes.number,
+        type: FieldTypes.number,
       )
     ],
     returnType: BlockTypes.none,
@@ -119,7 +119,7 @@ List<BlockBluePrint> blockData = [
       name: 'Logger',
       fields: [
         Field(
-          type: BlockTypes.number,
+          type: FieldTypes.number,
           label: 'Interval (ms)',
           value: 1000,
         )
@@ -316,12 +316,12 @@ List<BlockBluePrint> blockData = [
     name: 'Set Variable',
     fields: [
       Field(
-        type: BlockTypes.string,
+        type: FieldTypes.string,
         label: 'Name',
         value: '',
       ),
       Field(
-        type: BlockTypes.string,
+        type: FieldTypes.string,
         label: 'Type',
         value: '',
       ),
@@ -341,7 +341,7 @@ List<BlockBluePrint> blockData = [
     name: 'Get Variable',
     fields: [
       Field(
-        type: BlockTypes.string,
+        type: FieldTypes.string,
         label: 'Name',
         value: '',
       ),
@@ -363,7 +363,7 @@ List<BlockBluePrint> blockData = [
     name: 'Interval',
     fields: [
       Field(
-        type: BlockTypes.number,
+        type: FieldTypes.number,
         label: "Miliseconds",
         value: 0,
       ),
@@ -397,7 +397,7 @@ List<BlockBluePrint> blockData = [
     name: 'For Loop',
     fields: [
       Field(
-        type: BlockTypes.number,
+        type: FieldTypes.number,
         label: "Times",
         value: 0,
       ),
@@ -440,7 +440,7 @@ List<BlockBluePrint> blockData = [
     name: 'Int',
     fields: [
       Field(
-        type: BlockTypes.number,
+        type: FieldTypes.number,
         label: "Value",
         value: 0,
       ),

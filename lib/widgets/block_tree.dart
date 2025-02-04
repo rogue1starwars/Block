@@ -72,9 +72,9 @@ class _BlockTreeState extends ConsumerState<BlockTree> {
   Widget _handleFields({required Block parent, required int index}) {
     final Field field = parent.fields[index];
     switch (field.type) {
-      case BlockTypes.string:
+      case FieldTypes.string:
         return StringFieldWidget(parent: parent, index: index);
-      case BlockTypes.number:
+      case FieldTypes.number:
         return NumericFieldWidget(parent: parent, index: index);
       default:
         return const SizedBox.shrink();
