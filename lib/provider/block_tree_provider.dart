@@ -1,7 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phoneduino_block/data/block_data.dart';
 import 'package:phoneduino_block/models/block.dart';
+import 'package:phoneduino_block/models/fields.dart';
 import 'package:phoneduino_block/models/inputs.dart';
+import 'package:phoneduino_block/utils/type.dart';
 import 'package:uuid/uuid.dart';
 
 class BlockTreeNotifier extends StateNotifier<Block> {
@@ -13,6 +15,171 @@ class BlockTreeNotifier extends StateNotifier<Block> {
 
   void updateRoot(Block value) {
     state = value;
+  }
+
+  void removeVariable({
+    required String name,
+  }) {
+    bool removeVariableInFields(List<Field> fields) {
+      for (int i = 0; i < fields.length; i++) {
+        if (fields[i].type == FieldTypes.variableNames &&
+            fields[i].value == name) {
+          print("Removing variable from field from removeVariableInFields");
+          return true;
+        }
+      }
+      return false;
+    }
+
+    Block? removeVariableHelper({
+      required String name,
+      required Block parent,
+    }) {
+      if (parent.children.isEmpty) return null;
+
+      final Map<int, Input> newChildren = {};
+      for (int i = 0; i < parent.children.length; i++) {
+        switch (parent.children[i]) {
+          case ValueInput input:
+            if (input.block == null) continue;
+            final bool isInField = removeVariableInFields(input.block!.fields);
+            if (isInField) {
+              print("Removing variable from field");
+              newChildren[i] = input.copyWith(delete: true);
+              continue;
+            }
+            final result = removeVariableHelper(
+              name: name,
+              parent: input.block!,
+            );
+            if (result == null) continue;
+            newChildren[i] = input.copyWith(block: result);
+          case StatementInput input:
+            for (int j = 0; j < input.blocks.length; j++) {
+              final bool isInField =
+                  removeVariableInFields(input.blocks[j].fields);
+              if (isInField) {
+                newChildren[i] = input.copyWith(blocks: [
+                  ...input.blocks.sublist(0, j),
+                  ...input.blocks.sublist(j + 1),
+                ]);
+                continue;
+              }
+              final result = removeVariableHelper(
+                name: name,
+                parent: input.blocks[j],
+              );
+              if (result == null) continue;
+              newChildren[i] = input.copyWith(blocks: [
+                ...input.blocks.sublist(0, j),
+                result,
+                ...input.blocks.sublist(j + 1),
+              ]);
+            }
+        }
+      }
+      if (newChildren.isEmpty) return null;
+      return parent.copyWith(children: [
+        for (int i = 0; i < parent.children.length; i++)
+          if (newChildren.containsKey(i))
+            newChildren[i]!
+          else
+            parent.children[i]
+      ]);
+    }
+
+    final newBlock = removeVariableHelper(name: name, parent: state);
+    if (newBlock != null) {
+      state = newBlock;
+    }
+  }
+
+  void renameVariable({
+    required String oldName,
+    required String newName,
+  }) {
+    List<Field>? renameVariableInFields(List<Field> fields) {
+      for (int i = 0; i < fields.length; i++) {
+        if (fields[i].type == FieldTypes.variableNames &&
+            fields[i].value == oldName) {
+          return [
+            for (Field field in fields)
+              if (field.type == FieldTypes.variableNames &&
+                  field.value == oldName)
+                field.copyWith(value: newName)
+              else
+                field
+          ];
+        }
+      }
+      return null;
+    }
+
+    Block? renameVariableHelper({
+      required String oldName,
+      required String newName,
+      required Block parent,
+    }) {
+      if (parent.children.isEmpty) return null;
+
+      Map<int, Input> newChildren = {};
+      for (int i = 0; i < parent.children.length; i++) {
+        switch (parent.children[i]) {
+          case ValueInput input:
+            if (input.block == null) continue;
+            final List<Field>? newFields = renameVariableInFields(input.block!
+                .fields); // new fields which can be null, or has a new value when update needed
+            final result = renameVariableHelper(
+              oldName: oldName,
+              newName: newName,
+              parent: input.block!,
+            ); // result, which can be null, or has a new value when update needed
+
+            // if newfields or result is not null, return the new parent with updated children
+            if (result == null && newFields == null) continue;
+
+            final Block newBlock = result ?? input.block!;
+
+            newChildren[i] =
+                input.copyWith(block: newBlock.copyWith(fields: newFields));
+          case StatementInput input:
+            for (int j = 0; j < input.blocks.length; j++) {
+              // new fields which can be null, or has a new value when update needed
+              final List<Field>? newFields =
+                  renameVariableInFields(input.blocks[j].fields);
+              final result = renameVariableHelper(
+                oldName: oldName,
+                newName: newName,
+                parent: input.blocks[j],
+              );
+              if (result == null && newFields == null) continue;
+              final newBlock = result ?? input.blocks[j];
+              newChildren[i] = input.copyWith(blocks: [
+                ...input.blocks.sublist(0, j),
+                newBlock.copyWith(fields: newFields),
+                ...input.blocks.sublist(j + 1),
+              ]);
+            }
+        }
+      }
+      if (newChildren.isEmpty) return null;
+      return parent.copyWith(children: [
+        for (int i = 0; i < parent.children.length; i++)
+          if (newChildren.containsKey(i))
+            newChildren[i]!
+          else
+            parent.children[i]
+      ]);
+    }
+
+    final newBlock = renameVariableHelper(
+      oldName: oldName,
+      newName: newName,
+      parent: state,
+    );
+    if (newBlock != null) {
+      state = newBlock;
+    }
   }
 
   void updateField({

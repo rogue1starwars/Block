@@ -94,9 +94,9 @@ class _AddVariableButtonState extends ConsumerState<AddVariableButton> {
 
   @override
   Widget build(BuildContext context) {
-    return IconButton(
+    return TextButton(
       onPressed: () => _showDialog(context),
-      icon: const Icon(Icons.add),
+      child: const Text('Add Variable'),
     );
   }
 }

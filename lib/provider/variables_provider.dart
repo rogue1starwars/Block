@@ -10,6 +10,14 @@ class VariablesNotifier extends StateNotifier<Map<String, Variable>> {
           'z': Variable(value: 'default2', type: BlockTypes.string, name: 'z'),
         } as Map<String, Variable>);
 
+  void renameVariable(String oldName, String newName) {
+    if (hasVariable(oldName)) {
+      final Variable variable = state[oldName]!;
+      state = {...state}..remove(oldName);
+      state = {...state}..[newName] = variable;
+    }
+  }
+
   bool hasVariable(String name) {
     return state.containsKey(name);
   }
