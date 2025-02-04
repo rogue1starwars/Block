@@ -11,6 +11,8 @@ import 'package:phoneduino_block/screens/logger_screen.dart';
 import 'package:phoneduino_block/widgets/ble/ble_home.dart';
 import 'package:phoneduino_block/widgets/block_tree.dart';
 import 'package:phoneduino_block/widgets/print_board.dart';
+import 'package:phoneduino_block/widgets/variables/add_variables.dart';
+import 'package:phoneduino_block/widgets/variables/variable_list.dart';
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
@@ -92,7 +94,22 @@ class HomePage extends ConsumerWidget {
       ]),
       body: Column(
         children: [
-          const BleHome(),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              const BleHome(),
+              const AddVariableButton(),
+              TextButton(
+                  child: Text("Variables"),
+                  onPressed: () {
+                    showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return VariableListDialog();
+                        });
+                  })
+            ],
+          ),
           Expanded(
             child: intervals.intervals.isNotEmpty
                 ? const PrintBoard()
