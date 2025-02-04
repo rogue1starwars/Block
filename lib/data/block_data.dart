@@ -9,6 +9,7 @@ import 'package:phoneduino_block/models/fields.dart';
 import 'package:phoneduino_block/models/inputs.dart';
 import 'package:phoneduino_block/provider/intervals_provider.dart';
 import 'package:phoneduino_block/provider/ui_provider.dart';
+import 'package:phoneduino_block/provider/variables_provider.dart';
 import 'package:phoneduino_block/utils/file_logger.dart';
 import 'package:phoneduino_block/utils/type.dart';
 
@@ -338,19 +339,20 @@ List<BlockBluePrint> blockData = [
     },
   ),
   BlockBluePrint(
-    name: 'Get Variable',
+    name: 'Get Variable (String)',
     fields: [
       Field(
-        type: FieldTypes.string,
+        type: FieldTypes.variableNames,
         label: 'Name',
         value: '',
+        variableType: BlockTypes.string,
       ),
     ],
     children: [],
-    returnType: BlockTypes.none,
+    returnType: BlockTypes.string,
     originalFunc: (WidgetRef ref, Block block) {
       final name = block.fields[0].value;
-      final value = Block.getVariable(name);
+      final value = ref.read(variablesProvider.notifier).getVariable(name);
       if (value == null) {
         print("Get Variable: null");
         return;

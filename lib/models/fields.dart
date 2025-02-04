@@ -5,12 +5,14 @@ class Field {
   final FieldTypes type;
   final dynamic value;
   final List<String> options;
+  BlockTypes? variableType;
 
   Field({
     required this.label,
     required this.value,
     required this.type,
     this.options = const [],
+    this.variableType,
   }) {
     assert(type != FieldTypes.dropdown || options.isNotEmpty,
         'Dropdown field must have options');
@@ -25,6 +27,7 @@ class Field {
       options: init.options,
       value: value,
       type: init.type,
+      variableType: init.variableType,
     );
   }
 
@@ -37,12 +40,14 @@ class Field {
     FieldTypes? type,
     dynamic value,
     List<String>? options,
+    BlockTypes? variableType,
   }) {
     return Field(
       label: label ?? this.label,
       value: value ?? this.value,
       type: type ?? this.type,
       options: options ?? this.options,
+      variableType: variableType ?? this.variableType,
     );
   }
 }

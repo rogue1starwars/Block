@@ -76,6 +76,8 @@ class _BlockTreeState extends ConsumerState<BlockTree> {
         return StringFieldWidget(parent: parent, index: index);
       case FieldTypes.number:
         return NumericFieldWidget(parent: parent, index: index);
+      case FieldTypes.variableNames:
+        return VariableNamesFieldWidget(parent: parent, index: index);
       default:
         return const SizedBox.shrink();
     }

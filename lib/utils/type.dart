@@ -10,4 +10,5 @@ enum FieldTypes {
   number,
   string,
   dropdown,
+  variableNames,
 }
