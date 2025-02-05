@@ -1,14 +1,13 @@
 import 'package:phoneduino_block/data/block_data.dart';
 import 'package:phoneduino_block/utils/type.dart';
 
-List<BlockBluePrint> filterBlockData(Map<BlockTypes, bool>? filter) {
+List<BlockBluePrint> filterBlockData(
+    List<BlockTypes>? filter, List<BlockBluePrint> blockData) {
   if (filter == null) {
     return blockData;
   }
 
   return blockData.where((block) {
-    return filter.containsKey(block.returnType)
-        ? filter[block.returnType]!
-        : true;
+    return filter.contains(block.returnType);
   }).toList();
 }

@@ -9,6 +9,7 @@
 - Finalize UI
   - printing
   - dragging
+    - **when dragging, filter!**
 - Field Inputs variety
   - Setting variables...
   - Variable data structure. key == name??

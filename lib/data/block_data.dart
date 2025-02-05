@@ -86,11 +86,10 @@ List<BlockBluePrint> blockData = [
       children: [
         ValueInput(
             label: 'Data',
-            filter: {
-              BlockTypes.number: true,
-              BlockTypes.string: true,
-              BlockTypes.none: false,
-            },
+            filter: [
+              BlockTypes.number,
+              BlockTypes.string,
+            ],
             block: null),
       ],
       returnType: BlockTypes.none,
@@ -174,10 +173,10 @@ List<BlockBluePrint> blockData = [
       ValueInput(
         label: 'Value',
         block: null,
-        filter: {
-          BlockTypes.string: true,
-          BlockTypes.number: true,
-        },
+        filter: [
+          BlockTypes.string,
+          BlockTypes.number,
+        ],
       ),
     ],
     returnType: BlockTypes.none,
@@ -314,28 +313,37 @@ List<BlockBluePrint> blockData = [
     },
   ),
   BlockBluePrint(
-    name: 'Set Variable',
+    name: 'Set Variable (String)',
     fields: [
       Field(
-        type: FieldTypes.string,
+        type: FieldTypes.variableNames,
         label: 'Name',
         value: '',
-      ),
-      Field(
-        type: FieldTypes.string,
-        label: 'Type',
-        value: '',
+        variableType: BlockTypes.string,
       ),
     ],
     children: [
-      ValueInput(label: 'Value', block: null),
+      ValueInput(
+        label: 'Value',
+        block: null,
+        filter: [BlockTypes.string],
+      ),
     ],
     returnType: BlockTypes.none,
     originalFunc: (WidgetRef ref, Block block) {
       final value = block.children[0] as ValueInput;
-      final type = BlockTypes.values.firstWhere(
-          (e) => e.toString() == 'BlockTypes.' + block.fields[1].value);
-      Block.setVariable(block.fields[0].value, value.block!.execute(ref), type);
+      // testing... store varibles in riverpod providers
+      ref.read(variablesProvider.notifier).setVariable(
+            block.fields[0].value,
+            value.block!.execute(ref),
+            BlockTypes.string,
+          );
+
+      Block.setVariable(
+        block.fields[0].value,
+        value.block!.execute(ref),
+        BlockTypes.string,
+      );
     },
   ),
   BlockBluePrint(
@@ -449,8 +457,15 @@ List<BlockBluePrint> blockData = [
     ],
     children: [],
     returnType: BlockTypes.number,
-    originalFunc: (WidgetRef ref, Block block) {
-      return block.fields[0].value;
+    originalFunc: <num>(WidgetRef ref, Block block) {
+      final value = block.fields[0].value;
+      if (value is String) {
+        return int.parse(value);
+      } else if (value is num) {
+        return value;
+      } else {
+        throw "Invalid return";
+      }
     },
   ),
 ];

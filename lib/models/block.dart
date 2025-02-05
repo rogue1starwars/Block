@@ -173,6 +173,12 @@ class Block {
     }
   }
 
+  static void setAllVariables(Map<String, Variable> allVariables) {
+    allVariables.entries.map((entry) {
+      setVariable(entry.key, entry.value.value, entry.value.type);
+    });
+  }
+
   static bool hasVariable(String name) {
     return _globalVariables.containsKey(name);
   }

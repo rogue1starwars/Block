@@ -92,7 +92,7 @@ class _AddButtonState extends ConsumerState<AddButton> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                for (BlockBluePrint block in filterBlockData(filter))
+                for (BlockBluePrint block in filterBlockData(filter, blockData))
                   ListTile(
                     title: Text(block.name),
                     onTap: () {

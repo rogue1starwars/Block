@@ -369,15 +369,14 @@ class BlockTreeNotifier extends StateNotifier<Block> {
     required String id,
     required String siblingId,
   }) {
-    Block? targetBlock = findBlock(id: id);
+    final Block? targetBlock = findBlock(id: id);
     if (targetBlock == null) return;
 
-    targetBlock =
+    final targetBlockCopied =
         targetBlock.copyWith(id: const Uuid().v4()); // copy with new id
 
-    bool inserted = insertBlock(siblingId: siblingId, value: targetBlock);
+    bool inserted = insertBlock(siblingId: siblingId, value: targetBlockCopied);
     if (inserted) deleteBlock(id: id);
-    targetBlock = state;
   }
 
   bool insertBlock({
@@ -399,10 +398,8 @@ class BlockTreeNotifier extends StateNotifier<Block> {
             if (input.block == null) return null;
             if (input.block!.id == siblingId) {
               if (input.filter != null) {
-                if (input.filter!.containsKey(value.returnType)) {
-                  if (input.filter![value.returnType] == false) {
-                    continue;
-                  }
+                if (!input.filter!.contains(value.returnType)) {
+                  continue;
                 }
               }
               final newParent = parent.copyWith(children: [

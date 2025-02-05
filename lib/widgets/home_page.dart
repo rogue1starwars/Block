@@ -4,9 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:phoneduino_block/models/block.dart';
+import 'package:phoneduino_block/models/variables.dart';
 import 'package:phoneduino_block/provider/block_tree_provider.dart';
 import 'package:phoneduino_block/provider/intervals_provider.dart';
 import 'package:phoneduino_block/provider/ui_provider.dart';
+import 'package:phoneduino_block/provider/variables_provider.dart';
 import 'package:phoneduino_block/screens/logger_screen.dart';
 import 'package:phoneduino_block/widgets/ble/ble_home.dart';
 import 'package:phoneduino_block/widgets/block_tree.dart';
@@ -80,6 +82,9 @@ class HomePage extends ConsumerWidget {
         ),
         IconButton(
           onPressed: () {
+            final Map<String, Variable> allVariables =
+                ref.read(variablesProvider);
+            Block.setAllVariables(allVariables);
             root.execute(ref);
           },
           icon: const Icon(Icons.play_arrow),
