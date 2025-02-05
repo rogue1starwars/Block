@@ -12,7 +12,7 @@ class VariablesNotifier extends StateNotifier<Map<String, Variable>> {
 
   void renameVariable(String oldName, String newName) {
     if (hasVariable(oldName)) {
-      final Variable variable = state[oldName]!;
+      final Variable variable = state[oldName]!.copyWith(name: newName);
       state = {...state}..remove(oldName);
       state = {...state}..[newName] = variable;
     }

@@ -10,4 +10,16 @@ class Variable {
     required this.type,
     required this.name,
   });
+
+  Variable copyWith({
+    dynamic value,
+    BlockTypes? type,
+    String? name,
+  }) {
+    return Variable(
+      value: value ?? this.value,
+      type: type ?? this.type,
+      name: name ?? this.name,
+    );
+  }
 }
