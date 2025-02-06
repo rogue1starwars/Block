@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phoneduino_block/models/block.dart';
 import 'package:phoneduino_block/models/fields.dart';
+import 'package:phoneduino_block/models/variables.dart';
 import 'package:phoneduino_block/provider/block_tree_provider.dart';
 import 'package:phoneduino_block/provider/ui_provider.dart';
+import 'package:phoneduino_block/provider/variables_provider.dart';
+import 'package:phoneduino_block/utils/type.dart';
 
 // Base field widget
 class BaseFieldWidget extends ConsumerWidget {
@@ -101,5 +104,61 @@ class NumericFieldWidget extends BaseFieldWidget {
       return 'Please enter a valid number';
     }
     return null;
+  }
+}
+
+class VariableNamesFieldWidget extends ConsumerStatefulWidget {
+  final Block parent;
+  final int index;
+  const VariableNamesFieldWidget({
+    super.key,
+    required this.parent,
+    required this.index,
+  });
+
+  @override
+  ConsumerState<VariableNamesFieldWidget> createState() =>
+      _VariableFieldWidgetState();
+}
+
+class _VariableFieldWidgetState
+    extends ConsumerState<VariableNamesFieldWidget> {
+  @override
+  Widget build(BuildContext context) {
+    final Field field = widget.parent.fields[widget.index];
+    final BlockTypes? variableType = field.variableType;
+
+    Map<String, Variable> variables = ref.watch(variablesProvider);
+
+    print("variable type: $variableType");
+    final filteredVariables = variables.entries
+        .where((entry) => entry.value.type == variableType)
+        .toList();
+    print("variables: $variables");
+    print("filteredVariables: $filteredVariables");
+
+    // Last check. Should not happen
+    if (filteredVariables.isEmpty) {
+      return const Text("No variables found");
+    }
+
+    print("field.value: ${field.value}");
+    return DropdownMenu(
+        label: const Text('Select a variable'),
+        initialSelection: field.value as String? ?? ' ',
+        onSelected: (String? name) {
+          if (name == null) return;
+          ref.read(blockTreeProvider.notifier).updateField(
+                parentId: widget.parent.id,
+                value: name,
+                index: widget.index,
+              );
+        },
+        dropdownMenuEntries: filteredVariables
+            .map((entry) => DropdownMenuEntry(
+                  value: entry.key,
+                  label: entry.key,
+                ))
+            .toList());
   }
 }

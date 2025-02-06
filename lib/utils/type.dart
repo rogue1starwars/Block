@@ -5,3 +5,10 @@ enum BlockTypes {
   none,
   intervalList,
 }
+
+enum FieldTypes {
+  number,
+  string,
+  dropdown,
+  variableNames,
+}

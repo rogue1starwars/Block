@@ -2,15 +2,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phoneduino_block/data/block_data.dart';
 import 'package:phoneduino_block/models/fields.dart';
 import 'package:phoneduino_block/models/inputs.dart';
-import 'package:phoneduino_block/models/variables.dart';
 import 'package:phoneduino_block/provider/block_tree_provider.dart';
 import 'package:phoneduino_block/provider/intervals_provider.dart';
 import 'package:phoneduino_block/provider/ui_provider.dart';
 import 'package:phoneduino_block/utils/type.dart';
 
 class Block {
-  static final Map<String, Variable> _globalVariables = {};
-
   final String id;
   final String name;
   final List<Field> fields;
@@ -36,9 +33,8 @@ class Block {
           returnType: block.returnType,
           originalFunc: block.originalFunc,
           fields: block.fields
-              .map((field) => Field(
-                    label: field.label,
-                    type: field.type,
+              .map((field) => Field.fromJson(
+                    init: field,
                     value: json['fields'][field.label],
                   ))
               .toList(),
@@ -171,40 +167,6 @@ class Block {
       // Re running entire program
       // rerun(ref);
     }
-  }
-
-  static bool hasVariable(String name) {
-    return _globalVariables.containsKey(name);
-  }
-
-  static BlockTypes? getVariableType(String name) {
-    if (!hasVariable(name)) {
-      return null;
-    }
-    return _globalVariables[name]!.type;
-  }
-
-  static void deleteVariable(String name) {
-    if (hasVariable(name)) {
-      _globalVariables.remove(name);
-    }
-  }
-
-  static void setVariable(String name, dynamic value, BlockTypes type) {
-    _globalVariables[name] = Variable(value: value, type: type, name: name);
-  }
-
-  static void updateVariable(String name, dynamic value) {
-    if (hasVariable(name)) {
-      _globalVariables[name]!.value = value;
-    }
-  }
-
-  static dynamic getVariable(String name) {
-    if (!hasVariable(name)) {
-      return null;
-    }
-    return _globalVariables[name]!.value;
   }
 
   Block copyWith({

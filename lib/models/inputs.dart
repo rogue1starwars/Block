@@ -3,7 +3,7 @@ import 'package:phoneduino_block/utils/type.dart';
 
 class Input {
   final String label;
-  final Map<BlockTypes, bool>? filter;
+  final List<BlockTypes>? filter;
   // factory Input.fromJson(Map<String, dynamic> json) {
   //   if (json.containsKey('blocks')) {
   //     return StatementInput(
@@ -72,7 +72,7 @@ class StatementInput extends Input {
 
   StatementInput copyWith({
     String? label,
-    Map<BlockTypes, bool>? filter,
+    List<BlockTypes>? filter,
     List<Block>? blocks,
   }) {
     return StatementInput(
@@ -122,7 +122,7 @@ class ValueInput extends Input {
 
   ValueInput copyWith({
     String? label,
-    Map<BlockTypes, bool>? filter,
+    List<BlockTypes>? filter,
     Block? block,
     bool delete = false,
   }) {

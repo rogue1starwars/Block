@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phoneduino_block/data/block_data.dart';
 import 'package:phoneduino_block/models/block.dart';
 import 'package:phoneduino_block/provider/block_tree_provider.dart';
+import 'package:phoneduino_block/provider/ui_provider.dart';
 import 'package:phoneduino_block/utils/fildter.dart';
 import 'package:uuid/uuid.dart';
 
@@ -67,12 +68,18 @@ class _AddButtonState extends ConsumerState<AddButton> {
                 id: const Uuid().v4(),
               );
 
-              ref.read(blockTreeProvider.notifier).addBlock(
+              final bool added = ref.read(blockTreeProvider.notifier).addBlock(
                     parentId: widget.parentBlock.id,
                     value: targetBlock,
                     index: widget.index,
                   );
-              ref.read(blockTreeProvider.notifier).deleteBlock(id: id);
+              if (added) {
+                ref.read(blockTreeProvider.notifier).deleteBlock(id: id);
+              } else {
+                ref.read(uiProvider.notifier).showMessage(
+                      'Failed to add block',
+                    );
+              }
             },
           ),
         ],
@@ -92,7 +99,7 @@ class _AddButtonState extends ConsumerState<AddButton> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                for (BlockBluePrint block in filterBlockData(filter))
+                for (BlockBluePrint block in filterBlockData(filter, blockData))
                   ListTile(
                     title: Text(block.name),
                     onTap: () {
