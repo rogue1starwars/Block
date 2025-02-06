@@ -206,15 +206,26 @@ List<BlockBluePrint> blockData = [
             );
         return;
       }
-      if (Block.getVariable("_orientationStream") != null) {
+
+      if (ref
+              .read(variablesProvider.notifier)
+              .getVariable("_orientationStream") !=
+          null) {
         print("Orientation Stream already active");
         return;
       }
       StreamSubscription orientationStream = events.listen((event) {
-        Block.setVariable("_orientation", event.heading, BlockTypes.number);
+        ref.read(variablesProvider.notifier).setVariable(
+              "_orientation",
+              event.heading,
+              BlockTypes.number,
+            );
       });
-      Block.setVariable(
-          "_orientationStream", orientationStream, BlockTypes.none);
+      ref.read(variablesProvider.notifier).setVariable(
+            "_orientationStream",
+            orientationStream,
+            BlockTypes.none,
+          );
     },
   ),
   BlockBluePrint(
@@ -223,7 +234,8 @@ List<BlockBluePrint> blockData = [
     children: [],
     returnType: BlockTypes.number,
     originalFunc: (WidgetRef ref, Block block) {
-      final value = Block.getVariable("_orientation");
+      final value =
+          ref.read(variablesProvider.notifier).getVariable("_orientation");
       if (value == null) {
         print("Get Orientation: null");
         return;
@@ -263,7 +275,8 @@ List<BlockBluePrint> blockData = [
         }
       }
 
-      if (Block.getVariable("_positionStream") != null) {
+      if (ref.read(variablesProvider.notifier).getVariable("_positionStream") !=
+          null) {
         print("Position Stream already active");
         return;
       }
@@ -278,10 +291,22 @@ List<BlockBluePrint> blockData = [
           print('uknown');
           return;
         }
-        Block.setVariable("_long", position.longitude, BlockTypes.number);
-        Block.setVariable("_lat", position.latitude, BlockTypes.number);
+        ref.read(variablesProvider.notifier).setVariable(
+              "_lat",
+              position.latitude,
+              BlockTypes.none,
+            );
+        ref.read(variablesProvider.notifier).setVariable(
+              "_long",
+              position.longitude,
+              BlockTypes.number,
+            );
       });
-      Block.setVariable("_positionStream", positionStream, BlockTypes.none);
+      ref.read(variablesProvider.notifier).setVariable(
+            "_positionStream",
+            positionStream,
+            BlockTypes.none,
+          );
     },
   ),
   BlockBluePrint(
@@ -290,7 +315,7 @@ List<BlockBluePrint> blockData = [
     children: [],
     returnType: BlockTypes.number,
     originalFunc: (WidgetRef ref, Block block) {
-      final value = Block.getVariable("_lat");
+      final value = ref.read(variablesProvider.notifier).getVariable("_lat");
       if (value == null) {
         print("Get Latitude: null");
         return;
@@ -304,12 +329,46 @@ List<BlockBluePrint> blockData = [
     children: [],
     returnType: BlockTypes.number,
     originalFunc: (WidgetRef ref, Block block) {
-      final value = Block.getVariable("_long");
+      final value = ref.read(variablesProvider.notifier).getVariable("_long");
       if (value == null) {
         print("Get Longitude: null");
         return;
       }
       return value;
+    },
+  ),
+  BlockBluePrint(
+    name: 'Set Variable (Number)',
+    fields: [
+      Field(
+        type: FieldTypes.variableNames,
+        label: 'Name',
+        value: '',
+        variableType: BlockTypes.number,
+      ),
+    ],
+    children: [
+      ValueInput(
+        label: 'Value',
+        block: null,
+        filter: [BlockTypes.number],
+      ),
+    ],
+    returnType: BlockTypes.none,
+    originalFunc: (WidgetRef ref, Block block) {
+      final value = block.children[0] as ValueInput;
+      // testing... store varibles in riverpod providers
+      ref.read(variablesProvider.notifier).setVariable(
+            block.fields[0].value,
+            value.block!.execute(ref),
+            BlockTypes.number,
+          );
+
+      Block.setVariable(
+        block.fields[0].value,
+        value.block!.execute(ref),
+        BlockTypes.number,
+      );
     },
   ),
   BlockBluePrint(
@@ -344,6 +403,29 @@ List<BlockBluePrint> blockData = [
         value.block!.execute(ref),
         BlockTypes.string,
       );
+    },
+  ),
+  BlockBluePrint(
+    name: 'Get Variable (Number)',
+    fields: [
+      Field(
+        type: FieldTypes.variableNames,
+        label: 'Name',
+        value: '',
+        variableType: BlockTypes.number,
+      ),
+    ],
+    children: [],
+    returnType: BlockTypes.number,
+    originalFunc: (WidgetRef ref, Block block) {
+      final name = block.fields[0].value;
+      final value = ref.read(variablesProvider.notifier).getVariable(name);
+      if (value == null) {
+        print("Get Variable: null");
+        return;
+      }
+      print(value);
+      return value;
     },
   ),
   BlockBluePrint(
