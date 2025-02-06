@@ -6,8 +6,8 @@ import 'package:phoneduino_block/data/block_data_logic.dart';
 import 'package:phoneduino_block/data/block_data_logs.dart';
 import 'package:phoneduino_block/data/block_data_loops.dart';
 import 'package:phoneduino_block/data/block_data_math.dart';
-import 'package:phoneduino_block/data/block_data_print.dart';
 import 'package:phoneduino_block/data/block_data_sensors.dart';
+import 'package:phoneduino_block/data/block_data_strings.dart';
 import 'package:phoneduino_block/data/block_data_variables.dart';
 import 'package:phoneduino_block/models/block.dart';
 import 'package:phoneduino_block/models/fields.dart';
@@ -89,6 +89,6 @@ Map<String, List<BlockBluePrint>> blockData = {
   'Bluetooth': blockDataBle,
   'Sensors': blockDataSensors,
   'Variables': blockDataVariables,
-  'Printing': blockDataPrint,
+  'Strings': blockDataStrings,
   'Math': blockDataMath,
 };
