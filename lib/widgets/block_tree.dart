@@ -64,8 +64,13 @@ class _BlockTreeState extends ConsumerState<BlockTree> {
                         size: 35,
                         color: Colors.black.withOpacity(0.5),
                       ),
-                      Text(input.label,
-                          style: const TextStyle(fontWeight: FontWeight.bold)),
+                      if (_isClosed[index] && input.block != null)
+                        Text(input.block!.name,
+                            style: const TextStyle(fontStyle: FontStyle.italic))
+                      else
+                        Text(input.label,
+                            style:
+                                const TextStyle(fontWeight: FontWeight.bold)),
                     ],
                   ),
                 ),
