@@ -357,18 +357,11 @@ List<BlockBluePrint> blockData = [
     returnType: BlockTypes.none,
     originalFunc: (WidgetRef ref, Block block) {
       final value = block.children[0] as ValueInput;
-      // testing... store varibles in riverpod providers
       ref.read(variablesProvider.notifier).setVariable(
             block.fields[0].value,
             value.block!.execute(ref),
             BlockTypes.number,
           );
-
-      Block.setVariable(
-        block.fields[0].value,
-        value.block!.execute(ref),
-        BlockTypes.number,
-      );
     },
   ),
   BlockBluePrint(
@@ -397,12 +390,6 @@ List<BlockBluePrint> blockData = [
             value.block!.execute(ref),
             BlockTypes.string,
           );
-
-      Block.setVariable(
-        block.fields[0].value,
-        value.block!.execute(ref),
-        BlockTypes.string,
-      );
     },
   ),
   BlockBluePrint(
