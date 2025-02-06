@@ -425,6 +425,11 @@ class BlockTreeNotifier extends StateNotifier<Block> {
           case StatementInput input:
             for (int j = 0; j < input.blocks.length; j++) {
               if (input.blocks[j].id == siblingId) {
+                if (input.filter != null) {
+                  if (!input.filter!.contains(value.returnType)) {
+                    continue;
+                  }
+                }
                 return parent.copyWith(children: [
                   ...parent.children.sublist(0, i),
                   input.copyWith(blocks: [

@@ -128,6 +128,10 @@ List<BlockBluePrint> blockData = [
         StatementInput(
           label: 'Data',
           blocks: [],
+          filter: [
+            BlockTypes.number,
+            BlockTypes.string,
+          ],
         )
       ],
       returnType: BlockTypes.none,
