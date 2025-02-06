@@ -19,8 +19,9 @@ class VariableListDialog extends ConsumerWidget {
           for (final key in variables.keys)
             variables.containsKey(key)
                 ? ListTile(
-                    title: Text(variables[key]!.name),
-                    subtitle: Text(variables[key]!.type.toString()),
+                    title: Text(variables[key]!.name,
+                        style: const TextStyle(fontSize: 20)),
+                    subtitle: Text(variables[key]!.type.name),
                     trailing: ModifyVariables(name: key),
                   )
                 : const SizedBox()

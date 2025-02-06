@@ -33,9 +33,8 @@ class Block {
           returnType: block.returnType,
           originalFunc: block.originalFunc,
           fields: block.fields
-              .map((field) => Field(
-                    label: field.label,
-                    type: field.type,
+              .map((field) => Field.fromJson(
+                    init: field,
                     value: json['fields'][field.label],
                   ))
               .toList(),

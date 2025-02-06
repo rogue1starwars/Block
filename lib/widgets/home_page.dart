@@ -4,9 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:phoneduino_block/models/block.dart';
+import 'package:phoneduino_block/models/variables.dart';
 import 'package:phoneduino_block/provider/block_tree_provider.dart';
 import 'package:phoneduino_block/provider/intervals_provider.dart';
 import 'package:phoneduino_block/provider/ui_provider.dart';
+import 'package:phoneduino_block/provider/variables_provider.dart';
 import 'package:phoneduino_block/screens/logger_screen.dart';
 import 'package:phoneduino_block/widgets/ble/ble_home.dart';
 import 'package:phoneduino_block/widgets/block_tree.dart';
@@ -51,9 +53,17 @@ class HomePage extends ConsumerWidget {
         IconButton(
           onPressed: () {
             try {
-              final String json = jsonEncode(root.toJson());
-              print(json);
-              box.put('block_tree', json);
+              final String blockTreeJson = jsonEncode(root.toJson());
+              print(blockTreeJson);
+              box.put('block_tree', blockTreeJson);
+
+              final Map<String, Variable> variables =
+                  ref.read(variablesProvider);
+              final Map<String, dynamic> variablesJson =
+                  variables.map((key, value) {
+                return MapEntry(key, value.toJson());
+              });
+              box.put('variables', jsonEncode(variablesJson));
             } catch (e) {
               ref
                   .read(uiProvider.notifier)
@@ -65,11 +75,22 @@ class HomePage extends ConsumerWidget {
         IconButton(
           onPressed: () {
             try {
-              final json = box.get('block_tree');
-              final data = jsonDecode(json);
-              print(data);
-              Block root = Block.fromJson(data);
+              final blockTreeJson = box.get('block_tree');
+              final blockTreeData = jsonDecode(blockTreeJson);
+              print(blockTreeData);
+              Block root = Block.fromJson(blockTreeData);
               ref.read(blockTreeProvider.notifier).updateRoot(root);
+
+              final variablesJson = box.get('variables');
+              final Map<String, dynamic> variablesData =
+                  jsonDecode(variablesJson);
+              final Map<String, Variable> variables =
+                  variablesData.map((key, value) {
+                return MapEntry(key, Variable.fromJson(value));
+              });
+              ref
+                  .read(variablesProvider.notifier)
+                  .updateAllVariables(variables);
             } catch (e) {
               ref
                   .read(uiProvider.notifier)
