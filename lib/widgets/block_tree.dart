@@ -22,6 +22,13 @@ class BlockTree extends ConsumerStatefulWidget {
 
 class _BlockTreeState extends ConsumerState<BlockTree> {
   bool _isHovering = false;
+  late List<bool> _isClosed;
+
+  @override
+  void initState() {
+    super.initState();
+    _isClosed = List<bool>.filled(widget.block.children.length, false);
+  }
 
   Widget _handleInputs({
     required Block parent,
@@ -37,14 +44,37 @@ class _BlockTreeState extends ConsumerState<BlockTree> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 5, horizontal: 20),
-                child: Text(input.label,
-                    style: const TextStyle(fontWeight: FontWeight.bold)),
+                padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 0),
+                child: GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _isClosed = [
+                        for (int i = 0; i < _isClosed.length; i++)
+                          i == index ? !_isClosed[i] : _isClosed[i]
+                      ];
+                    });
+                  },
+                  child: Row(
+                    mainAxisSize: MainAxisSize.max,
+                    children: [
+                      Icon(
+                        _isClosed[index]
+                            ? Icons.keyboard_arrow_right_rounded
+                            : Icons.keyboard_arrow_down_rounded,
+                        size: 35,
+                        color: Colors.black.withOpacity(0.5),
+                      ),
+                      Text(input.label,
+                          style: const TextStyle(fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                ),
               ),
-              (input.block != null)
-                  ? BlockTree(block: input.block!)
-                  : AddButton(parentBlock: parent, index: index)
+              (_isClosed[index])
+                  ? const SizedBox.shrink()
+                  : (input.block != null)
+                      ? BlockTree(block: input.block!)
+                      : AddButton(parentBlock: parent, index: index)
             ],
           ),
         );
@@ -56,13 +86,42 @@ class _BlockTreeState extends ConsumerState<BlockTree> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                child: Text(input.label,
-                    style: const TextStyle(fontWeight: FontWeight.bold)),
+                padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 0),
+                child: GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _isClosed = [
+                        for (int i = 0; i < _isClosed.length; i++)
+                          i == index ? !_isClosed[i] : _isClosed[i]
+                      ];
+                    });
+                  },
+                  child: Row(
+                    mainAxisSize: MainAxisSize.max,
+                    children: [
+                      Icon(
+                        _isClosed[index]
+                            ? Icons.keyboard_arrow_right_rounded
+                            : Icons.keyboard_arrow_down_rounded,
+                        size: 35,
+                        color: Colors.black.withOpacity(0.5),
+                      ),
+                      Text(input.label,
+                          style: const TextStyle(fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                ),
               ),
-              for (var block in input.blocks) BlockTree(block: block),
-              AddButton(parentBlock: parent, index: index),
+              if (_isClosed[index])
+                const SizedBox.shrink()
+              else
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    for (var block in input.blocks) BlockTree(block: block),
+                    AddButton(parentBlock: parent, index: index),
+                  ],
+                )
             ],
           ),
         );
