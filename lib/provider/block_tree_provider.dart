@@ -471,26 +471,26 @@ class BlockTreeNotifier extends StateNotifier<Block> {
       required Block value,
       required int index,
     }) {
-      if (parent.children.length <= index) return null;
-
-      if (parent.id == parentId) {
-        print("Adding block");
-        final newChildren = createNewChildren(
-          parent: parent,
-          value: value,
-          index: index,
-        );
-        if (newChildren.isEmpty) return null;
-        return parent.copyWith(children: newChildren);
-      } else {
-        return recursive(
-          callback: addBlockHelper,
-          parent: parent,
-          parentId: parentId,
-          value: value,
-          index: index,
-        );
+      if (parent.children.length > index) {
+        if (parent.id == parentId) {
+          print("Adding block");
+          final newChildren = createNewChildren(
+            parent: parent,
+            value: value,
+            index: index,
+          );
+          if (newChildren.isEmpty) return null;
+          return parent.copyWith(children: newChildren);
+        }
       }
+
+      return recursive(
+        callback: addBlockHelper,
+        parent: parent,
+        parentId: parentId,
+        value: value,
+        index: index,
+      );
     }
 
     final newBlock = addBlockHelper(

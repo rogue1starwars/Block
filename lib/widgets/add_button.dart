@@ -149,12 +149,19 @@ class _BlockListDialogState extends ConsumerState<BlockListDialog> {
                 title: Text(block.name),
                 onTap: () {
                   final String newId = const Uuid().v4();
-                  ref.read(blockTreeProvider.notifier).addBlock(
-                        parentId: widget.parentId,
-                        value: Block.fromBluePrint(block: block, id: newId),
-                        index: widget.index,
-                      );
-                  Navigator.of(context).pop();
+                  final bool succeded =
+                      ref.read(blockTreeProvider.notifier).addBlock(
+                            parentId: widget.parentId,
+                            value: Block.fromBluePrint(block: block, id: newId),
+                            index: widget.index,
+                          );
+                  if (succeded) {
+                    Navigator.of(context).pop();
+                  } else {
+                    ref.read(uiProvider.notifier).showMessage(
+                          'Failed to add block',
+                        );
+                  }
                 },
               ),
           ],
