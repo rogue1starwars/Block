@@ -4,7 +4,6 @@ import 'package:phoneduino_block/models/block.dart';
 import 'package:phoneduino_block/models/fields.dart';
 import 'package:phoneduino_block/models/inputs.dart';
 import 'package:phoneduino_block/utils/type.dart';
-import 'package:uuid/uuid.dart';
 
 class BlockTreeNotifier extends StateNotifier<Block> {
   BlockTreeNotifier()
