@@ -233,28 +233,27 @@ class BlockTreeNotifier extends StateNotifier<Block> {
     required Block value,
     required int index,
   }) {
+    if (parent.children[index].filter != null) {
+      if (!parent.children[index].filter!.contains(value.returnType)) {
+        return [];
+      }
+    }
     switch (parent.children[index]) {
-      case ValueInput _:
-        final ValueInput targetChild = parent.children[index] as ValueInput;
+      case ValueInput input:
         final List<Input> newChildren = [
           for (int i = 0; i < parent.children.length; i++)
-            if (i == index)
-              targetChild.copyWith(block: value)
-            else
-              parent.children[i]
+            if (i == index) input.copyWith(block: value) else parent.children[i]
         ];
         return newChildren;
-      case StatementInput _:
-        final StatementInput targetChild =
-            parent.children[index] as StatementInput;
+      case StatementInput input:
         List<Block> newBlocks = [
-          ...(targetChild.blocks),
+          ...(input.blocks),
           value,
         ];
         final List<Input> newChildren = [
           for (int i = 0; i < parent.children.length; i++)
             if (i == index)
-              targetChild.copyWith(blocks: newBlocks)
+              input.copyWith(blocks: newBlocks)
             else
               parent.children[i]
         ];
@@ -365,20 +364,6 @@ class BlockTreeNotifier extends StateNotifier<Block> {
     return null;
   }
 
-  void moveBlock({
-    required String id,
-    required String siblingId,
-  }) {
-    final Block? targetBlock = findBlock(id: id);
-    if (targetBlock == null) return;
-
-    final targetBlockCopied =
-        targetBlock.copyWith(id: const Uuid().v4()); // copy with new id
-
-    bool inserted = insertBlock(siblingId: siblingId, value: targetBlockCopied);
-    if (inserted) deleteBlock(id: id);
-  }
-
   bool insertBlock({
     required String siblingId,
     required Block value,
@@ -476,7 +461,7 @@ class BlockTreeNotifier extends StateNotifier<Block> {
     return false;
   }
 
-  void addBlock({
+  bool addBlock({
     required String parentId,
     required Block value,
     required int index,
@@ -496,6 +481,7 @@ class BlockTreeNotifier extends StateNotifier<Block> {
           value: value,
           index: index,
         );
+        if (newChildren.isEmpty) return null;
         return parent.copyWith(children: newChildren);
       } else {
         return recursive(
@@ -516,7 +502,9 @@ class BlockTreeNotifier extends StateNotifier<Block> {
     );
     if (newBlock != null) {
       state = newBlock;
+      return true;
     }
+    return false;
   }
 
   void deleteBlock({

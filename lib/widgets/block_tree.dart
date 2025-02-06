@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phoneduino_block/models/block.dart';
 import 'package:phoneduino_block/provider/is_dragging_provider.dart';
+import 'package:phoneduino_block/provider/ui_provider.dart';
 import 'package:phoneduino_block/utils/type.dart';
 import 'package:phoneduino_block/models/fields.dart';
 import 'package:phoneduino_block/models/inputs.dart';
@@ -9,6 +10,7 @@ import 'package:phoneduino_block/provider/block_tree_provider.dart';
 import 'package:phoneduino_block/widgets/fields_widget.dart';
 import 'package:phoneduino_block/widgets/add_button.dart';
 import 'package:phoneduino_block/widgets/delete_button.dart';
+import 'package:uuid/uuid.dart';
 
 class BlockTree extends ConsumerStatefulWidget {
   final Block block;
@@ -185,10 +187,24 @@ class _BlockTreeState extends ConsumerState<BlockTree> {
                   onAcceptWithDetails: (detail) {
                     setState(() => _isHovering = false);
                     final id = detail.data as String;
-                    ref.read(blockTreeProvider.notifier).moveBlock(
-                          siblingId: widget.block.id,
-                          id: id,
-                        );
+                    final Block? targetBlock =
+                        ref.read(blockTreeProvider.notifier).findBlock(id: id);
+                    if (targetBlock == null) return;
+
+                    final targetBlockCopied = targetBlock.copyWith(
+                        id: const Uuid().v4()); // copy with new id
+                    bool inserted = ref
+                        .read(blockTreeProvider.notifier)
+                        .insertBlock(
+                            siblingId: widget.block.id,
+                            value: targetBlockCopied);
+                    if (inserted) {
+                      ref.read(blockTreeProvider.notifier).deleteBlock(id: id);
+                    } else {
+                      ref.read(uiProvider.notifier).showMessage(
+                            'Failed to add block',
+                          );
+                    }
                   },
                 )),
           )
