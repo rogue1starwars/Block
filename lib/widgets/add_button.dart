@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:phoneduino_block/data/block_data.dart';
+import 'package:phoneduino_block/data/block_data_core.dart';
 import 'package:phoneduino_block/models/block.dart';
 import 'package:phoneduino_block/provider/block_tree_provider.dart';
 import 'package:phoneduino_block/provider/ui_provider.dart';
-import 'package:phoneduino_block/utils/fildter.dart';
+import 'package:phoneduino_block/utils/filter.dart';
+import 'package:phoneduino_block/utils/type.dart';
 import 'package:uuid/uuid.dart';
 
 class AddButton extends ConsumerStatefulWidget {
@@ -33,7 +34,18 @@ class _AddButtonState extends ConsumerState<AddButton> {
             builder: (context, candidateData, rejectedData) => Padding(
               padding: const EdgeInsets.all(8.0),
               child: GestureDetector(
-                onTap: () => _dialogBuilder(context),
+                onTap: () {
+                  showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return BlockListDialog(
+                          filter:
+                              widget.parentBlock.children[widget.index].filter,
+                          parentId: widget.parentBlock.id,
+                          index: widget.index,
+                        );
+                      });
+                },
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
                   height: 60,
@@ -86,38 +98,68 @@ class _AddButtonState extends ConsumerState<AddButton> {
       ),
     );
   }
+}
 
-  Future<void> _dialogBuilder(BuildContext context) {
-    final filter = widget.parentBlock.children[widget.index].filter;
+class BlockListDialog extends ConsumerStatefulWidget {
+  final List<BlockTypes>? filter;
+  final String parentId;
+  final int index;
+  const BlockListDialog({
+    super.key,
+    required this.filter,
+    required this.parentId,
+    required this.index,
+  });
 
-    return showDialog<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text("Add a new block"),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                for (BlockBluePrint block in filterBlockData(filter, blockData))
-                  ListTile(
-                    title: Text(block.name),
-                    onTap: () {
-                      var uuid = const Uuid();
-                      final String newId = uuid.v4();
-                      ref.read(blockTreeProvider.notifier).addBlock(
-                            parentId: widget.parentBlock.id,
-                            value: Block.fromBluePrint(block: block, id: newId),
-                            index: widget.index,
-                          );
-                      Navigator.of(context).pop();
-                    },
+  @override
+  ConsumerState<BlockListDialog> createState() => _BlockListDialogState();
+}
+
+class _BlockListDialogState extends ConsumerState<BlockListDialog> {
+  String _category = blockData.keys.elementAt(1);
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Block List'),
+      content: SingleChildScrollView(
+        child: Column(
+          children: [
+            DropdownMenu(
+              initialSelection: _category,
+              dropdownMenuEntries: [
+                for (String category in blockData.keys)
+                  DropdownMenuEntry(
+                    value: category,
+                    label: category,
                   ),
               ],
+              onSelected: (String? value) {
+                if (value != null) {
+                  setState(() {
+                    _category = value;
+                  });
+                }
+              },
             ),
-          ),
-        );
-      },
+            for (BlockBluePrint block in filterBlockData(
+              widget.filter,
+              blockData[_category] ?? blockData[blockData.keys.elementAt(1)]!,
+            ))
+              ListTile(
+                title: Text(block.name),
+                onTap: () {
+                  final String newId = const Uuid().v4();
+                  ref.read(blockTreeProvider.notifier).addBlock(
+                        parentId: widget.parentId,
+                        value: Block.fromBluePrint(block: block, id: newId),
+                        index: widget.index,
+                      );
+                  Navigator.of(context).pop();
+                },
+              ),
+          ],
+        ),
+      ),
     );
   }
 }

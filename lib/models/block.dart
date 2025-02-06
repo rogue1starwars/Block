@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:phoneduino_block/data/block_data.dart';
+import 'package:phoneduino_block/data/block_data_core.dart';
 import 'package:phoneduino_block/models/fields.dart';
 import 'package:phoneduino_block/models/inputs.dart';
 import 'package:phoneduino_block/provider/block_tree_provider.dart';
@@ -25,7 +25,7 @@ class Block {
   });
 
   factory Block.fromJson(Map<String, dynamic> json) {
-    for (final block in blockData) {
+    for (final block in blockData.values.expand((blocks) => blocks)) {
       if (block.name == json['name']) {
         final Block root = Block(
           id: json['id'],

@@ -80,6 +80,8 @@ class _BlockTreeState extends ConsumerState<BlockTree> {
         return NumericFieldWidget(parent: parent, index: index);
       case FieldTypes.variableNames:
         return VariableNamesFieldWidget(parent: parent, index: index);
+      case FieldTypes.dropdown:
+        return DropdownFieldWidget(parent: parent, index: index);
       default:
         return const SizedBox.shrink();
     }

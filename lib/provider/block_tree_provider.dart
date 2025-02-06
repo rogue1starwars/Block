@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:phoneduino_block/data/block_data.dart';
+import 'package:phoneduino_block/data/block_data_core.dart';
 import 'package:phoneduino_block/models/block.dart';
 import 'package:phoneduino_block/models/fields.dart';
 import 'package:phoneduino_block/models/inputs.dart';
@@ -8,7 +8,7 @@ import 'package:phoneduino_block/utils/type.dart';
 class BlockTreeNotifier extends StateNotifier<Block> {
   BlockTreeNotifier()
       : super(Block.fromBluePrint(
-          block: blockData[0],
+          block: blockData['Main']![0],
           id: '0',
         ));
 

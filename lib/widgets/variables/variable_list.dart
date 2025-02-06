@@ -12,19 +12,23 @@ class VariableListDialog extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final Map<String, Variable> variables = ref.watch(variablesProvider);
     return AlertDialog(
-        title: const Text('Variable List'),
-        content: SingleChildScrollView(
-            child: Column(children: [
-          const AddVariableButton(),
-          for (final key in variables.keys)
-            variables.containsKey(key)
-                ? ListTile(
-                    title: Text(variables[key]!.name,
-                        style: const TextStyle(fontSize: 20)),
-                    subtitle: Text(variables[key]!.type.name),
-                    trailing: ModifyVariables(name: key),
-                  )
-                : const SizedBox()
-        ])));
+      title: const Text('Variable List'),
+      content: SingleChildScrollView(
+        child: Column(
+          children: [
+            const AddVariableButton(),
+            for (final key in variables.keys)
+              variables.containsKey(key)
+                  ? ListTile(
+                      title: Text(variables[key]!.name,
+                          style: const TextStyle(fontSize: 20)),
+                      subtitle: Text(variables[key]!.type.name),
+                      trailing: ModifyVariables(name: key),
+                    )
+                  : const SizedBox()
+          ],
+        ),
+      ),
+    );
   }
 }
