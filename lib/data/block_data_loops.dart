@@ -11,7 +11,7 @@ import 'package:phoneduino_block/utils/type.dart';
 
 List<BlockBluePrint> blockDataLoops = [
   BlockBluePrint(
-    name: 'For Loop',
+    name: 'Repeat',
     fields: [
       Field(
         type: FieldTypes.number,
@@ -34,6 +34,40 @@ List<BlockBluePrint> blockDataLoops = [
           block.execute(ref);
         }
       }
+    },
+  ),
+  BlockBluePrint(
+    name: 'Repeat While',
+    fields: [],
+    children: [
+      ValueInput(
+        label: 'Condition',
+        block: null,
+        filter: [BlockTypes.boolean],
+      ),
+      StatementInput(
+        label: 'Do',
+        blocks: [],
+      ),
+    ],
+    returnType: BlockTypes.none,
+    originalFunc: (WidgetRef ref, Block block) {
+      final condition = block.children[0] as ValueInput;
+      final statement = block.children[1] as StatementInput;
+      while (condition.block!.execute(ref)) {
+        for (var block in statement.blocks) {
+          block.execute(ref);
+        }
+      }
+    },
+  ),
+  BlockBluePrint(
+    name: 'Force Stop',
+    fields: [],
+    children: [],
+    returnType: BlockTypes.none,
+    originalFunc: (WidgetRef ref, Block block) {
+      ref.watch(intervalProvider.notifier).clearInterval();
     },
   ),
   BlockBluePrint(
