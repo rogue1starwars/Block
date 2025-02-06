@@ -12,7 +12,7 @@ List<BlockBluePrint> blockDataLogic = [
       Field(
         type: FieldTypes.dropdown,
         label: 'Operator',
-        value: '==',
+        value: 0,
         options: [
           '==',
           '!=',
@@ -35,7 +35,7 @@ List<BlockBluePrint> blockDataLogic = [
     ],
     returnType: BlockTypes.boolean,
     originalFunc: (WidgetRef ref, Block block) {
-      final operator = block.fields[0].value;
+      final int operator = block.fields[0].value;
       final value1 = block.children[0] as ValueInput;
       final value2 = block.children[1] as ValueInput;
 
@@ -43,17 +43,17 @@ List<BlockBluePrint> blockDataLogic = [
       final v2 = value2.block!.execute(ref);
 
       switch (operator) {
-        case '==':
+        case 0:
           return v1 == v2;
-        case '!=':
+        case 1:
           return v1 != v2;
-        case '>':
+        case 2:
           return v1 > v2;
-        case '>=':
+        case 3:
           return v1 >= v2;
-        case '<':
+        case 4:
           return v1 < v2;
-        case '<=':
+        case 5:
           return v1 <= v2;
         default:
           throw 'Invalid operator';

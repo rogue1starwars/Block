@@ -180,22 +180,22 @@ class DropdownFieldWidget extends ConsumerStatefulWidget {
 class _DropdownFieldWidgetState extends ConsumerState<DropdownFieldWidget> {
   @override
   Widget build(BuildContext context) {
-    final List<String> options = widget.parent.fields[widget.index].options;
-    String _selectedOption = widget.parent.fields[widget.index].value as String;
+    final List<dynamic> options = widget.parent.fields[widget.index].options;
+    int selectedOption = widget.parent.fields[widget.index].value as int;
     return DropdownMenu(
       dropdownMenuEntries: [
-        for (String option in options)
+        for (final option in options)
           DropdownMenuEntry(
             value: option,
-            label: option,
+            label: option.toString(),
           ),
       ],
-      initialSelection: _selectedOption,
-      onSelected: (String? value) {
+      initialSelection: options[selectedOption],
+      onSelected: (dynamic value) {
         if (value != null) {
           ref.read(blockTreeProvider.notifier).updateField(
                 parentId: widget.parent.id,
-                value: value,
+                value: options.indexOf(value),
                 index: widget.index,
               );
         }
