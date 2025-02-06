@@ -27,10 +27,20 @@ List<BlockBluePrint> blockDataLogic = [
       ValueInput(
         label: 'Value 1',
         block: null,
+        filter: [
+          BlockTypes.number,
+          BlockTypes.string,
+          BlockTypes.boolean,
+        ],
       ),
       ValueInput(
         label: 'Value 2',
         block: null,
+        filter: [
+          BlockTypes.number,
+          BlockTypes.string,
+          BlockTypes.boolean,
+        ],
       ),
     ],
     returnType: BlockTypes.boolean,
@@ -57,6 +67,47 @@ List<BlockBluePrint> blockDataLogic = [
           return v1 <= v2;
         default:
           throw 'Invalid operator';
+      }
+    },
+  ),
+  BlockBluePrint(
+    name: 'And/Or',
+    fields: [
+      Field(
+        type: FieldTypes.dropdown,
+        label: 'Operator',
+        value: 0,
+        options: [
+          'And',
+          'Or',
+        ],
+      ),
+    ],
+    children: [
+      ValueInput(
+        label: 'Value 1',
+        block: null,
+        filter: [BlockTypes.boolean],
+      ),
+      ValueInput(
+        label: 'Value 2',
+        block: null,
+        filter: [BlockTypes.boolean],
+      ),
+    ],
+    returnType: BlockTypes.boolean,
+    originalFunc: (WidgetRef ref, Block block) {
+      final int operator = block.fields[0].value;
+      final value1 = block.children[0] as ValueInput;
+      final value2 = block.children[1] as ValueInput;
+
+      final v1 = value1.block!.execute(ref);
+      final v2 = value2.block!.execute(ref);
+
+      if (operator == 0) {
+        return v1 == true && v2 == true;
+      } else {
+        return v1 == true || v2 == true;
       }
     },
   ),
