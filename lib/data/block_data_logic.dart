@@ -112,6 +112,37 @@ List<BlockBluePrint> blockDataLogic = [
     },
   ),
   BlockBluePrint(
+    name: 'Not',
+    fields: [],
+    children: [
+      ValueInput(
+        label: 'Value',
+        block: null,
+        filter: [BlockTypes.boolean],
+      ),
+    ],
+    returnType: BlockTypes.boolean,
+    originalFunc: (WidgetRef ref, Block block) {
+      final value = block.children[0] as ValueInput;
+      return value.block!.execute(ref) == false;
+    },
+  ),
+  BlockBluePrint(
+    name: 'True/False',
+    fields: [
+      Field(
+          label: 'Value',
+          type: FieldTypes.dropdown,
+          value: 0,
+          options: ['True', 'False'])
+    ],
+    children: [],
+    returnType: BlockTypes.boolean,
+    originalFunc: (WidgetRef ref, Block block) {
+      return block.fields[0].value == 0;
+    },
+  ),
+  BlockBluePrint(
     name: 'If',
     fields: [],
     children: [
