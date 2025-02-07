@@ -14,6 +14,7 @@ class Block {
   final List<Input> children;
   final BlockTypes returnType;
   final Function(WidgetRef, Block) originalFunc;
+  final bool isClosed;
 
   Block({
     required this.id,
@@ -22,6 +23,7 @@ class Block {
     required this.originalFunc,
     required this.fields,
     required this.children,
+    this.isClosed = false,
   });
 
   factory Block.fromJson(Map<String, dynamic> json) {
@@ -101,7 +103,8 @@ class Block {
         returnType = block.returnType,
         originalFunc = block.originalFunc,
         fields = block.fields,
-        children = block.children;
+        children = block.children,
+        isClosed = false;
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> json = {
@@ -176,6 +179,7 @@ class Block {
     List<Input>? children,
     BlockTypes? returnType,
     Function(WidgetRef, Block)? originalFunc,
+    bool triggerClose = false,
   }) {
     return Block(
       id: id ?? this.id,
@@ -184,6 +188,7 @@ class Block {
       children: children ?? this.children,
       returnType: returnType ?? this.returnType,
       originalFunc: originalFunc ?? this.originalFunc,
+      isClosed: triggerClose ? !isClosed : isClosed,
     );
   }
 }

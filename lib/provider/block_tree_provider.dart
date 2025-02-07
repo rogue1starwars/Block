@@ -16,6 +16,34 @@ class BlockTreeNotifier extends StateNotifier<Block> {
     state = value;
   }
 
+  void trigger(String id) {
+    Block? _triggerHelper({
+      required Block parent,
+      required String parentId,
+      required dynamic value,
+      required int index,
+    }) {
+      if (parent.id == id) {
+        return parent.copyWith(triggerClose: true);
+      }
+      return recursive(
+        callback: _triggerHelper,
+        parent: parent,
+        parentId: id,
+        value: null,
+        index: 0,
+      );
+    }
+
+    state = _triggerHelper(
+          parent: state,
+          parentId: id,
+          value: null,
+          index: 0,
+        ) ??
+        state;
+  }
+
   void removeVariable({
     required String name,
   }) {
@@ -269,6 +297,7 @@ class BlockTreeNotifier extends StateNotifier<Block> {
     required dynamic value,
     required int index,
   }) {
+    if (parent.children.isEmpty) return null;
     for (int i = 0; i < parent.children.length; i++) {
       switch (parent.children[i]) {
         case ValueInput input:
