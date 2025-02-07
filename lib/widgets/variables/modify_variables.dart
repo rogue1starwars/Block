@@ -20,6 +20,7 @@ class _ModifyVariablesState extends ConsumerState<ModifyVariables> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Modify Variable: ${widget.name}'),
+          backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [

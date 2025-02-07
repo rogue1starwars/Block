@@ -126,7 +126,7 @@ class HomePage extends ConsumerWidget {
                     showDialog(
                         context: context,
                         builder: (BuildContext context) {
-                          return VariableListDialog();
+                          return const VariableListDialog();
                         });
                   })
             ],

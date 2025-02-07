@@ -12,6 +12,7 @@ class VariableListDialog extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final Map<String, Variable> variables = ref.watch(variablesProvider);
     return AlertDialog(
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
       title: const Text('Variable List'),
       content: SingleChildScrollView(
         child: Column(

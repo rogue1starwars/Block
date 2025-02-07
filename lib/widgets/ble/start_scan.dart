@@ -75,6 +75,8 @@ class _StartScanState extends ConsumerState<StartScan> {
           initialData: const [],
           builder: (context, snapshot) {
             return SimpleDialog(
+              backgroundColor:
+                  Theme.of(context).colorScheme.surfaceContainerHigh,
               title: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [

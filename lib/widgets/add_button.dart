@@ -47,25 +47,31 @@ class _AddButtonState extends ConsumerState<AddButton> {
                       });
                 },
                 child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  height: 60,
-                  width: constraints.maxWidth,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
+                    duration: const Duration(milliseconds: 200),
+                    height: 60,
+                    width: constraints.maxWidth,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: _isHovering
+                            ? Theme.of(context).colorScheme.primary
+                            : Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withOpacity(0.1),
+                        width: 2,
+                      ),
                       color: _isHovering
-                          ? Colors.blue
-                          : Colors.black.withOpacity(0.1),
-                      width: 2,
+                          ? Theme.of(context)
+                              .colorScheme
+                              .primary
+                              .withOpacity(0.3)
+                          : Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withOpacity(0.1),
                     ),
-                    color: _isHovering
-                        ? Colors.blue.withOpacity(0.3)
-                        : Colors.black.withOpacity(0.05),
-                  ),
-                  child: const Center(
-                    child: Icon(Icons.add),
-                  ),
-                ),
+                    child: const Center(child: Icon(Icons.add))),
               ),
             ),
             onMove: (_) => setState(() => _isHovering = true),
@@ -121,6 +127,7 @@ class _BlockListDialogState extends ConsumerState<BlockListDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: const Text('Block List'),
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
       content: SingleChildScrollView(
         child: Column(
           children: [
