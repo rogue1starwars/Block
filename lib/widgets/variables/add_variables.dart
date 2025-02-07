@@ -40,6 +40,7 @@ class _AddVariableButtonState extends ConsumerState<AddVariableButton> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Add Variable'),
+          backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [

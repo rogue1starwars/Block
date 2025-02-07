@@ -22,6 +22,9 @@ class Variable {
   }
 
   Map<String, dynamic> toJson() {
+    if (value is! num && value is! String && value is! bool) {
+      return {};
+    }
     return {
       'value': value,
       'type': type.name,

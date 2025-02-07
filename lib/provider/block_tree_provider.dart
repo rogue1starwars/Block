@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:phoneduino_block/data/block_data.dart';
+import 'package:phoneduino_block/data/block_data_core.dart';
 import 'package:phoneduino_block/models/block.dart';
 import 'package:phoneduino_block/models/fields.dart';
 import 'package:phoneduino_block/models/inputs.dart';
@@ -8,12 +8,40 @@ import 'package:phoneduino_block/utils/type.dart';
 class BlockTreeNotifier extends StateNotifier<Block> {
   BlockTreeNotifier()
       : super(Block.fromBluePrint(
-          block: blockData[0],
+          block: blockData['Main']![0],
           id: '0',
         ));
 
   void updateRoot(Block value) {
     state = value;
+  }
+
+  void trigger(String id) {
+    Block? _triggerHelper({
+      required Block parent,
+      required String parentId,
+      required dynamic value,
+      required int index,
+    }) {
+      if (parent.id == id) {
+        return parent.copyWith(triggerClose: true);
+      }
+      return recursive(
+        callback: _triggerHelper,
+        parent: parent,
+        parentId: id,
+        value: null,
+        index: 0,
+      );
+    }
+
+    state = _triggerHelper(
+          parent: state,
+          parentId: id,
+          value: null,
+          index: 0,
+        ) ??
+        state;
   }
 
   void removeVariable({
@@ -269,6 +297,7 @@ class BlockTreeNotifier extends StateNotifier<Block> {
     required dynamic value,
     required int index,
   }) {
+    if (parent.children.isEmpty) return null;
     for (int i = 0; i < parent.children.length; i++) {
       switch (parent.children[i]) {
         case ValueInput input:
@@ -471,26 +500,26 @@ class BlockTreeNotifier extends StateNotifier<Block> {
       required Block value,
       required int index,
     }) {
-      if (parent.children.length <= index) return null;
-
-      if (parent.id == parentId) {
-        print("Adding block");
-        final newChildren = createNewChildren(
-          parent: parent,
-          value: value,
-          index: index,
-        );
-        if (newChildren.isEmpty) return null;
-        return parent.copyWith(children: newChildren);
-      } else {
-        return recursive(
-          callback: addBlockHelper,
-          parent: parent,
-          parentId: parentId,
-          value: value,
-          index: index,
-        );
+      if (parent.children.length > index) {
+        if (parent.id == parentId) {
+          print("Adding block");
+          final newChildren = createNewChildren(
+            parent: parent,
+            value: value,
+            index: index,
+          );
+          if (newChildren.isEmpty) return null;
+          return parent.copyWith(children: newChildren);
+        }
       }
+
+      return recursive(
+        callback: addBlockHelper,
+        parent: parent,
+        parentId: parentId,
+        value: value,
+        index: index,
+      );
     }
 
     final newBlock = addBlockHelper(

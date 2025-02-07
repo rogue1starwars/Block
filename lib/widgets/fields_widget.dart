@@ -162,3 +162,44 @@ class _VariableFieldWidgetState
             .toList());
   }
 }
+
+class DropdownFieldWidget extends ConsumerStatefulWidget {
+  final Block parent;
+  final int index;
+  const DropdownFieldWidget({
+    super.key,
+    required this.parent,
+    required this.index,
+  });
+
+  @override
+  ConsumerState<DropdownFieldWidget> createState() =>
+      _DropdownFieldWidgetState();
+}
+
+class _DropdownFieldWidgetState extends ConsumerState<DropdownFieldWidget> {
+  @override
+  Widget build(BuildContext context) {
+    final List<dynamic> options = widget.parent.fields[widget.index].options;
+    int selectedOption = widget.parent.fields[widget.index].value as int;
+    return DropdownMenu(
+      dropdownMenuEntries: [
+        for (final option in options)
+          DropdownMenuEntry(
+            value: option,
+            label: option.toString(),
+          ),
+      ],
+      initialSelection: options[selectedOption],
+      onSelected: (dynamic value) {
+        if (value != null) {
+          ref.read(blockTreeProvider.notifier).updateField(
+                parentId: widget.parent.id,
+                value: options.indexOf(value),
+                index: widget.index,
+              );
+        }
+      },
+    );
+  }
+}

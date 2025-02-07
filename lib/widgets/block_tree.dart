@@ -22,11 +22,15 @@ class BlockTree extends ConsumerStatefulWidget {
 
 class _BlockTreeState extends ConsumerState<BlockTree> {
   bool _isHovering = false;
+  @override
+  void initState() {
+    super.initState();
+  }
 
   Widget _handleInputs({
-    required Block parent,
     required int index,
   }) {
+    final Block parent = widget.block;
     final Input input = parent.children[index];
     switch (input) {
       case ValueInput _:
@@ -37,8 +41,7 @@ class _BlockTreeState extends ConsumerState<BlockTree> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 5, horizontal: 20),
+                padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 0),
                 child: Text(input.label,
                     style: const TextStyle(fontWeight: FontWeight.bold)),
               ),
@@ -56,13 +59,17 @@ class _BlockTreeState extends ConsumerState<BlockTree> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                child: Text(input.label,
-                    style: const TextStyle(fontWeight: FontWeight.bold)),
+                padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 0),
+                child: Row(
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    Text(input.label,
+                        style: const TextStyle(fontWeight: FontWeight.bold)),
+                  ],
+                ),
               ),
               for (var block in input.blocks) BlockTree(block: block),
-              AddButton(parentBlock: parent, index: index),
+              AddButton(parentBlock: parent, index: index)
             ],
           ),
         );
@@ -71,7 +78,8 @@ class _BlockTreeState extends ConsumerState<BlockTree> {
     }
   }
 
-  Widget _handleFields({required Block parent, required int index}) {
+  Widget _handleFields({required int index}) {
+    final Block parent = widget.block;
     final Field field = parent.fields[index];
     switch (field.type) {
       case FieldTypes.string:
@@ -80,41 +88,84 @@ class _BlockTreeState extends ConsumerState<BlockTree> {
         return NumericFieldWidget(parent: parent, index: index);
       case FieldTypes.variableNames:
         return VariableNamesFieldWidget(parent: parent, index: index);
+      case FieldTypes.dropdown:
+        return DropdownFieldWidget(parent: parent, index: index);
       default:
         return const SizedBox.shrink();
     }
   }
 
-  Widget _block() => Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Card(
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(widget.block.name),
-                        DeleteButton(id: widget.block.id),
-                      ],
-                    ),
-                    for (int i = 0; i < widget.block.fields.length; i++)
-                      _handleFields(parent: widget.block, index: i),
-                  ],
+  Widget toggleButton() {
+    return IconButton(
+      onPressed: () {
+        setState(() {
+          ref.read(blockTreeProvider.notifier).trigger(widget.block.id);
+        });
+      },
+      icon: Icon(
+        widget.block.isClosed
+            ? Icons.keyboard_arrow_right_rounded
+            : Icons.keyboard_arrow_down_rounded,
+      ),
+    );
+  }
+
+  Widget _block() => widget.block.isClosed
+      ? _blockSimple()
+      : Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Card(
+                color: Theme.of(context).colorScheme.surfaceContainerHigh,
+                // shadowColor: Theme.of(context).colorScheme.primary,
+                borderOnForeground: true,
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          toggleButton(),
+                          Text(widget.block.name),
+                          DeleteButton(id: widget.block.id),
+                        ],
+                      ),
+                      for (int i = 0; i < widget.block.fields.length; i++)
+                        _handleFields(index: i),
+                    ],
+                  ),
                 ),
               ),
             ),
+            for (int i = 0; i < widget.block.children.length; i++)
+              _handleInputs(index: i),
+          ],
+        );
+
+  Widget _blockSimple() => Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Card(
+          color: Theme.of(context).colorScheme.surfaceContainerHigh,
+          // shadowColor: Theme.of(context).colorScheme.primary,
+          borderOnForeground: true,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                toggleButton(),
+                Text(widget.block.name),
+                DeleteButton(id: widget.block.id),
+              ],
+            ),
           ),
-          for (int i = 0; i < widget.block.children.length; i++)
-            _handleInputs(parent: widget.block, index: i),
-        ],
+        ),
       );
 
   @override
@@ -131,16 +182,21 @@ class _BlockTreeState extends ConsumerState<BlockTree> {
             data: widget.block.id,
             dragAnchorStrategy: pointerDragAnchorStrategy,
             hitTestBehavior: HitTestBehavior.translucent,
-            feedback: Material(
-              color: Colors.transparent,
-              child: SizedBox(
-                width: constraints.maxWidth,
-                child: Text(
-                  widget.block.name,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    height: -5,
+            feedback: SizedBox(
+              width: 300,
+              child: Card(
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                shadowColor: Theme.of(context).colorScheme.primary,
+                elevation: 7,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0, vertical: 8.0),
+                  child: Text(
+                    widget.block.name,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
@@ -169,11 +225,16 @@ class _BlockTreeState extends ConsumerState<BlockTree> {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
-                          color: _isHovering ? Colors.blue : Colors.transparent,
+                          color: _isHovering
+                              ? Theme.of(context).colorScheme.primary
+                              : Colors.transparent,
                           width: 2,
                         ),
                         color: _isHovering
-                            ? Colors.blue.withOpacity(0.3)
+                            ? Theme.of(context)
+                                .colorScheme
+                                .primary
+                                .withOpacity(0.3)
                             : Colors.transparent,
                       ),
                     );
