@@ -13,7 +13,6 @@ import 'package:phoneduino_block/screens/logger_screen.dart';
 import 'package:phoneduino_block/widgets/ble/ble_home.dart';
 import 'package:phoneduino_block/widgets/block_tree.dart';
 import 'package:phoneduino_block/widgets/print_board.dart';
-import 'package:phoneduino_block/widgets/variables/add_variables.dart';
 import 'package:phoneduino_block/widgets/variables/variable_list.dart';
 
 class HomePage extends ConsumerWidget {
@@ -42,7 +41,18 @@ class HomePage extends ConsumerWidget {
       }
     });
     return Scaffold(
-      appBar: AppBar(title: const Text('PhoneDuino Block'), actions: [
+      appBar: AppBar(title: const Text('Block'), actions: [
+        const BleHome(),
+        IconButton(
+          onPressed: () {
+            showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return const VariableListDialog();
+                });
+          },
+          icon: const Icon(Icons.edit),
+        ),
         IconButton(
             onPressed: () async {
               Navigator.push(context, MaterialPageRoute(builder: (context) {
@@ -100,46 +110,24 @@ class HomePage extends ConsumerWidget {
           },
           icon: const Icon(Icons.restore),
         ),
-        IconButton(
-          onPressed: () {
-            root.execute(ref);
-          },
-          icon: const Icon(Icons.play_arrow),
-        ),
-        IconButton(
-          onPressed: () {
+      ]),
+      body: intervals.intervals.isNotEmpty
+          ? const PrintBoard()
+          : SingleChildScrollView(
+              child: BlockTree(block: root),
+            ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          if (intervals.intervals.isNotEmpty) {
             ref.read(intervalProvider.notifier).clearInterval();
             ref.read(uiProvider.notifier).clearMessage();
-          },
-          icon: const Icon(Icons.stop),
-        ),
-      ]),
-      body: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              const BleHome(),
-              const AddVariableButton(),
-              TextButton(
-                  child: Text("Variables"),
-                  onPressed: () {
-                    showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return const VariableListDialog();
-                        });
-                  })
-            ],
-          ),
-          Expanded(
-            child: intervals.intervals.isNotEmpty
-                ? const PrintBoard()
-                : SingleChildScrollView(
-                    child: BlockTree(block: root),
-                  ),
-          ),
-        ],
+          } else {
+            root.execute(ref);
+          }
+        },
+        child: intervals.intervals.isNotEmpty
+            ? const Icon(Icons.stop)
+            : const Icon(Icons.play_arrow),
       ),
     );
   }
