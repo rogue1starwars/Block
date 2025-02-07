@@ -63,6 +63,7 @@ class HomePage extends ConsumerWidget {
                   variables.map((key, value) {
                 return MapEntry(key, value.toJson());
               });
+              variablesJson.removeWhere((key, value) => value.isEmpty);
               box.put('variables', jsonEncode(variablesJson));
             } catch (e) {
               ref

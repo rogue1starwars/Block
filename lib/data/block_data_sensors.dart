@@ -4,6 +4,7 @@ import 'package:flutter_compass/flutter_compass.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:phoneduino_block/models/block.dart';
+import 'package:phoneduino_block/models/fields.dart';
 import 'package:phoneduino_block/models/inputs.dart';
 import 'package:phoneduino_block/provider/ui_provider.dart';
 import 'package:phoneduino_block/provider/variables_provider.dart';
@@ -388,12 +389,73 @@ final List<BlockBluePrint> blockDataSensors = [
       }
 
       final double bearing = Geolocator.bearingBetween(
-        lat1.block!.execute(ref),
-        long1.block!.execute(ref),
-        lat2.block!.execute(ref),
-        long2.block!.execute(ref),
+        lat1.block!.execute(ref).toDouble(),
+        long1.block!.execute(ref).toDouble(),
+        lat2.block!.execute(ref).toDouble(),
+        long2.block!.execute(ref).toDouble(),
       );
       return bearing;
     },
   ),
+  BlockBluePrint(
+    name: 'Calculate and Create Signal',
+    fields: [
+      Field(label: 'Dest Lon', type: FieldTypes.number, value: 0),
+      Field(label: 'Dest Lat', type: FieldTypes.number, value: 0),
+      Field(label: 'Orientation error', type: FieldTypes.number, value: 0),
+      Field(label: 'Threshold', type: FieldTypes.number, value: 20),
+    ],
+    children: [],
+    returnType: BlockTypes.number,
+    originalFunc: (WidgetRef ref, Block block) {
+      final destLon = block.fields[0].value;
+      final destLat = block.fields[1].value;
+      final orientationError = block.fields[2].value;
+      final threshold = block.fields[3].value;
+
+      if (destLon == null ||
+          destLat == null ||
+          threshold == null ||
+          orientationError == null) {
+        ref.read(uiProvider.notifier).showMessage(
+              'Invalid input',
+            );
+        return null;
+      }
+
+      final currentLon =
+          ref.read(variablesProvider.notifier).getVariable('_long') as num?;
+      final currentLat =
+          ref.read(variablesProvider.notifier).getVariable('_lat') as num?;
+
+      if (currentLon == null || currentLat == null) {
+        ref.read(uiProvider.notifier).showMessage(
+              'Invalid input',
+            );
+        return null;
+      }
+
+      final orientation = ref
+              .read(variablesProvider.notifier)
+              .getVariable('_orientation') as double? ??
+          0;
+
+      final orientationCalibrated = (orientation - orientationError) % 360;
+
+      final bearing = Geolocator.bearingBetween(
+        currentLon.toDouble(),
+        currentLat.toDouble(),
+        destLon.toDouble(),
+        destLat.toDouble(),
+      );
+
+      if ((orientationCalibrated - bearing).abs() < threshold) {
+        return 0;
+      } else if ((bearing - orientationCalibrated) < 0) {
+        return -1;
+      } else {
+        return 1;
+      }
+    },
+  )
 ];

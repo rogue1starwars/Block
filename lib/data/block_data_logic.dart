@@ -205,5 +205,61 @@ List<BlockBluePrint> blockDataLogic = [
         });
       }
     },
-  )
+  ),
+  BlockBluePrint(
+    name: 'Switch (3)',
+    fields: [
+      Field(
+        label: 'Threshold',
+        value: 20,
+        type: FieldTypes.number,
+      ),
+    ],
+    children: [
+      ValueInput(
+        label: 'Condition',
+        block: null,
+        filter: [BlockTypes.number],
+      ),
+      StatementInput(
+        label: 'Bigger...',
+        blocks: [],
+        filter: [],
+      ),
+      StatementInput(
+        label: 'Approximately Equal...',
+        blocks: [],
+        filter: [],
+      ),
+      StatementInput(
+        label: 'Smaller...',
+        blocks: [],
+        filter: [],
+      ),
+    ],
+    returnType: BlockTypes.none,
+    originalFunc: (WidgetRef ref, Block block) {
+      final threshold = block.fields[0].value;
+      final condition = block.children[0] as ValueInput;
+      final bigger = block.children[1] as StatementInput;
+      final approximatelyEqual = block.children[2] as StatementInput;
+      final smaller = block.children[3] as StatementInput;
+
+      final value = condition.block!.execute(ref) as num;
+
+      if (value.abs() < threshold) {
+        approximatelyEqual.blocks.forEach((block) {
+          block.execute(ref);
+        });
+      } else if (value < 0) {
+        smaller.blocks.forEach((block) {
+          block.execute(ref);
+        });
+      } else {
+        bigger.blocks.forEach((block) {
+          block.execute(ref);
+        });
+      }
+    },
+  ),
 ];

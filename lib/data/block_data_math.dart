@@ -29,55 +29,72 @@ final List<BlockBluePrint> blockDataMath = [
     },
   ),
   BlockBluePrint(
-      name: 'Operations',
-      fields: [
-        Field(
-          type: FieldTypes.dropdown,
-          label: 'Operator',
-          value: 0,
-          options: [
-            '+',
-            '-',
-            '*',
-            '/',
-            '%',
-          ],
-        ),
-      ],
-      children: [
-        ValueInput(
-          label: 'Value 1',
-          block: null,
-          filter: [BlockTypes.number],
-        ),
-        ValueInput(
-          label: 'Value 2',
-          block: null,
-          filter: [BlockTypes.number],
-        ),
-      ],
-      returnType: BlockTypes.number,
-      originalFunc: (WidgetRef ref, Block block) {
-        final operator = block.fields[0].value;
-        final value1 = block.children[0] as ValueInput;
-        final value2 = block.children[1] as ValueInput;
+    name: 'Operations',
+    fields: [
+      Field(
+        type: FieldTypes.dropdown,
+        label: 'Operator',
+        value: 0,
+        options: [
+          '+',
+          '-',
+          '*',
+          '/',
+          '%',
+        ],
+      ),
+    ],
+    children: [
+      ValueInput(
+        label: 'Value 1',
+        block: null,
+        filter: [BlockTypes.number],
+      ),
+      ValueInput(
+        label: 'Value 2',
+        block: null,
+        filter: [BlockTypes.number],
+      ),
+    ],
+    returnType: BlockTypes.number,
+    originalFunc: (WidgetRef ref, Block block) {
+      final operator = block.fields[0].value;
+      final value1 = block.children[0] as ValueInput;
+      final value2 = block.children[1] as ValueInput;
 
-        final v1 = value1.block!.execute(ref);
-        final v2 = value2.block!.execute(ref);
+      final v1 = value1.block!.execute(ref);
+      final v2 = value2.block!.execute(ref);
 
-        switch (operator) {
-          case 0:
-            return v1 + v2;
-          case 1:
-            return v1 - v2;
-          case 2:
-            return v1 * v2;
-          case 3:
-            return v1 / v2;
-          case 4:
-            return v1 % v2;
-          default:
-            throw 'Invalid operator';
-        }
-      })
+      switch (operator) {
+        case 0:
+          return v1 + v2;
+        case 1:
+          return v1 - v2;
+        case 2:
+          return v1 * v2;
+        case 3:
+          return v1 / v2;
+        case 4:
+          return v1 % v2;
+        default:
+          throw 'Invalid operator';
+      }
+    },
+  ),
+  BlockBluePrint(
+    name: 'Abs',
+    fields: [],
+    children: [
+      ValueInput(
+        label: 'Value',
+        block: null,
+        filter: [BlockTypes.number],
+      ),
+    ],
+    returnType: BlockTypes.number,
+    originalFunc: (WidgetRef ref, Block block) {
+      final value = block.children[0] as ValueInput;
+      return (value.block!.execute(ref) as num).abs();
+    },
+  )
 ];
