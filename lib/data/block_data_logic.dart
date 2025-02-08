@@ -163,9 +163,9 @@ List<BlockBluePrint> blockDataLogic = [
       final thenBlock = block.children[1] as StatementInput;
 
       if (condition.block!.execute(ref) == true) {
-        thenBlock.blocks.forEach((block) {
+        for (var block in thenBlock.blocks) {
           block.execute(ref);
-        });
+        }
       }
     },
   ),
@@ -196,13 +196,13 @@ List<BlockBluePrint> blockDataLogic = [
       final elseBlock = block.children[2] as StatementInput;
 
       if (condition.block!.execute(ref) == true) {
-        thenBlock.blocks.forEach((block) {
+        for (var block in thenBlock.blocks) {
           block.execute(ref);
-        });
+        }
       } else {
-        elseBlock.blocks.forEach((block) {
+        for (var block in elseBlock.blocks) {
           block.execute(ref);
-        });
+        }
       }
     },
   ),
@@ -248,17 +248,17 @@ List<BlockBluePrint> blockDataLogic = [
       final value = condition.block!.execute(ref) as num;
 
       if (value.abs() < threshold) {
-        approximatelyEqual.blocks.forEach((block) {
+        for (var block in approximatelyEqual.blocks) {
           block.execute(ref);
-        });
+        }
       } else if (value < 0) {
-        smaller.blocks.forEach((block) {
+        for (var block in smaller.blocks) {
           block.execute(ref);
-        });
+        }
       } else {
-        bigger.blocks.forEach((block) {
+        for (var block in bigger.blocks) {
           block.execute(ref);
-        });
+        }
       }
     },
   ),

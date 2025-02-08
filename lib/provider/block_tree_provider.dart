@@ -17,7 +17,7 @@ class BlockTreeNotifier extends StateNotifier<Block> {
   }
 
   void trigger(String id) {
-    Block? _triggerHelper({
+    Block? triggerHelper({
       required Block parent,
       required String parentId,
       required dynamic value,
@@ -27,7 +27,7 @@ class BlockTreeNotifier extends StateNotifier<Block> {
         return parent.copyWith(triggerClose: true);
       }
       return recursive(
-        callback: _triggerHelper,
+        callback: triggerHelper,
         parent: parent,
         parentId: id,
         value: null,
@@ -35,7 +35,7 @@ class BlockTreeNotifier extends StateNotifier<Block> {
       );
     }
 
-    state = _triggerHelper(
+    state = triggerHelper(
           parent: state,
           parentId: id,
           value: null,

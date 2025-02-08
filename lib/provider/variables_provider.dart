@@ -8,7 +8,7 @@ class VariablesNotifier extends StateNotifier<Map<String, Variable>> {
           'x': Variable(value: 0, type: BlockTypes.number, name: 'x'),
           'y': Variable(value: 'default', type: BlockTypes.string, name: 'y'),
           'z': Variable(value: 'default2', type: BlockTypes.string, name: 'z'),
-        } as Map<String, Variable>);
+        });
 
   void updateAllVariables(Map<String, Variable> newVariables) {
     state = newVariables;
