@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../utils/file_logger.dart';
 
@@ -12,6 +13,7 @@ class LoggerScreen extends ConsumerStatefulWidget {
 class _LoggerScreenState extends ConsumerState<LoggerScreen> {
   final ScrollController _scrollController = ScrollController();
   List<String> _logs = [];
+  StringBuffer _logContent = StringBuffer('empty');
 
   @override
   void initState() {
@@ -20,22 +22,12 @@ class _LoggerScreenState extends ConsumerState<LoggerScreen> {
   }
 
   Future<void> _loadLogs() async {
-    final StringBuffer logContent = await readLog(ref);
+    final logcontentTemp = await readLog(ref);
     if (mounted) {
       setState(() {
-        _logs = logContent.toString().split('\n');
+        _logContent = logcontentTemp;
       });
-      _scrollToBottom();
-    }
-  }
 
-  void _scrollToBottom() {
-    if (_scrollController.hasClients) {
-      _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOut,
-      );
     }
   }
 
@@ -58,13 +50,13 @@ class _LoggerScreenState extends ConsumerState<LoggerScreen> {
           ),
         ],
       ),
-      body: ListView.builder(
-        controller: _scrollController,
-        itemCount: _logs.length,
-        itemBuilder: (context, index) => ListTile(
-          title: Text(_logs[index]),
-        ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+        Clipboard.setData(ClipboardData(text: _logContent.toString()));
+      }, 
+      child: const Icon(Icons.copy),
       ),
+      body: SelectableText(_logContent.toString())
     );
   }
 
