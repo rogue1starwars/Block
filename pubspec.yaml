@@ -43,6 +43,7 @@ dependencies:
   path_provider: ^2.1.5
   hive_flutter: ^1.1.0
   sensors_plus: ^6.1.1
+  ambient_light: ^0.1.2
 
 dev_dependencies:
   flutter_test:

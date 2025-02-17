@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:io';
 
+import 'package:ambient_light/ambient_light.dart';
 import 'package:flutter_compass/flutter_compass.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
@@ -13,6 +15,43 @@ import 'package:sensors_plus/sensors_plus.dart';
 import 'package:phoneduino_block/data/block_data_core.dart';
 
 final List<BlockBluePrint> blockDataSensors = [
+  BlockBluePrint(
+    name: 'Activate Ambient Light Sensor',
+    fields: [],
+    children: [],
+    returnType: BlockTypes.none,
+    originalFunc: (WidgetRef ref, Block block) {
+      late final AmbientLight _ambientLight;
+      if (Platform.isIOS) {
+        _ambientLight = AmbientLight(frontCamera: true);
+      } else {
+        _ambientLight = AmbientLight();
+      }
+
+      _ambientLight.ambientLightStream.listen((double lightLevel) {
+        ref.read(variablesProvider.notifier).setVariable(
+              "_lightLevel",
+              lightLevel,
+              BlockTypes.number,
+            );
+      });
+    },
+  ),
+  BlockBluePrint(
+    name: 'Get Ambient Light Level',
+    fields: [],
+    children: [],
+    returnType: BlockTypes.number,
+    originalFunc: (WidgetRef ref, Block block) {
+      final value =
+          ref.read(variablesProvider.notifier).getVariable("_lightLevel");
+      if (value == null) {
+        print("Get Ambient Light Level: null");
+        return;
+      }
+      return value;
+    },
+  ),
   BlockBluePrint(
     name: 'Activate Barometer',
     fields: [],
