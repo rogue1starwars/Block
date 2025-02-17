@@ -1,5 +1,8 @@
 import 'dart:async';
+import 'dart:io';
+import 'dart:math';
 
+import 'package:ambient_light/ambient_light.dart';
 import 'package:flutter_compass/flutter_compass.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
@@ -13,6 +16,43 @@ import 'package:sensors_plus/sensors_plus.dart';
 import 'package:phoneduino_block/data/block_data_core.dart';
 
 final List<BlockBluePrint> blockDataSensors = [
+  BlockBluePrint(
+    name: 'Activate Ambient Light Sensor',
+    fields: [],
+    children: [],
+    returnType: BlockTypes.none,
+    originalFunc: (WidgetRef ref, Block block) {
+      late final AmbientLight _ambientLight;
+      if (Platform.isIOS) {
+        _ambientLight = AmbientLight(frontCamera: true);
+      } else {
+        _ambientLight = AmbientLight();
+      }
+
+      _ambientLight.ambientLightStream.listen((double lightLevel) {
+        ref.read(variablesProvider.notifier).setVariable(
+              "_lightLevel",
+              lightLevel,
+              BlockTypes.number,
+            );
+      });
+    },
+  ),
+  BlockBluePrint(
+    name: 'Get Ambient Light Level',
+    fields: [],
+    children: [],
+    returnType: BlockTypes.number,
+    originalFunc: (WidgetRef ref, Block block) {
+      final value =
+          ref.read(variablesProvider.notifier).getVariable("_lightLevel");
+      if (value == null) {
+        print("Get Ambient Light Level: null");
+        return;
+      }
+      return value;
+    },
+  ),
   BlockBluePrint(
     name: 'Activate Barometer',
     fields: [],
@@ -129,6 +169,29 @@ final List<BlockBluePrint> blockDataSensors = [
         return;
       }
       return value;
+    },
+  ),
+  BlockBluePrint(
+    name: 'Accelerometer Total',
+    fields: [],
+    children: [],
+    returnType: BlockTypes.number,
+    originalFunc: (WidgetRef ref, Block block) {
+      final x = ref
+          .read(variablesProvider.notifier)
+          .getVariable("_accelerometerX") as num?;
+      final y = ref
+          .read(variablesProvider.notifier)
+          .getVariable("_accelerometerY") as num?;
+      final z = ref
+          .read(variablesProvider.notifier)
+          .getVariable("_accelerometerZ") as num?;
+
+      if (x == null || y == null || z == null) {
+        print("Accelerometer Total: null");
+        return null;
+      }
+      return sqrt(x * x + y * y + z * z);
     },
   ),
   BlockBluePrint(
