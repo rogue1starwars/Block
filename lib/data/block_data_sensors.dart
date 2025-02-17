@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:ambient_light/ambient_light.dart';
 import 'package:flutter_compass/flutter_compass.dart';
@@ -168,6 +169,29 @@ final List<BlockBluePrint> blockDataSensors = [
         return;
       }
       return value;
+    },
+  ),
+  BlockBluePrint(
+    name: 'Accelerometer Total',
+    fields: [],
+    children: [],
+    returnType: BlockTypes.number,
+    originalFunc: (WidgetRef ref, Block block) {
+      final x = ref
+          .read(variablesProvider.notifier)
+          .getVariable("_accelerometerX") as num?;
+      final y = ref
+          .read(variablesProvider.notifier)
+          .getVariable("_accelerometerY") as num?;
+      final z = ref
+          .read(variablesProvider.notifier)
+          .getVariable("_accelerometerZ") as num?;
+
+      if (x == null || y == null || z == null) {
+        print("Accelerometer Total: null");
+        return null;
+      }
+      return sqrt(x * x + y * y + z * z);
     },
   ),
   BlockBluePrint(
