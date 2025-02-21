@@ -18,3 +18,7 @@
 - additional sensors
 - CV
 - Twitter API, LINE API implementation
+- Change log screen
+- improve gps instruction method
+- change screen color
+
