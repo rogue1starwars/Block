@@ -21,4 +21,5 @@
 - Change log screen
 - improve gps instruction method
 - change screen color
+- update ui for smaller screen
 
