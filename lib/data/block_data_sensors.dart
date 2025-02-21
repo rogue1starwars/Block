@@ -3,7 +3,6 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:ambient_light/ambient_light.dart';
-import 'package:flutter_compass/flutter_compass.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:phoneduino_block/models/block.dart';
@@ -11,6 +10,7 @@ import 'package:phoneduino_block/models/fields.dart';
 import 'package:phoneduino_block/models/inputs.dart';
 import 'package:phoneduino_block/provider/ui_provider.dart';
 import 'package:phoneduino_block/provider/variables_provider.dart';
+import 'package:phoneduino_block/utils/orientation_util.dart';
 import 'package:phoneduino_block/utils/type.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'package:phoneduino_block/data/block_data_core.dart';
@@ -59,9 +59,7 @@ final List<BlockBluePrint> blockDataSensors = [
     children: [],
     returnType: BlockTypes.none,
     originalFunc: (WidgetRef ref, Block block) {
-      final barometerStream =
-          barometerEventStream(samplingPeriod: SensorInterval.fastestInterval)
-              .listen(
+      final barometerStream = barometerEventStream().listen(
         (event) {
           ref.read(variablesProvider.notifier).setVariable(
                 "_pressure",
@@ -99,8 +97,8 @@ final List<BlockBluePrint> blockDataSensors = [
     returnType: BlockTypes.none,
     originalFunc: (WidgetRef ref, Block block) {
       final accelerometerStream = accelerometerEventStream(
-              samplingPeriod: SensorInterval.normalInterval)
-          .listen(
+        samplingPeriod: SensorInterval.uiInterval,
+      ).listen(
         (event) {
           ref.read(variablesProvider.notifier).setVariable(
                 "_accelerometerX",
@@ -195,53 +193,105 @@ final List<BlockBluePrint> blockDataSensors = [
     },
   ),
   BlockBluePrint(
-    name: 'Activate Orientation',
+    name: 'Activate Magnetometer',
     fields: [],
     children: [],
     returnType: BlockTypes.none,
     originalFunc: (WidgetRef ref, Block block) {
-      final events = FlutterCompass.events;
-      if (events == null) {
-        ref.read(uiProvider.notifier).showMessage(
-              'Orientation sensor not available',
-            );
-        return;
-      }
-
-      if (ref
-              .read(variablesProvider.notifier)
-              .getVariable("_orientationStream") !=
-          null) {
-        print("Orientation Stream already active");
-        return;
-      }
-      StreamSubscription orientationStream = events.listen((event) {
-        ref.read(variablesProvider.notifier).setVariable(
-              "_orientation",
-              event.heading,
-              BlockTypes.number,
-            );
-      });
+      final magnetometerStream = magnetometerEventStream(
+        samplingPeriod: SensorInterval.uiInterval,
+      ).listen(
+        (event) {
+          ref.read(variablesProvider.notifier).setVariable(
+                "_magnetometerX",
+                event.x,
+                BlockTypes.number,
+              );
+          ref.read(variablesProvider.notifier).setVariable(
+                "_magnetometerY",
+                event.y,
+                BlockTypes.number,
+              );
+          ref.read(variablesProvider.notifier).setVariable(
+                "_magnetometerZ",
+                event.z,
+                BlockTypes.number,
+              );
+        },
+      );
       ref.read(variablesProvider.notifier).setVariable(
-            "_orientationStream",
-            orientationStream,
+            "_magnetometerStream",
+            magnetometerStream,
             BlockTypes.none,
           );
     },
   ),
   BlockBluePrint(
-    name: 'Get Orientation',
+    name: 'Get Magnetometer X',
     fields: [],
     children: [],
     returnType: BlockTypes.number,
     originalFunc: (WidgetRef ref, Block block) {
       final value =
-          ref.read(variablesProvider.notifier).getVariable("_orientation");
+          ref.read(variablesProvider.notifier).getVariable("_magnetometerX");
       if (value == null) {
-        print("Get Orientation: null");
+        print("Get Magnetometer X: null");
         return;
       }
       return value;
+    },
+  ),
+  BlockBluePrint(
+    name: 'Get Magnetometer Y',
+    fields: [],
+    children: [],
+    returnType: BlockTypes.number,
+    originalFunc: (WidgetRef ref, Block block) {
+      final value =
+          ref.read(variablesProvider.notifier).getVariable("_magnetometerY");
+      if (value == null) {
+        print("Get Magnetometer Y: null");
+        return;
+      }
+      return value;
+    },
+  ),
+  BlockBluePrint(
+    name: 'Get Magnetometer Z',
+    fields: [],
+    children: [],
+    returnType: BlockTypes.number,
+    originalFunc: (WidgetRef ref, Block block) {
+      final value =
+          ref.read(variablesProvider.notifier).getVariable("_magnetometerZ");
+      if (value == null) {
+        print("Get Magnetometer Z: null");
+        return;
+      }
+      return value;
+    },
+  ),
+  BlockBluePrint(
+    name: 'Orientation from Magnetometer',
+    fields: [],
+    children: [],
+    returnType: BlockTypes.number,
+    originalFunc: (WidgetRef ref, Block block) {
+      final x = ref
+          .read(variablesProvider.notifier)
+          .getVariable("_magnetometerX") as num?;
+      final y = ref
+          .read(variablesProvider.notifier)
+          .getVariable("_magnetometerY") as num?;
+      final z = ref
+          .read(variablesProvider.notifier)
+          .getVariable("_magnetometerZ") as num?;
+
+      if (x == null || y == null || z == null) {
+        print("Orientation from Magnetometer: null");
+        return null;
+      }
+      return atan2(y, x) * 180 / pi;
     },
   ),
   BlockBluePrint(
@@ -343,22 +393,22 @@ final List<BlockBluePrint> blockDataSensors = [
     fields: [],
     children: [
       ValueInput(
-        label: 'Latitude 1',
+        label: 'Latitude (start)',
         block: null,
         filter: [BlockTypes.number],
       ),
       ValueInput(
-        label: 'Longitude 1',
+        label: 'Latitude (start)',
         block: null,
         filter: [BlockTypes.number],
       ),
       ValueInput(
-        label: 'Latitude 2',
+        label: 'Latitude (dest)',
         block: null,
         filter: [BlockTypes.number],
       ),
       ValueInput(
-        label: 'Longitude 2',
+        label: 'Longitude (dest)',
         block: null,
         filter: [BlockTypes.number],
       ),
@@ -404,22 +454,22 @@ final List<BlockBluePrint> blockDataSensors = [
     fields: [],
     children: [
       ValueInput(
-        label: 'Latitude 1',
+        label: 'Latitude (start)',
         block: null,
         filter: [BlockTypes.number],
       ),
       ValueInput(
-        label: 'Longitude 1',
+        label: 'Longitude (start)',
         block: null,
         filter: [BlockTypes.number],
       ),
       ValueInput(
-        label: 'Latitude 2',
+        label: 'Latitude (dest)',
         block: null,
         filter: [BlockTypes.number],
       ),
       ValueInput(
-        label: 'Longitude 2',
+        label: 'Longitude (dest)',
         block: null,
         filter: [BlockTypes.number],
       ),
@@ -463,21 +513,42 @@ final List<BlockBluePrint> blockDataSensors = [
   BlockBluePrint(
     name: 'Calculate and Create Signal',
     fields: [
-      Field(label: 'Dest Lon', type: FieldTypes.number, value: 0),
       Field(label: 'Dest Lat', type: FieldTypes.number, value: 0),
+      Field(label: 'Dest Lon', type: FieldTypes.number, value: 0),
       Field(label: 'Orientation error', type: FieldTypes.number, value: 0),
       Field(label: 'Threshold', type: FieldTypes.number, value: 20),
     ],
-    children: [],
+    children: [
+      ValueInput(
+        label: 'Current Lat',
+        block: null,
+        filter: [BlockTypes.number],
+      ),
+      ValueInput(
+        label: 'Current Lon',
+        block: null,
+        filter: [BlockTypes.number],
+      ),
+      ValueInput(
+        label: 'Orientation',
+        block: null,
+        filter: [BlockTypes.number],
+      ),
+    ],
     returnType: BlockTypes.number,
     originalFunc: (WidgetRef ref, Block block) {
-      final destLon = block.fields[0].value;
-      final destLat = block.fields[1].value;
+      final destLat = block.fields[0].value;
+      final destLon = block.fields[1].value;
       final orientationError = block.fields[2].value;
       final threshold = block.fields[3].value;
 
-      if (destLon == null ||
-          destLat == null ||
+      final currentLat = (block.children[0] as ValueInput).block?.execute(ref);
+      final currentLon = (block.children[1] as ValueInput).block?.execute(ref);
+
+      final orientation = (block.children[2] as ValueInput).block?.execute(ref);
+
+      if (destLat == null ||
+          destLon == null ||
           threshold == null ||
           orientationError == null) {
         ref.read(uiProvider.notifier).showMessage(
@@ -486,11 +557,6 @@ final List<BlockBluePrint> blockDataSensors = [
         return null;
       }
 
-      final currentLon =
-          ref.read(variablesProvider.notifier).getVariable('_long') as num?;
-      final currentLat =
-          ref.read(variablesProvider.notifier).getVariable('_lat') as num?;
-
       if (currentLon == null || currentLat == null) {
         ref.read(uiProvider.notifier).showMessage(
               'Invalid input',
@@ -498,26 +564,34 @@ final List<BlockBluePrint> blockDataSensors = [
         return null;
       }
 
-      final orientation = ref
-              .read(variablesProvider.notifier)
-              .getVariable('_orientation') as double? ??
-          0;
+      if (currentLat is! num || currentLon is! num || orientation is! num) {
+        ref.read(uiProvider.notifier).showMessage(
+              'Invalid input',
+            );
+        return null;
+      }
 
-      final orientationCalibrated = (orientation - orientationError) % 360;
+      final orientationCalibrated =
+          formatBearing(orientation.toDouble() - orientationError);
+      print('orientation: $orientation');
+      print('orientationCalibrated: $orientationCalibrated');
 
       final bearing = Geolocator.bearingBetween(
-        currentLon.toDouble(),
         currentLat.toDouble(),
-        destLon.toDouble(),
+        currentLon.toDouble(),
         destLat.toDouble(),
+        destLon.toDouble(),
       );
 
-      if ((orientationCalibrated - bearing).abs() < threshold) {
-        return 0;
-      } else if ((bearing - orientationCalibrated) < 0) {
-        return -1;
-      } else {
+      final double angle = formatBearing(orientationCalibrated - bearing);
+      // print('angle: $angle');
+
+      if (angle.abs() < threshold) {
         return 1;
+      } else if (angle < 0) {
+        return 2;
+      } else {
+        return 3;
       }
     },
   )
