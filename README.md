@@ -22,4 +22,6 @@
 - improve gps instruction method
 - change screen color
 - update ui for smaller screen
+- import and export project
+- timer implementation
 
