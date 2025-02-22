@@ -69,7 +69,7 @@ final List<BlockBluePrint> blockDataSensors = [
         },
       );
       ref.read(variablesProvider.notifier).setVariable(
-            "_barometerStream",
+            "_barometerStream_",
             barometerStream,
             BlockTypes.none,
           );
@@ -118,7 +118,7 @@ final List<BlockBluePrint> blockDataSensors = [
         },
       );
       ref.read(variablesProvider.notifier).setVariable(
-            "_accelerometerStream",
+            "_accelerometerStream_",
             accelerometerStream,
             BlockTypes.none,
           );
@@ -220,7 +220,7 @@ final List<BlockBluePrint> blockDataSensors = [
         },
       );
       ref.read(variablesProvider.notifier).setVariable(
-            "_magnetometerStream",
+            "_magnetometerStream_",
             magnetometerStream,
             BlockTypes.none,
           );
@@ -326,7 +326,9 @@ final List<BlockBluePrint> blockDataSensors = [
         }
       }
 
-      if (ref.read(variablesProvider.notifier).getVariable("_positionStream") !=
+      if (ref
+              .read(variablesProvider.notifier)
+              .getVariable("_positionStream_") !=
           null) {
         print("Position Stream already active");
         return;
@@ -354,7 +356,7 @@ final List<BlockBluePrint> blockDataSensors = [
             );
       });
       ref.read(variablesProvider.notifier).setVariable(
-            "_positionStream",
+            "_positionStream_",
             positionStream,
             BlockTypes.none,
           );
@@ -573,7 +575,7 @@ final List<BlockBluePrint> blockDataSensors = [
 
       final orientationCalibrated =
           formatBearing(orientation.toDouble() - orientationError);
-      print('orientation: $orientation');
+      // print('orientation: $orientation');
       print('orientationCalibrated: $orientationCalibrated');
 
       final bearing = Geolocator.bearingBetween(
@@ -584,7 +586,7 @@ final List<BlockBluePrint> blockDataSensors = [
       );
 
       final double angle = formatBearing(orientationCalibrated - bearing);
-      // print('angle: $angle');
+      print('angle: $angle');
 
       if (angle.abs() < threshold) {
         return 1;

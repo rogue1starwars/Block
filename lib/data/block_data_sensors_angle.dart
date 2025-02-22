@@ -20,7 +20,7 @@ final List<BlockBluePrint> blockDataSensorsAngle = [
       final events = RotationSensor.orientationStream;
       if (ref
               .read(variablesProvider.notifier)
-              .getVariable("_orientationStream") !=
+              .getVariable("_orientationStream_") !=
           null) {
         print("Orientation Stream already active");
         return;
@@ -33,7 +33,7 @@ final List<BlockBluePrint> blockDataSensorsAngle = [
             );
       });
       ref.read(variablesProvider.notifier).setVariable(
-            "_orientationStream",
+            "_orientationStream_",
             orientationStream,
             BlockTypes.none,
           );

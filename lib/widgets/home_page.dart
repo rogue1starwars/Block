@@ -121,6 +121,7 @@ class HomePage extends ConsumerWidget {
           if (intervals.intervals.isNotEmpty) {
             ref.read(intervalProvider.notifier).clearInterval();
             ref.read(uiProvider.notifier).clearMessage();
+            ref.read(variablesProvider.notifier).clearAllVariables();
           } else {
             root.execute(ref);
           }

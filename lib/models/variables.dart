@@ -22,8 +22,35 @@ class Variable {
   }
 
   Map<String, dynamic> toJson() {
-    if (value is! num && value is! String && value is! bool) {
-      return {};
+    // if (value is! num && value is! String && value is! bool) {
+    //   return {};
+    // }
+    if (type == BlockTypes.number) {
+      if (value is! num) {
+        return {
+          'value': 0,
+          'type': type.name,
+          'name': name,
+        };
+      }
+    }
+    if (type == BlockTypes.string) {
+      if (value is! String) {
+        return {
+          'value': 'default',
+          'type': type.name,
+          'name': name,
+        };
+      }
+    }
+    if (type == BlockTypes.boolean) {
+      if (value is! bool) {
+        return {
+          'value': false,
+          'type': type.name,
+          'name': name,
+        };
+      }
     }
     return {
       'value': value,
@@ -36,7 +63,15 @@ class Variable {
     dynamic value,
     BlockTypes? type,
     String? name,
+    bool delete = false,
   }) {
+    if (delete) {
+      return Variable(
+        value: null,
+        type: type ?? this.type,
+        name: name ?? this.name,
+      );
+    }
     return Variable(
       value: value ?? this.value,
       type: type ?? this.type,
