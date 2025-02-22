@@ -542,31 +542,7 @@ final List<BlockBluePrint> blockDataSensors = [
   children: [],
   returnType: BlockTypes.boolean,
   originalFunc: (WidgetRef ref, Block block) {
-    // double maxAccel = 0;
-    // double minAccel = double.infinity;
-    // List<double> accelBuffer = [];
-    // const int bufferSize = 60; 
-    // bool fallDetected = false;
-
-    // final accelerometerStream = accelerometerEventStream(
-    //   samplingPeriod: SensorInterval.normalInterval
-    // ).listen((event) {
-    //   double accelMagnitude = sqrt(event.x * event.x + event.y * event.y + event.z * event.z);
-
-    //   if (accelMagnitude > maxAccel) maxAccel = accelMagnitude;
-    //   if (accelMagnitude < minAccel) minAccel = accelMagnitude;
-
-    //   final lightLevel = ref.read(variablesProvider.notifier).getVariable("_lightLevel") as double? ?? 0;
-
-    //   if (minAccel < 3 && maxAccel > 25 && lightLevel > 20) {
-    //     // double avgAccel = accelBuffer.reduce((a, b) => a + b) / accelBuffer.length;
-    //     // if (avgAccel >= 9.3 && avgAccel <= 10.3) {
-    //     //   fallDetected = true;
-    //     //   ref.read(variablesProvider.notifier).setVariable("_fallDetected", true, BlockTypes.boolean);
-    //     // }
-    //     return true;
-    //   }
-    // });
+   
     final maxAccel = ref.read(variablesProvider.notifier).getVariable("_maxAccel") as double? ?? 0;
     final minAccel = ref.read(variablesProvider.notifier).getVariable("_minAccel") as double? ?? 0;
     final lightLevel = ref.read(variablesProvider.notifier).getVariable("_lightLevel") as double? ?? 0;
@@ -575,7 +551,6 @@ final List<BlockBluePrint> blockDataSensors = [
     }
     return false;
 
-    // ref.read(variablesProvider.notifier).setVariable("_accelerometerStream", accelerometerStream, BlockTypes.none);
   },
 ),
 /*
