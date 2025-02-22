@@ -17,19 +17,19 @@ import 'package:phoneduino_block/data/block_data_core.dart';
 
 final List<BlockBluePrint> blockDataSensors = [
   BlockBluePrint(
-    name: 'Activate Ambient Light Sensor',
+    name: 'Activate Light Sensor',
     fields: [],
     children: [],
     returnType: BlockTypes.none,
     originalFunc: (WidgetRef ref, Block block) {
-      late final AmbientLight _ambientLight;
+      late final AmbientLight ambientLight;
       if (Platform.isIOS) {
-        _ambientLight = AmbientLight(frontCamera: true);
+        ambientLight = AmbientLight(frontCamera: true);
       } else {
-        _ambientLight = AmbientLight();
+        ambientLight = AmbientLight();
       }
 
-      _ambientLight.ambientLightStream.listen((double lightLevel) {
+      ambientLight.ambientLightStream.listen((double lightLevel) {
         ref.read(variablesProvider.notifier).setVariable(
               "_lightLevel",
               lightLevel,
@@ -39,7 +39,7 @@ final List<BlockBluePrint> blockDataSensors = [
     },
   ),
   BlockBluePrint(
-    name: 'Get Ambient Light Level',
+    name: 'Get Light Level',
     fields: [],
     children: [],
     returnType: BlockTypes.number,
@@ -96,8 +96,9 @@ final List<BlockBluePrint> blockDataSensors = [
     children: [],
     returnType: BlockTypes.none,
     originalFunc: (WidgetRef ref, Block block) {
-      final double maxAccel = 0;
-      final double minAccel = double.infinity;
+      // final double maxAccel = 0;
+      // final double minAccel = double.infinity;
+  
       final accelerometerStream = accelerometerEventStream(
         samplingPeriod: SensorInterval.uiInterval,
       ).listen(
@@ -124,6 +125,8 @@ final List<BlockBluePrint> blockDataSensors = [
                 accelMagnitude,
                 BlockTypes.number,
               );
+          final double maxAccel = ref.read(variablesProvider.notifier).getVariable("_maxAccel") as double? ?? 0;
+          final double minAccel = ref.read(variablesProvider.notifier).getVariable("_minAccel") as double? ?? double.infinity;
           ref.read(variablesProvider.notifier).setVariable(
                 "_maxAccel",
                 max(maxAccel, accelMagnitude),
@@ -283,7 +286,7 @@ final List<BlockBluePrint> blockDataSensors = [
     },
   ),
   BlockBluePrint(
-    name: 'Orientation from Magnetometer',
+    name: 'Orientation from Mag',
     fields: [],
     children: [],
     returnType: BlockTypes.number,
@@ -524,7 +527,7 @@ final List<BlockBluePrint> blockDataSensors = [
     },
   ),
   BlockBluePrint(
-    name: 'Calculate and Create Signal',
+    name: 'Calculate_Create Signal',
     fields: [
       Field(label: 'Dest Lat', type: FieldTypes.number, value: 0),
       Field(label: 'Dest Lon', type: FieldTypes.number, value: 0),
@@ -637,7 +640,7 @@ status 3: cutting
 status 4: moving
 */
 BlockBluePrint(
-  name: 'Get Fall Detection Status',
+  name: 'Get Fall Detect Status',
   fields: [],
   children: [],
   returnType: BlockTypes.boolean,
