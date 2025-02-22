@@ -28,6 +28,10 @@ class VariablesNotifier extends StateNotifier<Map<String, Variable>> {
         print(key);
         newState[key]?.value.cancel();
       }
+      if (newState[key]?.value is Timer) {
+        print(key);
+        newState[key]?.value.cancel();
+      }
     }
     newState.removeWhere((key, value) => key[0] == '_');
     newState.forEach((key, value) {
