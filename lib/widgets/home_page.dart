@@ -65,7 +65,7 @@ class HomePage extends ConsumerWidget {
             try {
               final String blockTreeJson = jsonEncode(root.toJson());
               print(blockTreeJson);
-              box.put('block_tree', blockTreeJson);
+              // box.put('block_tree', blockTreeJson);
 
               final Map<String, Variable> variables =
                   ref.read(variablesProvider);
@@ -74,7 +74,12 @@ class HomePage extends ConsumerWidget {
                 return MapEntry(key, value.toJson());
               });
               variablesJson.removeWhere((key, value) => key[0] == '_');
-              box.put('variables', jsonEncode(variablesJson));
+
+              final Map<String, dynamic> projectData = {
+                'block_tree': root.toJson(),
+                'variables': variablesJson,
+              };
+              box.put('project', jsonEncode(projectData));
             } catch (e) {
               ref
                   .read(uiProvider.notifier)
@@ -86,15 +91,17 @@ class HomePage extends ConsumerWidget {
         IconButton(
           onPressed: () {
             try {
-              final blockTreeJson = box.get('block_tree');
-              final blockTreeData = jsonDecode(blockTreeJson);
+              final Map<String, dynamic> projectData =
+                  jsonDecode(box.get('project'));
+
+              final Map<String, dynamic> blockTreeData =
+                  projectData['block_tree'];
               print(blockTreeData);
               Block root = Block.fromJson(blockTreeData);
               ref.read(blockTreeProvider.notifier).updateRoot(root);
 
-              final variablesJson = box.get('variables');
               final Map<String, dynamic> variablesData =
-                  jsonDecode(variablesJson);
+                  projectData['variables'];
               final Map<String, Variable> variables =
                   variablesData.map((key, value) {
                 return MapEntry(key, Variable.fromJson(value));
