@@ -117,7 +117,7 @@ List<BlockBluePrint> blockDataLoops = [
         return;
       }
 
-      final timer = Future.delayed(
+      final timer = Timer(
         Duration(milliseconds: value),
         () {
           for (var block in statement.blocks) {
@@ -125,13 +125,7 @@ List<BlockBluePrint> blockDataLoops = [
           }
         },
       );
-      if (ref.read(variablesProvider.notifier).hasVariable(timerName)) {
-        ref.read(variablesProvider.notifier).updateVariable(timerName, timer);
-      } else {
-        ref
-            .read(variablesProvider.notifier)
-            .setVariable(timerName, timer, BlockTypes.timer);
-      }
+      ref.read(variablesProvider.notifier).updateVariable(timerName, timer);
     },
   ),
   BlockBluePrint(
