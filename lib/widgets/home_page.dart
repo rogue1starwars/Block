@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:phoneduino_block/models/block.dart';
@@ -46,7 +45,6 @@ class HomePage extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         actions: [
-          const BleHome(),
           IconButton(
             onPressed: () {
               showDialog(
@@ -109,6 +107,7 @@ class HomePage extends ConsumerWidget {
             },
             icon: const Icon(Icons.restore),
           ),
+          const ImportExportButton(),
         ],
       ),
       body: intervals.intervals.isNotEmpty
@@ -116,46 +115,7 @@ class HomePage extends ConsumerWidget {
           : SingleChildScrollView(
               child: Column(
                 children: [
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const BleHome(),
-                      ImportExportButton(),
-                      IconButton(
-                        onPressed: () async {
-                          final String blockTreeJson =
-                              jsonEncode(root.toJson());
-                          print(blockTreeJson);
-                          // box.put('block_tree', blockTreeJson);
-
-                          final Map<String, Variable> variables =
-                              ref.read(variablesProvider);
-                          final Map<String, dynamic> variablesJson =
-                              variables.map((key, value) {
-                            return MapEntry(key, value.toJson());
-                          });
-                          variablesJson
-                              .removeWhere((key, value) => key[0] == '_');
-
-                          final Map<String, dynamic> projectData = {
-                            'block_tree': root.toJson(),
-                            'variables': variablesJson,
-                          };
-                          final String? projectDataJson =
-                              jsonEncode(projectData);
-                          if (projectDataJson == null) {
-                            ref.read(uiProvider.notifier).showMessage(
-                                  'Failed to copy project data',
-                                );
-                            return;
-                          }
-                          Clipboard.setData(
-                              ClipboardData(text: projectDataJson));
-                        },
-                        icon: Icon(Icons.share),
-                      ),
-                    ],
-                  ),
+                  const BleHome(),
                   BlockTree(block: root),
                 ],
               ),

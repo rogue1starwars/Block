@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -40,17 +42,6 @@ class ImportExportButton extends ConsumerWidget {
                   Navigator.pop(context);
                 },
               ),
-              ListTile(
-                leading: const Icon(Icons.save),
-                title: const Text('Save to File'),
-                onTap: () {
-                  // TODO: Add save logic
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                title: const Text('Import from text'),
-              ),
               const Divider(),
               TextField(
                 controller: textController,
@@ -65,8 +56,29 @@ class ImportExportButton extends ConsumerWidget {
               ElevatedButton(
                 onPressed: () {
                   if (textController.text.isEmpty) return;
-                  // TODO: Handle import logic
+                  try {
+                    final Map<String, dynamic> projectData =
+                        jsonDecode(textController.text);
 
+                    final Map<String, dynamic> blockTreeData =
+                        projectData['block_tree'];
+                    Block root = Block.fromJson(blockTreeData);
+                    ref.read(blockTreeProvider.notifier).updateRoot(root);
+
+                    final Map<String, dynamic> variablesData =
+                        projectData['variables'];
+                    final Map<String, Variable> variables =
+                        variablesData.map((key, value) {
+                      return MapEntry(key, Variable.fromJson(value));
+                    });
+                    ref
+                        .read(variablesProvider.notifier)
+                        .updateAllVariables(variables);
+                  } catch (e) {
+                    ref
+                        .read(uiProvider.notifier)
+                        .showMessage('Failed to load block tree: $e');
+                  }
                   Navigator.pop(context);
                 },
                 child: const Text('Import'),
