@@ -4,6 +4,7 @@ enum BlockTypes {
   boolean,
   none,
   intervalList,
+  timer,
 }
 
 enum FieldTypes {

@@ -143,23 +143,26 @@ class _VariableFieldWidgetState
     }
 
     print("field.value: ${field.value}");
-    return DropdownMenu(
-        label: const Text('Select a variable'),
-        initialSelection: field.value as String? ?? ' ',
-        onSelected: (String? name) {
-          if (name == null) return;
-          ref.read(blockTreeProvider.notifier).updateField(
-                parentId: widget.parent.id,
-                value: name,
-                index: widget.index,
-              );
-        },
-        dropdownMenuEntries: filteredVariables
-            .map((entry) => DropdownMenuEntry(
-                  value: entry.key,
-                  label: entry.key,
-                ))
-            .toList());
+    return Padding(
+      padding: const EdgeInsets.only(top: 12.0),
+      child: DropdownMenu(
+          label: const Text('Select a variable'),
+          initialSelection: field.value as String? ?? ' ',
+          onSelected: (String? name) {
+            if (name == null) return;
+            ref.read(blockTreeProvider.notifier).updateField(
+                  parentId: widget.parent.id,
+                  value: name,
+                  index: widget.index,
+                );
+          },
+          dropdownMenuEntries: filteredVariables
+              .map((entry) => DropdownMenuEntry(
+                    value: entry.key,
+                    label: entry.key,
+                  ))
+              .toList()),
+    );
   }
 }
 
