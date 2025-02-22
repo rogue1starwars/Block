@@ -17,19 +17,19 @@ import 'package:phoneduino_block/data/block_data_core.dart';
 
 final List<BlockBluePrint> blockDataSensors = [
   BlockBluePrint(
-    name: 'Activate Ambient Light Sensor',
+    name: 'Activate Light Sensor',
     fields: [],
     children: [],
     returnType: BlockTypes.none,
     originalFunc: (WidgetRef ref, Block block) {
-      late final AmbientLight _ambientLight;
+      late final AmbientLight ambientLight;
       if (Platform.isIOS) {
-        _ambientLight = AmbientLight(frontCamera: true);
+        ambientLight = AmbientLight(frontCamera: true);
       } else {
-        _ambientLight = AmbientLight();
+        ambientLight = AmbientLight();
       }
 
-      _ambientLight.ambientLightStream.listen((double lightLevel) {
+      ambientLight.ambientLightStream.listen((double lightLevel) {
         ref.read(variablesProvider.notifier).setVariable(
               "_lightLevel",
               lightLevel,
@@ -39,7 +39,7 @@ final List<BlockBluePrint> blockDataSensors = [
     },
   ),
   BlockBluePrint(
-    name: 'Get Ambient Light Level',
+    name: 'Get Light Level',
     fields: [],
     children: [],
     returnType: BlockTypes.number,
@@ -96,10 +96,15 @@ final List<BlockBluePrint> blockDataSensors = [
     children: [],
     returnType: BlockTypes.none,
     originalFunc: (WidgetRef ref, Block block) {
+      // final double maxAccel = 0;
+      // final double minAccel = double.infinity;
+  
       final accelerometerStream = accelerometerEventStream(
         samplingPeriod: SensorInterval.uiInterval,
       ).listen(
         (event) {
+          final double accelMagnitude =
+              sqrt(event.x * event.x + event.y * event.y + event.z * event.z);
           ref.read(variablesProvider.notifier).setVariable(
                 "_accelerometerX",
                 event.x,
@@ -113,6 +118,23 @@ final List<BlockBluePrint> blockDataSensors = [
           ref.read(variablesProvider.notifier).setVariable(
                 "_accelerometerZ",
                 event.z,
+                BlockTypes.number,
+              );
+          ref.read(variablesProvider.notifier).setVariable(
+                "_accelerometerTotal",
+                accelMagnitude,
+                BlockTypes.number,
+              );
+          final double maxAccel = ref.read(variablesProvider.notifier).getVariable("_maxAccel") as double? ?? 0;
+          final double minAccel = ref.read(variablesProvider.notifier).getVariable("_minAccel") as double? ?? double.infinity;
+          ref.read(variablesProvider.notifier).setVariable(
+                "_maxAccel",
+                max(maxAccel, accelMagnitude),
+                BlockTypes.number,
+              );
+          ref.read(variablesProvider.notifier).setVariable(
+                "_minAccel",
+                min(minAccel, accelMagnitude),
                 BlockTypes.number,
               );
         },
@@ -175,21 +197,13 @@ final List<BlockBluePrint> blockDataSensors = [
     children: [],
     returnType: BlockTypes.number,
     originalFunc: (WidgetRef ref, Block block) {
-      final x = ref
-          .read(variablesProvider.notifier)
-          .getVariable("_accelerometerX") as num?;
-      final y = ref
-          .read(variablesProvider.notifier)
-          .getVariable("_accelerometerY") as num?;
-      final z = ref
-          .read(variablesProvider.notifier)
-          .getVariable("_accelerometerZ") as num?;
-
-      if (x == null || y == null || z == null) {
+      final value =
+          ref.read(variablesProvider.notifier).getVariable("_accelerometerTotal");
+      if (value == null) {
         print("Accelerometer Total: null");
-        return null;
+        return;
       }
-      return sqrt(x * x + y * y + z * z);
+      return value;
     },
   ),
   BlockBluePrint(
@@ -272,7 +286,7 @@ final List<BlockBluePrint> blockDataSensors = [
     },
   ),
   BlockBluePrint(
-    name: 'Orientation from Magnetometer',
+    name: 'Orientation from Mag',
     fields: [],
     children: [],
     returnType: BlockTypes.number,
@@ -513,7 +527,7 @@ final List<BlockBluePrint> blockDataSensors = [
     },
   ),
   BlockBluePrint(
-    name: 'Calculate and Create Signal',
+    name: 'Calculate_Create Signal',
     fields: [
       Field(label: 'Dest Lat', type: FieldTypes.number, value: 0),
       Field(label: 'Dest Lon', type: FieldTypes.number, value: 0),
@@ -596,5 +610,45 @@ final List<BlockBluePrint> blockDataSensors = [
         return 3;
       }
     },
-  )
+  ),
+  BlockBluePrint(
+  name: 'Activate Fall Detection',
+  fields: [
+    Field(label: 'Min Accel', type: FieldTypes.number, value: 0),
+    Field(label: 'Max Accel', type: FieldTypes.number, value: 0),
+    Field(label: 'Light Level', type: FieldTypes.number, value: 0),
+  ],
+  children: [],
+  returnType: BlockTypes.boolean,
+  originalFunc: (WidgetRef ref, Block block) {
+   
+    final maxAccel = ref.read(variablesProvider.notifier).getVariable("_maxAccel") as double? ?? 0;
+    final minAccel = ref.read(variablesProvider.notifier).getVariable("_minAccel") as double? ?? 0;
+    final lightLevel = ref.read(variablesProvider.notifier).getVariable("_lightLevel") as double? ?? 0;
+    if (minAccel < 3 && maxAccel > 25 && lightLevel > 20) {
+      return true;
+    }
+    return false;
+
+  },
+),
+/*
+Status 0: falling
+Status 1: ground detected
+Status 2: pending
+status 3: cutting
+status 4: moving
+*/
+BlockBluePrint(
+  name: 'Get Fall Detect Status',
+  fields: [],
+  children: [],
+  returnType: BlockTypes.boolean,
+  originalFunc: (WidgetRef ref, Block block) {
+    final value = ref.read(variablesProvider.notifier).getVariable("_fallDetected");
+    return value ?? false;
+  },
+
+),
+
 ];
