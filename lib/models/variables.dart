@@ -12,48 +12,18 @@ class Variable {
   });
 
   factory Variable.fromJson(Map<String, dynamic> json) {
+    final BlockTypes type = BlockTypes.values.firstWhere(
+      (element) => element.name == json['type'],
+    );
     return Variable(
-      value: json['value'],
-      type: BlockTypes.values.firstWhere(
-        (element) => element.name == json['type'],
-      ),
+      value: initialValue[type],
+      type: type,
       name: json['name'],
     );
   }
 
   Map<String, dynamic> toJson() {
-    // if (value is! num && value is! String && value is! bool) {
-    //   return {};
-    // }
-    if (type == BlockTypes.number) {
-      if (value is! num) {
-        return {
-          'value': 0,
-          'type': type.name,
-          'name': name,
-        };
-      }
-    }
-    if (type == BlockTypes.string) {
-      if (value is! String) {
-        return {
-          'value': 'default',
-          'type': type.name,
-          'name': name,
-        };
-      }
-    }
-    if (type == BlockTypes.boolean) {
-      if (value is! bool) {
-        return {
-          'value': false,
-          'type': type.name,
-          'name': name,
-        };
-      }
-    }
     return {
-      'value': value,
       'type': type.name,
       'name': name,
     };

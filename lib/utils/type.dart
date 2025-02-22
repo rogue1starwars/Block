@@ -7,6 +7,15 @@ enum BlockTypes {
   timer,
 }
 
+Map<BlockTypes, dynamic> initialValue = {
+  BlockTypes.number: 0,
+  BlockTypes.string: 'default',
+  BlockTypes.boolean: false,
+  BlockTypes.none: null,
+  BlockTypes.intervalList: [],
+  BlockTypes.timer: null,
+};
+
 enum FieldTypes {
   number,
   string,
