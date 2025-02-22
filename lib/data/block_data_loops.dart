@@ -129,6 +129,44 @@ List<BlockBluePrint> blockDataLoops = [
     },
   ),
   BlockBluePrint(
+    name: 'Cancel Timer',
+    fields: [
+      Field(
+        type: FieldTypes.variableNames,
+        label: "Timer Name",
+        value: '',
+        variableType: BlockTypes.timer,
+      ),
+    ],
+    children: [],
+    returnType: BlockTypes.none,
+    originalFunc: (WidgetRef ref, Block block) {
+      final timerName = block.fields[0].value;
+      if (timerName is! String) {
+        ref.read(uiProvider.notifier).showMessage(
+              'Invalid timer name',
+            );
+        return;
+      }
+
+      if (!ref.read(variablesProvider.notifier).hasVariable(timerName)) {
+        ref.read(uiProvider.notifier).showMessage(
+              'Timer name not found',
+            );
+        return;
+      }
+
+      final timer = ref.read(variablesProvider.notifier).getVariable(timerName);
+      if (timer is! Timer) {
+        ref.read(uiProvider.notifier).showMessage(
+              'Invalid timer',
+            );
+        return;
+      }
+      timer.cancel();
+    },
+  ),
+  BlockBluePrint(
     name: 'Interval',
     fields: [
       Field(
