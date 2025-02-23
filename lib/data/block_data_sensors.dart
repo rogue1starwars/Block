@@ -96,8 +96,8 @@ final List<BlockBluePrint> blockDataSensors = [
     children: [],
     returnType: BlockTypes.none,
     originalFunc: (WidgetRef ref, Block block) {
-      final double maxAccel = 0;
-      final double minAccel = double.infinity;
+      ref.read(variablesProvider.notifier).setVariable("_maxAccel", 0.0, BlockTypes.number);
+      ref.read(variablesProvider.notifier).setVariable("_minAccel", double.infinity, BlockTypes.number);
       final accelerometerStream = accelerometerEventStream(
         samplingPeriod: SensorInterval.uiInterval,
       ).listen(
@@ -124,6 +124,22 @@ final List<BlockBluePrint> blockDataSensors = [
                 accelMagnitude,
                 BlockTypes.number,
               );
+
+          late final double maxAccel;
+          late final double minAccel;
+          if (ref.read(variablesProvider.notifier).hasVariable("_maxAccel")) {
+            maxAccel = ref.read(variablesProvider.notifier).getVariable(
+            "_maxAccel"
+          ) as double;
+          } else {
+              maxAccel = 0;
+          }
+
+          if (ref.read(variablesProvider.notifier).hasVariable("_minAccel")) {
+            minAccel = ref.read(variablesProvider.notifier).getVariable("_minAccel") as double? ?? double.infinity;
+          } else {
+              minAccel = double.infinity;
+          }
           ref.read(variablesProvider.notifier).setVariable(
                 "_maxAccel",
                 max(maxAccel, accelMagnitude),
@@ -618,11 +634,18 @@ final List<BlockBluePrint> blockDataSensors = [
   children: [],
   returnType: BlockTypes.boolean,
   originalFunc: (WidgetRef ref, Block block) {
+
+    final minAccelThreshold = block.fields[0].value as num;
+    final maxAccelThreshold = block.fields[1].value as num;
+    final lightSensorThreshold = block.fields[2].value as num;
    
     final maxAccel = ref.read(variablesProvider.notifier).getVariable("_maxAccel") as double? ?? 0;
     final minAccel = ref.read(variablesProvider.notifier).getVariable("_minAccel") as double? ?? 0;
     final lightLevel = ref.read(variablesProvider.notifier).getVariable("_lightLevel") as double? ?? 0;
-    if (minAccel < 3 && maxAccel > 25 && lightLevel > 20) {
+    print("maxAccel: $maxAccel");
+    print("minAccel: $minAccel");
+    print("light: $lightLevel");
+    if (minAccel < minAccelThreshold && maxAccel > maxAccelThreshold && lightLevel > lightSensorThreshold) {
       return true;
     }
     return false;
