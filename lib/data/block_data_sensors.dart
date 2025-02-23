@@ -127,19 +127,12 @@ final List<BlockBluePrint> blockDataSensors = [
 
           late final double maxAccel;
           late final double minAccel;
-          if (ref.read(variablesProvider.notifier).hasVariable("_maxAccel")) {
             maxAccel = ref.read(variablesProvider.notifier).getVariable(
             "_maxAccel"
-          ) as double;
-          } else {
-              maxAccel = 0;
-          }
+          ) as double? ?? 0.0;
 
-          if (ref.read(variablesProvider.notifier).hasVariable("_minAccel")) {
             minAccel = ref.read(variablesProvider.notifier).getVariable("_minAccel") as double? ?? double.infinity;
-          } else {
-              minAccel = double.infinity;
-          }
+
           ref.read(variablesProvider.notifier).setVariable(
                 "_maxAccel",
                 max(maxAccel, accelMagnitude),
