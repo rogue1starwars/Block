@@ -453,6 +453,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.2.0"
+  http:
+    dependency: "direct main"
+    description:
+      name: http
+      sha256: "5895291c13fa8a3bd82e76d5627f69e0d85ca6a30dcac95c4ea19a5d555879c2"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.13.6"
   http_multi_server:
     dependency: transitive
     description:
@@ -589,6 +597,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.3"
+  oauth1:
+    dependency: transitive
+    description:
+      name: oauth1
+      sha256: "1d424e3c24017a6c5714acb12e0dd76c2fdff96db6d6ef0aab58c925ffc28ae0"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.0"
   package_config:
     dependency: transitive
     description:
@@ -882,6 +898,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.1"
+  twitter_api_core:
+    dependency: transitive
+    description:
+      name: twitter_api_core
+      sha256: "3a74bab688209a549a0d8c5373ef7a12b575fa792b07c41846a898c6116536d2"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.2.2"
+  twitter_api_v2:
+    dependency: "direct main"
+    description:
+      name: twitter_api_v2
+      sha256: ddba695ee935010bc771fc1c897007c12f938af2c83bde58dd3b885636f17a5f
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.0.2"
   typed_data:
     dependency: transitive
     description:
@@ -910,10 +942,10 @@ packages:
     dependency: transitive
     description:
       name: vm_service
-      sha256: "5c5f338a667b4c644744b661f309fb8080bb94b18a7e91ef1dbd343bed00ed6d"
+      sha256: f652077d0bdf60abe4c1f6377448e8655008eef28f128bc023f7b5e8dfeb48fc
       url: "https://pub.dev"
     source: hosted
-    version: "14.2.5"
+    version: "14.2.4"
   watcher:
     dependency: transitive
     description:
