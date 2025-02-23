@@ -12,7 +12,7 @@ class LoggerScreen extends ConsumerStatefulWidget {
 
 class _LoggerScreenState extends ConsumerState<LoggerScreen> {
   final ScrollController _scrollController = ScrollController();
-  List<String> _logs = [];
+  final List<String> _logs = [];
   StringBuffer _logContent = StringBuffer('empty');
 
   @override
