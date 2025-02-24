@@ -154,7 +154,7 @@ List<BlockBluePrint> blockDataLogic = [
       StatementInput(
         label: 'Then',
         blocks: [],
-        filter: [BlockTypes.none],
+        filter: [],
       ),
     ],
     returnType: BlockTypes.none,
@@ -181,12 +181,12 @@ List<BlockBluePrint> blockDataLogic = [
       StatementInput(
         label: 'Then',
         blocks: [],
-        filter: [BlockTypes.none],
+        filter: [],
       ),
       StatementInput(
         label: 'Else',
         blocks: [],
-        filter: [BlockTypes.none],
+        filter: [],
       ),
     ],
     returnType: BlockTypes.none,
