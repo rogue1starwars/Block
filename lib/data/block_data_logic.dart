@@ -1,8 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phoneduino_block/data/block_data_core.dart';
 import 'package:phoneduino_block/models/block.dart';
 import 'package:phoneduino_block/models/fields.dart';
 import 'package:phoneduino_block/models/inputs.dart';
+import 'package:phoneduino_block/provider/ui_provider.dart';
+import 'package:phoneduino_block/provider/variables_provider.dart';
 import 'package:phoneduino_block/utils/type.dart';
 
 List<BlockBluePrint> blockDataLogic = [
@@ -201,6 +205,190 @@ List<BlockBluePrint> blockDataLogic = [
         }
       } else {
         for (var block in elseBlock.blocks) {
+          block.execute(ref);
+        }
+      }
+    },
+  ),
+  BlockBluePrint(
+    name: 'Switch (time out)',
+    fields: [
+      Field(
+        label: 'Interval',
+        value: 100,
+        type: FieldTypes.number,
+      ),
+      Field(
+        label: 'Condition',
+        value: '',
+        type: FieldTypes.variableNames,
+        variableType: BlockTypes.number,
+      ),
+      Field(
+        label: 'Case 0 (ms)',
+        value: 1000,
+        type: FieldTypes.number,
+      ),
+      Field(
+        label: 'Case 1 (ms)',
+        value: 1000,
+        type: FieldTypes.number,
+      ),
+      Field(
+        label: 'Case 2 (ms)',
+        value: 1000,
+        type: FieldTypes.number,
+      ),
+      Field(
+        label: 'Case 3 (ms)',
+        value: 1000,
+        type: FieldTypes.number,
+      ),
+      Field(
+        label: 'Case 4 (ms)',
+        value: 1000,
+        type: FieldTypes.number,
+      ),
+      Field(
+        label: 'Case 5 (ms)',
+        value: 1000,
+        type: FieldTypes.number,
+      ),
+    ],
+    children: [
+      StatementInput(
+        label: 'Case 0',
+        blocks: [],
+      ),
+      StatementInput(
+        label: 'When time out',
+        blocks: [],
+      ),
+      StatementInput(
+        label: 'Case 1',
+        blocks: [],
+      ),
+      StatementInput(
+        label: 'When time out',
+        blocks: [],
+      ),
+      StatementInput(
+        label: 'Case 2',
+        blocks: [],
+      ),
+      StatementInput(
+        label: 'When time out',
+        blocks: [],
+      ),
+      StatementInput(
+        label: 'Case 3',
+        blocks: [],
+      ),
+      StatementInput(
+        label: 'When time out',
+        blocks: [],
+      ),
+      StatementInput(
+        label: 'Case 4',
+        blocks: [],
+      ),
+      StatementInput(
+        label: 'When time out',
+        blocks: [],
+      ),
+      StatementInput(
+        label: 'Case 5',
+        blocks: [],
+      ),
+      StatementInput(
+        label: 'When time out',
+        blocks: [],
+      ),
+    ],
+    returnType: BlockTypes.none,
+    originalFunc: (WidgetRef ref, Block block) {
+      final interval = block.fields[0].value;
+
+      if (interval is! int) {
+        ref.read(uiProvider.notifier).showMessage('Invalid interval');
+        return;
+      }
+
+      final condition = block.fields[1].value;
+      if (!ref.read(variablesProvider.notifier).hasVariable(condition)) {
+        ref.read(uiProvider.notifier).showMessage('Condition is empty');
+        return;
+      }
+
+      final value =
+          ref.read(variablesProvider.notifier).getVariable(condition).value;
+      if (value is! num) {
+        ref.read(uiProvider.notifier).showMessage('Condition is not a number');
+        return;
+      }
+      final valueRounded = value.round();
+
+      final cases = [...block.children] as List<StatementInput>;
+
+      if (value >= 0 && value < cases.length ~/ 2) {
+        Timer.periodic(Duration(milliseconds: interval), (timer) {
+          for (var block in cases[valueRounded * 2].blocks) {
+            block.execute(ref);
+          }
+        });
+      }
+    },
+  ),
+  BlockBluePrint(
+    name: 'Switch (5)',
+    fields: [
+      Field(
+        label: 'Condition',
+        value: '',
+        type: FieldTypes.variableNames,
+        variableType: BlockTypes.number,
+      )
+    ],
+    children: [
+      StatementInput(
+        label: 'Case 0',
+        blocks: [],
+      ),
+      StatementInput(
+        label: 'Case 1',
+        blocks: [],
+      ),
+      StatementInput(
+        label: 'Case 2',
+        blocks: [],
+      ),
+      StatementInput(
+        label: 'Case 3',
+        blocks: [],
+      ),
+      StatementInput(
+        label: 'Case 4',
+        blocks: [],
+      ),
+    ],
+    returnType: BlockTypes.none,
+    originalFunc: (WidgetRef ref, Block block) {
+      final condition = block.fields[0].value;
+      if (!ref.read(variablesProvider.notifier).hasVariable(condition)) {
+        ref.read(uiProvider.notifier).showMessage('Condition is empty');
+        return;
+      }
+
+      final value = ref.read(variablesProvider.notifier).getVariable(condition);
+      if (value is! int) {
+        ref.read(uiProvider.notifier).showMessage('Condition is not a number');
+        return;
+      }
+
+      final cases = [...block.children.map((child) => child as StatementInput)];
+
+      if (value >= 0 && value < cases.length) {
+        for (var block in cases[value].blocks) {
           block.execute(ref);
         }
       }
