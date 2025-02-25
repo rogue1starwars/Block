@@ -210,14 +210,49 @@ List<BlockBluePrint> blockDataLogic = [
       }
     },
   ),
+  // BlockBluePrint(
+  //   name: 'Switch Status',
+  //   fields: [
+  //     Field(
+  //       label: 'Select Switch',
+  //       value: '',
+  //       type: FieldTypes.variableNames,
+  //       variableType: BlockTypes.timer,
+  //     ),
+  //     Field(
+  //       label: 'Status',
+  //       value: 0,
+  //       type: FieldTypes.number,
+  //     ),
+  //   ],
+  //   children: [],
+  //   returnType: BlockTypes.none,
+  //   originalFunc: (WidgetRef ref, Block block) {
+  //     final switchName = block.fields[0].value;
+  //     final statusValue = block.fields[1].value;
+
+  //     if (!ref.read(variablesProvider.notifier).hasVariable(switchName)) {
+  //       ref.read(uiProvider.notifier).showMessage('Switch is empty');
+  //       return;
+  //     }
+
+  //     final switchValue =
+  //         ref.read(variablesProvider.notifier).getVariable(switchName).value;
+  //     if (switchValue is! Timer) {
+  //       ref.read(uiProvider.notifier).showMessage('Switch is not a timer');
+  //       return;
+  //     }
+
+  //     if (statusValue is! int) {
+  //       ref.read(uiProvider.notifier).showMessage('Case is not a number');
+  //       return;
+  //     }
+
+  //   },
+  // ),
   BlockBluePrint(
     name: 'Switch (time out)',
     fields: [
-      Field(
-        label: 'Interval',
-        value: 100,
-        type: FieldTypes.number,
-      ),
       Field(
         label: 'Condition',
         value: '',
@@ -249,11 +284,6 @@ List<BlockBluePrint> blockDataLogic = [
         value: 1000,
         type: FieldTypes.number,
       ),
-      Field(
-        label: 'Case 5 (ms)',
-        value: 1000,
-        type: FieldTypes.number,
-      ),
     ],
     children: [
       StatementInput(
@@ -261,7 +291,7 @@ List<BlockBluePrint> blockDataLogic = [
         blocks: [],
       ),
       StatementInput(
-        label: 'When time out',
+        label: 'When time out (0)',
         blocks: [],
       ),
       StatementInput(
@@ -269,7 +299,7 @@ List<BlockBluePrint> blockDataLogic = [
         blocks: [],
       ),
       StatementInput(
-        label: 'When time out',
+        label: 'When time out (1)',
         blocks: [],
       ),
       StatementInput(
@@ -277,7 +307,7 @@ List<BlockBluePrint> blockDataLogic = [
         blocks: [],
       ),
       StatementInput(
-        label: 'When time out',
+        label: 'When time out (2)',
         blocks: [],
       ),
       StatementInput(
@@ -285,7 +315,7 @@ List<BlockBluePrint> blockDataLogic = [
         blocks: [],
       ),
       StatementInput(
-        label: 'When time out',
+        label: 'When time out (3)',
         blocks: [],
       ),
       StatementInput(
@@ -293,49 +323,82 @@ List<BlockBluePrint> blockDataLogic = [
         blocks: [],
       ),
       StatementInput(
-        label: 'When time out',
+        label: 'When time out (4)',
         blocks: [],
       ),
       StatementInput(
-        label: 'Case 5',
-        blocks: [],
-      ),
-      StatementInput(
-        label: 'When time out',
+        label: 'Default',
         blocks: [],
       ),
     ],
     returnType: BlockTypes.none,
     originalFunc: (WidgetRef ref, Block block) {
-      final interval = block.fields[0].value;
-
-      if (interval is! int) {
-        ref.read(uiProvider.notifier).showMessage('Invalid interval');
-        return;
-      }
-
-      final condition = block.fields[1].value;
+      final String condition = block.fields[0].value;
       if (!ref.read(variablesProvider.notifier).hasVariable(condition)) {
         ref.read(uiProvider.notifier).showMessage('Condition is empty');
         return;
       }
 
-      final value =
-          ref.read(variablesProvider.notifier).getVariable(condition).value;
-      if (value is! num) {
+      final value = ref.read(variablesProvider.notifier).getVariable(condition);
+      if (value is! int) {
         ref.read(uiProvider.notifier).showMessage('Condition is not a number');
         return;
       }
-      final valueRounded = value.round();
+      if (value < 0 || value >= 5) {
+        final defaultStatement = block.children.last as StatementInput;
+        for (var block in defaultStatement.blocks) {
+          block.execute(ref);
+        }
+        return;
+      }
 
-      final cases = [...block.children] as List<StatementInput>;
+      final List<num> timeout =
+          block.fields.sublist(1).map((e) => e.value as num).toList();
 
-      if (value >= 0 && value < cases.length ~/ 2) {
-        Timer.periodic(Duration(milliseconds: interval), (timer) {
-          for (var block in cases[valueRounded * 2].blocks) {
+      final cases = [...block.children.map((child) => child as StatementInput)];
+
+      // when status changed or first time
+      if (!ref
+              .read(variablesProvider.notifier)
+              .hasVariable("${block.id}_prev") ||
+          ref
+                  .read(variablesProvider.notifier)
+                  .getVariable("${block.id}_prev_status") !=
+              value) {
+        ref.read(variablesProvider.notifier).setVariable(
+              "${block.id}_prev_status",
+              value,
+              BlockTypes.number,
+            );
+        ref.read(variablesProvider.notifier).setVariable(
+              "${block.id}_prev",
+              DateTime.now(),
+              BlockTypes.timer,
+            );
+      }
+
+      final prev =
+          ref.read(variablesProvider.notifier).getVariable("${block.id}_prev");
+      if (prev is DateTime) {
+        if (DateTime.now().difference(prev).inMilliseconds > timeout[value]) {
+          ref
+              .read(variablesProvider.notifier)
+              .deleteVariable("${block.id}_prev");
+          if ((value + 1) * 2 < cases.length) {
+            ref.read(variablesProvider.notifier).setVariable(
+                block.fields[0].value as String, value + 1, BlockTypes.number);
+          }
+          for (var block in cases[value * 2 + 1].blocks) {
             block.execute(ref);
           }
-        });
+          return;
+        }
+      }
+
+      if (value >= 0 && value * 2 < cases.length) {
+        for (var block in cases[value * 2].blocks) {
+          block.execute(ref);
+        }
       }
     },
   ),
