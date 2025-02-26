@@ -29,13 +29,19 @@ final List<BlockBluePrint> blockDataSensors = [
         ambientLight = AmbientLight();
       }
 
-      ambientLight.ambientLightStream.listen((double lightLevel) {
+      final StreamSubscription ambientLightStream =
+          ambientLight.ambientLightStream.listen((double lightLevel) {
         ref.read(variablesProvider.notifier).setVariable(
               "_lightLevel",
               lightLevel,
               BlockTypes.number,
             );
       });
+      ref.read(variablesProvider.notifier).setVariable(
+            "_ambientLight_",
+            ambientLightStream,
+            BlockTypes.none,
+          );
     },
   ),
   BlockBluePrint(
@@ -96,8 +102,12 @@ final List<BlockBluePrint> blockDataSensors = [
     children: [],
     returnType: BlockTypes.none,
     originalFunc: (WidgetRef ref, Block block) {
-      ref.read(variablesProvider.notifier).setVariable("_maxAccel", 0.0, BlockTypes.number);
-      ref.read(variablesProvider.notifier).setVariable("_minAccel", double.infinity, BlockTypes.number);
+      ref
+          .read(variablesProvider.notifier)
+          .setVariable("_maxAccel", 0.0, BlockTypes.number);
+      ref
+          .read(variablesProvider.notifier)
+          .setVariable("_minAccel", double.infinity, BlockTypes.number);
       final accelerometerStream = accelerometerEventStream(
         samplingPeriod: SensorInterval.uiInterval,
       ).listen(
@@ -127,11 +137,15 @@ final List<BlockBluePrint> blockDataSensors = [
 
           late final double maxAccel;
           late final double minAccel;
-            maxAccel = ref.read(variablesProvider.notifier).getVariable(
-            "_maxAccel"
-          ) as double? ?? 0.0;
+          maxAccel = ref
+                  .read(variablesProvider.notifier)
+                  .getVariable("_maxAccel") as double? ??
+              0.0;
 
-            minAccel = ref.read(variablesProvider.notifier).getVariable("_minAccel") as double? ?? double.infinity;
+          minAccel = ref
+                  .read(variablesProvider.notifier)
+                  .getVariable("_minAccel") as double? ??
+              double.infinity;
 
           ref.read(variablesProvider.notifier).setVariable(
                 "_maxAccel",
@@ -203,8 +217,9 @@ final List<BlockBluePrint> blockDataSensors = [
     children: [],
     returnType: BlockTypes.number,
     originalFunc: (WidgetRef ref, Block block) {
-      final value =
-          ref.read(variablesProvider.notifier).getVariable("_accelerometerTotal");
+      final value = ref
+          .read(variablesProvider.notifier)
+          .getVariable("_accelerometerTotal");
       if (value == null) {
         print("Accelerometer Total: null");
         return;
@@ -618,33 +633,42 @@ final List<BlockBluePrint> blockDataSensors = [
     },
   ),
   BlockBluePrint(
-  name: 'Activate Fall Detection',
-  fields: [
-    Field(label: 'Min Accel', type: FieldTypes.number, value: 0),
-    Field(label: 'Max Accel', type: FieldTypes.number, value: 0),
-    Field(label: 'Light Level', type: FieldTypes.number, value: 0),
-  ],
-  children: [],
-  returnType: BlockTypes.boolean,
-  originalFunc: (WidgetRef ref, Block block) {
+    name: 'Activate Fall Detection',
+    fields: [
+      Field(label: 'Min Accel', type: FieldTypes.number, value: 0),
+      Field(label: 'Max Accel', type: FieldTypes.number, value: 0),
+      Field(label: 'Light Level', type: FieldTypes.number, value: 0),
+    ],
+    children: [],
+    returnType: BlockTypes.boolean,
+    originalFunc: (WidgetRef ref, Block block) {
+      final minAccelThreshold = block.fields[0].value as num;
+      final maxAccelThreshold = block.fields[1].value as num;
+      final lightSensorThreshold = block.fields[2].value as num;
 
-    final minAccelThreshold = block.fields[0].value as num;
-    final maxAccelThreshold = block.fields[1].value as num;
-    final lightSensorThreshold = block.fields[2].value as num;
-   
-    final maxAccel = ref.read(variablesProvider.notifier).getVariable("_maxAccel") as double? ?? 0;
-    final minAccel = ref.read(variablesProvider.notifier).getVariable("_minAccel") as double? ?? 0;
-    final lightLevel = ref.read(variablesProvider.notifier).getVariable("_lightLevel") as double? ?? 0;
-    print("maxAccel: $maxAccel");
-    print("minAccel: $minAccel");
-    print("light: $lightLevel");
-    if (minAccel < minAccelThreshold && maxAccel > maxAccelThreshold && lightLevel > lightSensorThreshold) {
-      return true;
-    }
-    return false;
-
-  },
-),
+      final maxAccel = ref
+              .read(variablesProvider.notifier)
+              .getVariable("_maxAccel") as double? ??
+          0;
+      final minAccel = ref
+              .read(variablesProvider.notifier)
+              .getVariable("_minAccel") as double? ??
+          0;
+      final lightLevel = ref
+              .read(variablesProvider.notifier)
+              .getVariable("_lightLevel") as double? ??
+          0;
+      print("maxAccel: $maxAccel");
+      print("minAccel: $minAccel");
+      print("light: $lightLevel");
+      if (minAccel < minAccelThreshold &&
+          maxAccel > maxAccelThreshold &&
+          lightLevel > lightSensorThreshold) {
+        return true;
+      }
+      return false;
+    },
+  ),
 /*
 Status 0: falling
 Status 1: ground detected
@@ -652,16 +676,15 @@ Status 2: pending
 status 3: cutting
 status 4: moving
 */
-BlockBluePrint(
-  name: 'Get Fall Detect Status',
-  fields: [],
-  children: [],
-  returnType: BlockTypes.boolean,
-  originalFunc: (WidgetRef ref, Block block) {
-    final value = ref.read(variablesProvider.notifier).getVariable("_fallDetected");
-    return value ?? false;
-  },
-
-),
-
+  BlockBluePrint(
+    name: 'Get Fall Detect Status',
+    fields: [],
+    children: [],
+    returnType: BlockTypes.boolean,
+    originalFunc: (WidgetRef ref, Block block) {
+      final value =
+          ref.read(variablesProvider.notifier).getVariable("_fallDetected");
+      return value ?? false;
+    },
+  ),
 ];

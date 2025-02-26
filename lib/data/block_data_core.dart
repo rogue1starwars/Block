@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phoneduino_block/data/block_data_ble.dart';
+import 'package:phoneduino_block/data/block_data_http.dart';
 import 'package:phoneduino_block/data/block_data_logic.dart';
 import 'package:phoneduino_block/data/block_data_logs.dart';
 import 'package:phoneduino_block/data/block_data_loops.dart';
@@ -87,6 +88,7 @@ Map<String, List<BlockBluePrint>> blockData = {
   'Logic': blockDataLogic,
   'Loops': blockDataLoops,
   'Logs': blockDataLogs,
+  'Http': blockDataHttp,
   'Bluetooth': blockDataBle,
   'Sensors': blockDataSensors,
   'Sensors (Angle)': blockDataSensorsAngle,

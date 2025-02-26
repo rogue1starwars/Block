@@ -18,10 +18,11 @@ class PrintBoard extends ConsumerWidget {
         itemCount: uiState.messageDequeue.length,
         itemBuilder: (context, index) {
           return ListTile(
-            title: Text(uiState.messageDequeue[index]),
+            title: SelectableText(uiState.messageDequeue[index]),
           );
         },
       ),
+
     );
   }
 }
