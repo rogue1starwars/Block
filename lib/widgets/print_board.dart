@@ -10,13 +10,18 @@ class PrintBoard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final uiState = ref.watch(uiProvider);
-    return ListView.builder(
-      itemCount: uiState.messageDequeue.length,
-      itemBuilder: (context, index) {
-        return ListTile(
-          title: Text(uiState.messageDequeue[index]),
-        );
-      },
+    const List<Color> colors = UiState.colors;
+    final int? colorIndex = uiState.colorIndex;
+    return Container(
+      color: colorIndex != null ? colors[colorIndex] : Theme.of(context).colorScheme.surface,
+      child: ListView.builder(
+        itemCount: uiState.messageDequeue.length,
+        itemBuilder: (context, index) {
+          return ListTile(
+            title: Text(uiState.messageDequeue[index]),
+          );
+        },
+      ),
     );
   }
 }

@@ -187,21 +187,20 @@ class _DropdownFieldWidgetState extends ConsumerState<DropdownFieldWidget> {
     int selectedOption = widget.parent.fields[widget.index].value as int;
     return DropdownMenu(
       dropdownMenuEntries: [
-        for (final option in options)
+        for (int i = 0; i < options.length; i++)
           DropdownMenuEntry(
-            value: option,
-            label: option.toString(),
+            value: i,
+            label: options[i].toString(),
           ),
       ],
-      initialSelection: options[selectedOption],
+      initialSelection: selectedOption,
       onSelected: (dynamic value) {
-        if (value != null) {
-          ref.read(blockTreeProvider.notifier).updateField(
-                parentId: widget.parent.id,
-                value: options.indexOf(value),
-                index: widget.index,
-              );
-        }
+        if (value is! int) return;
+        ref.read(blockTreeProvider.notifier).updateField(
+              parentId: widget.parent.id,
+              value: value,
+              index: widget.index,
+            );
       },
     );
   }
