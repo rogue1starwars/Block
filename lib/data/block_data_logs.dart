@@ -12,6 +12,35 @@ import 'package:phoneduino_block/data/block_data_core.dart';
 
 final List<BlockBluePrint> blockDataLogs = [
   BlockBluePrint(
+    name: 'Create very long log',
+    fields: [
+      Field(
+        type: FieldTypes.number,
+        label: 'Length',
+        value: 1000,
+      ),
+    ],
+    children: [],
+    returnType: BlockTypes.none,
+    originalFunc: (WidgetRef ref, Block block) {
+      final length = block.fields[0].value;
+      if (length is! int) {
+        ref.read(uiProvider.notifier).showMessage(
+              'Invalid length',
+            );
+        return;
+      }
+      if (length < 1) {
+        ref.read(uiProvider.notifier).showMessage(
+              'Length must be at least 1',
+            );
+        return;
+      }
+      final log = List.generate(length, (index) => 'Log $index').join(', ');
+      writeLog(log, ref);
+    },
+  ),
+  BlockBluePrint(
       name: 'Logger',
       fields: [
         Field(
