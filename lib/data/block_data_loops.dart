@@ -7,6 +7,7 @@ import 'package:phoneduino_block/models/fields.dart';
 import 'package:phoneduino_block/models/inputs.dart';
 import 'package:phoneduino_block/provider/intervals_provider.dart';
 import 'package:phoneduino_block/provider/ui_provider.dart';
+import 'package:phoneduino_block/provider/variables_provider.dart';
 import 'package:phoneduino_block/utils/type.dart';
 
 List<BlockBluePrint> blockDataLoops = [
@@ -68,6 +69,101 @@ List<BlockBluePrint> blockDataLoops = [
     returnType: BlockTypes.none,
     originalFunc: (WidgetRef ref, Block block) {
       ref.watch(intervalProvider.notifier).clearInterval();
+    },
+  ),
+  BlockBluePrint(
+    name: 'Timer',
+    fields: [
+      Field(
+        type: FieldTypes.number,
+        label: "Miliseconds",
+        value: 0,
+      ),
+      Field(
+        type: FieldTypes.variableNames,
+        label: "Timer Name",
+        value: '',
+        variableType: BlockTypes.timer,
+      ),
+    ],
+    children: [
+      StatementInput(
+        label: 'Do',
+        blocks: [],
+      ),
+    ],
+    returnType: BlockTypes.none,
+    originalFunc: (WidgetRef ref, Block block) {
+      final statement = block.children[0] as StatementInput;
+      final value = block.fields[0].value;
+      final timerName = block.fields[1].value;
+      if (value is! int) {
+        ref.read(uiProvider.notifier).showMessage(
+              'Invalid interval',
+            );
+        return;
+      }
+      if (timerName is! String) {
+        ref.read(uiProvider.notifier).showMessage(
+              'Invalid timer name',
+            );
+        return;
+      }
+
+      if (!ref.read(variablesProvider.notifier).hasVariable(timerName)) {
+        ref.read(uiProvider.notifier).showMessage(
+              'Timer name not found',
+            );
+        return;
+      }
+
+      final timer = Timer(
+        Duration(milliseconds: value),
+        () {
+          for (var block in statement.blocks) {
+            block.execute(ref);
+          }
+        },
+      );
+      ref.read(variablesProvider.notifier).updateVariable(timerName, timer);
+    },
+  ),
+  BlockBluePrint(
+    name: 'Cancel Timer',
+    fields: [
+      Field(
+        type: FieldTypes.variableNames,
+        label: "Timer Name",
+        value: '',
+        variableType: BlockTypes.timer,
+      ),
+    ],
+    children: [],
+    returnType: BlockTypes.none,
+    originalFunc: (WidgetRef ref, Block block) {
+      final timerName = block.fields[0].value;
+      if (timerName is! String) {
+        ref.read(uiProvider.notifier).showMessage(
+              'Invalid timer name',
+            );
+        return;
+      }
+
+      if (!ref.read(variablesProvider.notifier).hasVariable(timerName)) {
+        ref.read(uiProvider.notifier).showMessage(
+              'Timer name not found',
+            );
+        return;
+      }
+
+      final timer = ref.read(variablesProvider.notifier).getVariable(timerName);
+      if (timer is! Timer) {
+        ref.read(uiProvider.notifier).showMessage(
+              'Invalid timer',
+            );
+        return;
+      }
+      timer.cancel();
     },
   ),
   BlockBluePrint(

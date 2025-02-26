@@ -10,9 +10,11 @@ import 'package:phoneduino_block/provider/intervals_provider.dart';
 import 'package:phoneduino_block/provider/ui_provider.dart';
 import 'package:phoneduino_block/provider/variables_provider.dart';
 import 'package:phoneduino_block/screens/logger_screen.dart';
+import 'package:phoneduino_block/utils/encode_decode_project.dart';
 import 'package:phoneduino_block/widgets/ble/ble_home.dart';
 import 'package:phoneduino_block/widgets/block_tree.dart';
 import 'package:phoneduino_block/widgets/print_board.dart';
+import 'package:phoneduino_block/widgets/import_export_project.dart';
 import 'package:phoneduino_block/widgets/variables/variable_list.dart';
 
 class HomePage extends ConsumerWidget {
@@ -41,86 +43,89 @@ class HomePage extends ConsumerWidget {
       }
     });
     return Scaffold(
-      appBar: AppBar(title: const Text('Block'), actions: [
-        const BleHome(),
-        IconButton(
-          onPressed: () {
-            showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return const VariableListDialog();
-                });
-          },
-          icon: const Icon(Icons.edit),
-        ),
-        IconButton(
-            onPressed: () async {
-              Navigator.push(context, MaterialPageRoute(builder: (context) {
-                return const LoggerScreen();
-              }));
+      appBar: AppBar(
+        actions: [
+          IconButton(
+            onPressed: () {
+              showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return const VariableListDialog();
+                  });
             },
-            icon: const Icon(Icons.list)),
-        IconButton(
-          onPressed: () {
-            try {
-              final String blockTreeJson = jsonEncode(root.toJson());
-              print(blockTreeJson);
-              box.put('block_tree', blockTreeJson);
+            icon: const Icon(Icons.edit),
+          ),
+          IconButton(
+              onPressed: () async {
+                Navigator.push(context, MaterialPageRoute(builder: (context) {
+                  return const LoggerScreen();
+                }));
+              },
+              icon: const Icon(Icons.list)),
+          IconButton(
+            onPressed: () {
+              try {
+                final Map<String, Variable> variables =
+                    ref.read(variablesProvider);
 
-              final Map<String, Variable> variables =
-                  ref.read(variablesProvider);
-              final Map<String, dynamic> variablesJson =
-                  variables.map((key, value) {
-                return MapEntry(key, value.toJson());
-              });
-              variablesJson.removeWhere((key, value) => value.isEmpty);
-              box.put('variables', jsonEncode(variablesJson));
-            } catch (e) {
-              ref
-                  .read(uiProvider.notifier)
-                  .showMessage('Failed to save block tree: $e');
-            }
-          },
-          icon: const Icon(Icons.save),
-        ),
-        IconButton(
-          onPressed: () {
-            try {
-              final blockTreeJson = box.get('block_tree');
-              final blockTreeData = jsonDecode(blockTreeJson);
-              print(blockTreeData);
-              Block root = Block.fromJson(blockTreeData);
-              ref.read(blockTreeProvider.notifier).updateRoot(root);
+                final String projectData = encode(root, variables);
+                box.put('project', projectData);
+              } catch (e) {
+                ref
+                    .read(uiProvider.notifier)
+                    .showMessage('Failed to save block tree: $e');
+              }
+            },
+            icon: const Icon(Icons.save),
+          ),
+          IconButton(
+            onPressed: () {
+              try {
+                final Map<String, dynamic> projectData =
+                    jsonDecode(box.get('project'));
 
-              final variablesJson = box.get('variables');
-              final Map<String, dynamic> variablesData =
-                  jsonDecode(variablesJson);
-              final Map<String, Variable> variables =
-                  variablesData.map((key, value) {
-                return MapEntry(key, Variable.fromJson(value));
-              });
-              ref
-                  .read(variablesProvider.notifier)
-                  .updateAllVariables(variables);
-            } catch (e) {
-              ref
-                  .read(uiProvider.notifier)
-                  .showMessage('Failed to load block tree: $e');
-            }
-          },
-          icon: const Icon(Icons.restore),
-        ),
-      ]),
+                final Map<String, dynamic> blockTreeData =
+                    projectData['block_tree'];
+                print(blockTreeData);
+                Block root = Block.fromJson(blockTreeData);
+                ref.read(blockTreeProvider.notifier).updateRoot(root);
+
+                final Map<String, dynamic> variablesData =
+                    projectData['variables'];
+                final Map<String, Variable> variables =
+                    variablesData.map((key, value) {
+                  return MapEntry(key, Variable.fromJson(value));
+                });
+                ref
+                    .read(variablesProvider.notifier)
+                    .updateAllVariables(variables);
+              } catch (e) {
+                ref
+                    .read(uiProvider.notifier)
+                    .showMessage('Failed to load block tree: $e');
+              }
+            },
+            icon: const Icon(Icons.restore),
+          ),
+          const ImportExportButton(),
+        ],
+      ),
       body: intervals.intervals.isNotEmpty
           ? const PrintBoard()
           : SingleChildScrollView(
-              child: BlockTree(block: root),
+              child: Column(
+                children: [
+                  const BleHome(),
+                  BlockTree(block: root),
+                ],
+              ),
             ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           if (intervals.intervals.isNotEmpty) {
             ref.read(intervalProvider.notifier).clearInterval();
             ref.read(uiProvider.notifier).clearMessage();
+            ref.read(variablesProvider.notifier).clearAllVariables();
           } else {
             root.execute(ref);
           }

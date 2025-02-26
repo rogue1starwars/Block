@@ -3,7 +3,6 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:ambient_light/ambient_light.dart';
-import 'package:flutter_compass/flutter_compass.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:phoneduino_block/models/block.dart';
@@ -11,25 +10,26 @@ import 'package:phoneduino_block/models/fields.dart';
 import 'package:phoneduino_block/models/inputs.dart';
 import 'package:phoneduino_block/provider/ui_provider.dart';
 import 'package:phoneduino_block/provider/variables_provider.dart';
+import 'package:phoneduino_block/utils/orientation_util.dart';
 import 'package:phoneduino_block/utils/type.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'package:phoneduino_block/data/block_data_core.dart';
 
 final List<BlockBluePrint> blockDataSensors = [
   BlockBluePrint(
-    name: 'Activate Ambient Light Sensor',
+    name: 'Activate Light Sensor',
     fields: [],
     children: [],
     returnType: BlockTypes.none,
     originalFunc: (WidgetRef ref, Block block) {
-      late final AmbientLight _ambientLight;
+      late final AmbientLight ambientLight;
       if (Platform.isIOS) {
-        _ambientLight = AmbientLight(frontCamera: true);
+        ambientLight = AmbientLight(frontCamera: true);
       } else {
-        _ambientLight = AmbientLight();
+        ambientLight = AmbientLight();
       }
 
-      _ambientLight.ambientLightStream.listen((double lightLevel) {
+      ambientLight.ambientLightStream.listen((double lightLevel) {
         ref.read(variablesProvider.notifier).setVariable(
               "_lightLevel",
               lightLevel,
@@ -39,7 +39,7 @@ final List<BlockBluePrint> blockDataSensors = [
     },
   ),
   BlockBluePrint(
-    name: 'Get Ambient Light Level',
+    name: 'Get Light Level',
     fields: [],
     children: [],
     returnType: BlockTypes.number,
@@ -59,9 +59,7 @@ final List<BlockBluePrint> blockDataSensors = [
     children: [],
     returnType: BlockTypes.none,
     originalFunc: (WidgetRef ref, Block block) {
-      final barometerStream =
-          barometerEventStream(samplingPeriod: SensorInterval.fastestInterval)
-              .listen(
+      final barometerStream = barometerEventStream().listen(
         (event) {
           ref.read(variablesProvider.notifier).setVariable(
                 "_pressure",
@@ -71,7 +69,7 @@ final List<BlockBluePrint> blockDataSensors = [
         },
       );
       ref.read(variablesProvider.notifier).setVariable(
-            "_barometerStream",
+            "_barometerStream_",
             barometerStream,
             BlockTypes.none,
           );
@@ -98,10 +96,14 @@ final List<BlockBluePrint> blockDataSensors = [
     children: [],
     returnType: BlockTypes.none,
     originalFunc: (WidgetRef ref, Block block) {
+      ref.read(variablesProvider.notifier).setVariable("_maxAccel", 0.0, BlockTypes.number);
+      ref.read(variablesProvider.notifier).setVariable("_minAccel", double.infinity, BlockTypes.number);
       final accelerometerStream = accelerometerEventStream(
-              samplingPeriod: SensorInterval.normalInterval)
-          .listen(
+        samplingPeriod: SensorInterval.uiInterval,
+      ).listen(
         (event) {
+          final double accelMagnitude =
+              sqrt(event.x * event.x + event.y * event.y + event.z * event.z);
           ref.read(variablesProvider.notifier).setVariable(
                 "_accelerometerX",
                 event.x,
@@ -117,10 +119,34 @@ final List<BlockBluePrint> blockDataSensors = [
                 event.z,
                 BlockTypes.number,
               );
+          ref.read(variablesProvider.notifier).setVariable(
+                "_accelerometerTotal",
+                accelMagnitude,
+                BlockTypes.number,
+              );
+
+          late final double maxAccel;
+          late final double minAccel;
+            maxAccel = ref.read(variablesProvider.notifier).getVariable(
+            "_maxAccel"
+          ) as double? ?? 0.0;
+
+            minAccel = ref.read(variablesProvider.notifier).getVariable("_minAccel") as double? ?? double.infinity;
+
+          ref.read(variablesProvider.notifier).setVariable(
+                "_maxAccel",
+                max(maxAccel, accelMagnitude),
+                BlockTypes.number,
+              );
+          ref.read(variablesProvider.notifier).setVariable(
+                "_minAccel",
+                min(minAccel, accelMagnitude),
+                BlockTypes.number,
+              );
         },
       );
       ref.read(variablesProvider.notifier).setVariable(
-            "_accelerometerStream",
+            "_accelerometerStream_",
             accelerometerStream,
             BlockTypes.none,
           );
@@ -177,71 +203,115 @@ final List<BlockBluePrint> blockDataSensors = [
     children: [],
     returnType: BlockTypes.number,
     originalFunc: (WidgetRef ref, Block block) {
-      final x = ref
-          .read(variablesProvider.notifier)
-          .getVariable("_accelerometerX") as num?;
-      final y = ref
-          .read(variablesProvider.notifier)
-          .getVariable("_accelerometerY") as num?;
-      final z = ref
-          .read(variablesProvider.notifier)
-          .getVariable("_accelerometerZ") as num?;
-
-      if (x == null || y == null || z == null) {
+      final value =
+          ref.read(variablesProvider.notifier).getVariable("_accelerometerTotal");
+      if (value == null) {
         print("Accelerometer Total: null");
-        return null;
+        return;
       }
-      return sqrt(x * x + y * y + z * z);
+      return value;
     },
   ),
   BlockBluePrint(
-    name: 'Activate Orientation',
+    name: 'Activate Magnetometer',
     fields: [],
     children: [],
     returnType: BlockTypes.none,
     originalFunc: (WidgetRef ref, Block block) {
-      final events = FlutterCompass.events;
-      if (events == null) {
-        ref.read(uiProvider.notifier).showMessage(
-              'Orientation sensor not available',
-            );
-        return;
-      }
-
-      if (ref
-              .read(variablesProvider.notifier)
-              .getVariable("_orientationStream") !=
-          null) {
-        print("Orientation Stream already active");
-        return;
-      }
-      StreamSubscription orientationStream = events.listen((event) {
-        ref.read(variablesProvider.notifier).setVariable(
-              "_orientation",
-              event.heading,
-              BlockTypes.number,
-            );
-      });
+      final magnetometerStream = magnetometerEventStream(
+        samplingPeriod: SensorInterval.uiInterval,
+      ).listen(
+        (event) {
+          ref.read(variablesProvider.notifier).setVariable(
+                "_magnetometerX",
+                event.x,
+                BlockTypes.number,
+              );
+          ref.read(variablesProvider.notifier).setVariable(
+                "_magnetometerY",
+                event.y,
+                BlockTypes.number,
+              );
+          ref.read(variablesProvider.notifier).setVariable(
+                "_magnetometerZ",
+                event.z,
+                BlockTypes.number,
+              );
+        },
+      );
       ref.read(variablesProvider.notifier).setVariable(
-            "_orientationStream",
-            orientationStream,
+            "_magnetometerStream_",
+            magnetometerStream,
             BlockTypes.none,
           );
     },
   ),
   BlockBluePrint(
-    name: 'Get Orientation',
+    name: 'Get Magnetometer X',
     fields: [],
     children: [],
     returnType: BlockTypes.number,
     originalFunc: (WidgetRef ref, Block block) {
       final value =
-          ref.read(variablesProvider.notifier).getVariable("_orientation");
+          ref.read(variablesProvider.notifier).getVariable("_magnetometerX");
       if (value == null) {
-        print("Get Orientation: null");
+        print("Get Magnetometer X: null");
         return;
       }
       return value;
+    },
+  ),
+  BlockBluePrint(
+    name: 'Get Magnetometer Y',
+    fields: [],
+    children: [],
+    returnType: BlockTypes.number,
+    originalFunc: (WidgetRef ref, Block block) {
+      final value =
+          ref.read(variablesProvider.notifier).getVariable("_magnetometerY");
+      if (value == null) {
+        print("Get Magnetometer Y: null");
+        return;
+      }
+      return value;
+    },
+  ),
+  BlockBluePrint(
+    name: 'Get Magnetometer Z',
+    fields: [],
+    children: [],
+    returnType: BlockTypes.number,
+    originalFunc: (WidgetRef ref, Block block) {
+      final value =
+          ref.read(variablesProvider.notifier).getVariable("_magnetometerZ");
+      if (value == null) {
+        print("Get Magnetometer Z: null");
+        return;
+      }
+      return value;
+    },
+  ),
+  BlockBluePrint(
+    name: 'Orientation from Mag',
+    fields: [],
+    children: [],
+    returnType: BlockTypes.number,
+    originalFunc: (WidgetRef ref, Block block) {
+      final x = ref
+          .read(variablesProvider.notifier)
+          .getVariable("_magnetometerX") as num?;
+      final y = ref
+          .read(variablesProvider.notifier)
+          .getVariable("_magnetometerY") as num?;
+      final z = ref
+          .read(variablesProvider.notifier)
+          .getVariable("_magnetometerZ") as num?;
+
+      if (x == null || y == null || z == null) {
+        print("Orientation from Magnetometer: null");
+        return null;
+      }
+      return atan2(y, x) * 180 / pi;
     },
   ),
   BlockBluePrint(
@@ -276,7 +346,9 @@ final List<BlockBluePrint> blockDataSensors = [
         }
       }
 
-      if (ref.read(variablesProvider.notifier).getVariable("_positionStream") !=
+      if (ref
+              .read(variablesProvider.notifier)
+              .getVariable("_positionStream_") !=
           null) {
         print("Position Stream already active");
         return;
@@ -304,7 +376,7 @@ final List<BlockBluePrint> blockDataSensors = [
             );
       });
       ref.read(variablesProvider.notifier).setVariable(
-            "_positionStream",
+            "_positionStream_",
             positionStream,
             BlockTypes.none,
           );
@@ -343,22 +415,22 @@ final List<BlockBluePrint> blockDataSensors = [
     fields: [],
     children: [
       ValueInput(
-        label: 'Latitude 1',
+        label: 'Latitude (start)',
         block: null,
         filter: [BlockTypes.number],
       ),
       ValueInput(
-        label: 'Longitude 1',
+        label: 'Latitude (start)',
         block: null,
         filter: [BlockTypes.number],
       ),
       ValueInput(
-        label: 'Latitude 2',
+        label: 'Latitude (dest)',
         block: null,
         filter: [BlockTypes.number],
       ),
       ValueInput(
-        label: 'Longitude 2',
+        label: 'Longitude (dest)',
         block: null,
         filter: [BlockTypes.number],
       ),
@@ -404,22 +476,22 @@ final List<BlockBluePrint> blockDataSensors = [
     fields: [],
     children: [
       ValueInput(
-        label: 'Latitude 1',
+        label: 'Latitude (start)',
         block: null,
         filter: [BlockTypes.number],
       ),
       ValueInput(
-        label: 'Longitude 1',
+        label: 'Longitude (start)',
         block: null,
         filter: [BlockTypes.number],
       ),
       ValueInput(
-        label: 'Latitude 2',
+        label: 'Latitude (dest)',
         block: null,
         filter: [BlockTypes.number],
       ),
       ValueInput(
-        label: 'Longitude 2',
+        label: 'Longitude (dest)',
         block: null,
         filter: [BlockTypes.number],
       ),
@@ -461,23 +533,44 @@ final List<BlockBluePrint> blockDataSensors = [
     },
   ),
   BlockBluePrint(
-    name: 'Calculate and Create Signal',
+    name: 'Calculate_Create Signal',
     fields: [
-      Field(label: 'Dest Lon', type: FieldTypes.number, value: 0),
       Field(label: 'Dest Lat', type: FieldTypes.number, value: 0),
+      Field(label: 'Dest Lon', type: FieldTypes.number, value: 0),
       Field(label: 'Orientation error', type: FieldTypes.number, value: 0),
       Field(label: 'Threshold', type: FieldTypes.number, value: 20),
     ],
-    children: [],
+    children: [
+      ValueInput(
+        label: 'Current Lat',
+        block: null,
+        filter: [BlockTypes.number],
+      ),
+      ValueInput(
+        label: 'Current Lon',
+        block: null,
+        filter: [BlockTypes.number],
+      ),
+      ValueInput(
+        label: 'Orientation',
+        block: null,
+        filter: [BlockTypes.number],
+      ),
+    ],
     returnType: BlockTypes.number,
     originalFunc: (WidgetRef ref, Block block) {
-      final destLon = block.fields[0].value;
-      final destLat = block.fields[1].value;
+      final destLat = block.fields[0].value;
+      final destLon = block.fields[1].value;
       final orientationError = block.fields[2].value;
       final threshold = block.fields[3].value;
 
-      if (destLon == null ||
-          destLat == null ||
+      final currentLat = (block.children[0] as ValueInput).block?.execute(ref);
+      final currentLon = (block.children[1] as ValueInput).block?.execute(ref);
+
+      final orientation = (block.children[2] as ValueInput).block?.execute(ref);
+
+      if (destLat == null ||
+          destLon == null ||
           threshold == null ||
           orientationError == null) {
         ref.read(uiProvider.notifier).showMessage(
@@ -486,11 +579,6 @@ final List<BlockBluePrint> blockDataSensors = [
         return null;
       }
 
-      final currentLon =
-          ref.read(variablesProvider.notifier).getVariable('_long') as num?;
-      final currentLat =
-          ref.read(variablesProvider.notifier).getVariable('_lat') as num?;
-
       if (currentLon == null || currentLat == null) {
         ref.read(uiProvider.notifier).showMessage(
               'Invalid input',
@@ -498,27 +586,82 @@ final List<BlockBluePrint> blockDataSensors = [
         return null;
       }
 
-      final orientation = ref
-              .read(variablesProvider.notifier)
-              .getVariable('_orientation') as double? ??
-          0;
+      if (currentLat is! num || currentLon is! num || orientation is! num) {
+        ref.read(uiProvider.notifier).showMessage(
+              'Invalid input',
+            );
+        return null;
+      }
 
-      final orientationCalibrated = (orientation - orientationError) % 360;
+      final orientationCalibrated =
+          formatBearing(orientation.toDouble() - orientationError);
+      // print('orientation: $orientation');
+      print('orientationCalibrated: $orientationCalibrated');
 
       final bearing = Geolocator.bearingBetween(
-        currentLon.toDouble(),
         currentLat.toDouble(),
-        destLon.toDouble(),
+        currentLon.toDouble(),
         destLat.toDouble(),
+        destLon.toDouble(),
       );
 
-      if ((orientationCalibrated - bearing).abs() < threshold) {
-        return 0;
-      } else if ((bearing - orientationCalibrated) < 0) {
-        return -1;
-      } else {
+      final double angle = formatBearing(orientationCalibrated - bearing);
+      print('angle: $angle');
+
+      if (angle.abs() < threshold) {
         return 1;
+      } else if (angle < 0) {
+        return 2;
+      } else {
+        return 3;
       }
     },
-  )
+  ),
+  BlockBluePrint(
+  name: 'Activate Fall Detection',
+  fields: [
+    Field(label: 'Min Accel', type: FieldTypes.number, value: 0),
+    Field(label: 'Max Accel', type: FieldTypes.number, value: 0),
+    Field(label: 'Light Level', type: FieldTypes.number, value: 0),
+  ],
+  children: [],
+  returnType: BlockTypes.boolean,
+  originalFunc: (WidgetRef ref, Block block) {
+
+    final minAccelThreshold = block.fields[0].value as num;
+    final maxAccelThreshold = block.fields[1].value as num;
+    final lightSensorThreshold = block.fields[2].value as num;
+   
+    final maxAccel = ref.read(variablesProvider.notifier).getVariable("_maxAccel") as double? ?? 0;
+    final minAccel = ref.read(variablesProvider.notifier).getVariable("_minAccel") as double? ?? 0;
+    final lightLevel = ref.read(variablesProvider.notifier).getVariable("_lightLevel") as double? ?? 0;
+    print("maxAccel: $maxAccel");
+    print("minAccel: $minAccel");
+    print("light: $lightLevel");
+    if (minAccel < minAccelThreshold && maxAccel > maxAccelThreshold && lightLevel > lightSensorThreshold) {
+      return true;
+    }
+    return false;
+
+  },
+),
+/*
+Status 0: falling
+Status 1: ground detected
+Status 2: pending
+status 3: cutting
+status 4: moving
+*/
+BlockBluePrint(
+  name: 'Get Fall Detect Status',
+  fields: [],
+  children: [],
+  returnType: BlockTypes.boolean,
+  originalFunc: (WidgetRef ref, Block block) {
+    final value = ref.read(variablesProvider.notifier).getVariable("_fallDetected");
+    return value ?? false;
+  },
+
+),
+
 ];
