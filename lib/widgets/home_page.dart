@@ -1,10 +1,12 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:phoneduino_block/models/block.dart';
 import 'package:phoneduino_block/models/variables.dart';
+import 'package:phoneduino_block/provider/ble_info.dart';
 import 'package:phoneduino_block/provider/block_tree_provider.dart';
 import 'package:phoneduino_block/provider/intervals_provider.dart';
 import 'package:phoneduino_block/provider/ui_provider.dart';
@@ -126,6 +128,14 @@ class HomePage extends ConsumerWidget {
             ref.read(intervalProvider.notifier).clearInterval();
             ref.read(uiProvider.notifier).clearMessage();
             ref.read(variablesProvider.notifier).clearAllVariables();
+            try {
+              final BleInfo bleInfo = ref.read(bleProvider);
+              if (bleInfo.characteristics != null) {
+                bleInfo.characteristics!.write('0'.toString().codeUnits);
+              }
+            } catch (e) {
+              ref.read(uiProvider.notifier).showMessage('Failed to stop: $e');
+            }
           } else {
             root.execute(ref);
           }

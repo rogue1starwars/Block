@@ -554,6 +554,7 @@ final List<BlockBluePrint> blockDataSensors = [
       Field(label: 'Dest Lon', type: FieldTypes.number, value: 0),
       Field(label: 'Orientation error', type: FieldTypes.number, value: 0),
       Field(label: 'Threshold', type: FieldTypes.number, value: 20),
+      Field(label: 'Distance', type: FieldTypes.number, value: 10),
     ],
     children: [
       ValueInput(
@@ -578,30 +579,21 @@ final List<BlockBluePrint> blockDataSensors = [
       final destLon = block.fields[1].value;
       final orientationError = block.fields[2].value;
       final threshold = block.fields[3].value;
+      final distanceThreshold = block.fields[4].value;
 
       final currentLat = (block.children[0] as ValueInput).block?.execute(ref);
       final currentLon = (block.children[1] as ValueInput).block?.execute(ref);
 
       final orientation = (block.children[2] as ValueInput).block?.execute(ref);
 
-      if (destLat == null ||
-          destLon == null ||
-          threshold == null ||
-          orientationError == null) {
-        ref.read(uiProvider.notifier).showMessage(
-              'Invalid input',
-            );
-        return null;
-      }
-
-      if (currentLon == null || currentLat == null) {
-        ref.read(uiProvider.notifier).showMessage(
-              'Invalid input',
-            );
-        return null;
-      }
-
-      if (currentLat is! num || currentLon is! num || orientation is! num) {
+      if (currentLat is! num ||
+          currentLon is! num ||
+          orientation is! num ||
+          orientationError is! num ||
+          distanceThreshold is! num ||
+          threshold is! num ||
+          destLat is! num ||
+          destLon is! num) {
         ref.read(uiProvider.notifier).showMessage(
               'Invalid input',
             );
@@ -619,6 +611,17 @@ final List<BlockBluePrint> blockDataSensors = [
         destLat.toDouble(),
         destLon.toDouble(),
       );
+
+      final distance = Geolocator.distanceBetween(
+        currentLat.toDouble(),
+        currentLon.toDouble(),
+        destLat.toDouble(),
+        destLon.toDouble(),
+      );
+
+      if (distance < distanceThreshold) {
+        return 0;
+      }
 
       final double angle = formatBearing(orientationCalibrated - bearing);
       print('angle: $angle');
