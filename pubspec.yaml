@@ -44,6 +44,7 @@ dependencies:
   hive_flutter: ^1.1.0
   sensors_plus: ^6.1.1
   ambient_light: ^0.1.2
+  permission_handler: ^11.4.0
   flutter_rotation_sensor: ^0.1.1
   twitter_api_v2: ^4.0.2
   http: ^0.13.6
