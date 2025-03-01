@@ -228,6 +228,36 @@ final List<BlockBluePrint> blockDataSensors = [
     },
   ),
   BlockBluePrint(
+    name: 'Get Accelerometer Max',
+    fields: [],
+    children: [],
+    returnType: BlockTypes.number,
+    originalFunc: (WidgetRef ref, Block block) {
+      final value =
+          ref.read(variablesProvider.notifier).getVariable("_maxAccel");
+      if (value == null) {
+        print("Get Accelerometer Max: null");
+        return;
+      }
+      return value;
+    },
+  ),
+  BlockBluePrint(
+    name: 'Get Accelerometer Min',
+    fields: [],
+    children: [],
+    returnType: BlockTypes.number,
+    originalFunc: (WidgetRef ref, Block block) {
+      final value =
+          ref.read(variablesProvider.notifier).getVariable("_minAccel");
+      if (value == null) {
+        print("Get Accelerometer Min: null");
+        return;
+      }
+      return value;
+    },
+  ),
+  BlockBluePrint(
     name: 'Activate Magnetometer',
     fields: [],
     children: [],
