@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phoneduino_block/data/block_data_core.dart';
 import 'package:phoneduino_block/models/block.dart';
@@ -210,46 +208,6 @@ List<BlockBluePrint> blockDataLogic = [
       }
     },
   ),
-  // BlockBluePrint(
-  //   name: 'Switch Status',
-  //   fields: [
-  //     Field(
-  //       label: 'Select Switch',
-  //       value: '',
-  //       type: FieldTypes.variableNames,
-  //       variableType: BlockTypes.timer,
-  //     ),
-  //     Field(
-  //       label: 'Status',
-  //       value: 0,
-  //       type: FieldTypes.number,
-  //     ),
-  //   ],
-  //   children: [],
-  //   returnType: BlockTypes.none,
-  //   originalFunc: (WidgetRef ref, Block block) {
-  //     final switchName = block.fields[0].value;
-  //     final statusValue = block.fields[1].value;
-
-  //     if (!ref.read(variablesProvider.notifier).hasVariable(switchName)) {
-  //       ref.read(uiProvider.notifier).showMessage('Switch is empty');
-  //       return;
-  //     }
-
-  //     final switchValue =
-  //         ref.read(variablesProvider.notifier).getVariable(switchName).value;
-  //     if (switchValue is! Timer) {
-  //       ref.read(uiProvider.notifier).showMessage('Switch is not a timer');
-  //       return;
-  //     }
-
-  //     if (statusValue is! int) {
-  //       ref.read(uiProvider.notifier).showMessage('Case is not a number');
-  //       return;
-  //     }
-
-  //   },
-  // ),
   BlockBluePrint(
     name: 'Switch (time out)',
     fields: [
@@ -360,30 +318,30 @@ List<BlockBluePrint> blockDataLogic = [
       // when status changed or first time
       if (!ref
               .read(variablesProvider.notifier)
-              .hasVariable("${block.id}_prev") ||
+              .hasVariable("_${block.id}_prev") ||
           ref
                   .read(variablesProvider.notifier)
-                  .getVariable("${block.id}_prev_status") !=
+                  .getVariable("_${block.id}_prev_status") !=
               value) {
         ref.read(variablesProvider.notifier).setVariable(
-              "${block.id}_prev_status",
+              "_${block.id}_prev_status",
               value,
               BlockTypes.number,
             );
         ref.read(variablesProvider.notifier).setVariable(
-              "${block.id}_prev",
+              "_${block.id}_prev",
               DateTime.now(),
               BlockTypes.timer,
             );
       }
 
       final prev =
-          ref.read(variablesProvider.notifier).getVariable("${block.id}_prev");
+          ref.read(variablesProvider.notifier).getVariable("_${block.id}_prev");
       if (prev is DateTime) {
         if (DateTime.now().difference(prev).inMilliseconds > timeout[value]) {
           ref
               .read(variablesProvider.notifier)
-              .deleteVariable("${block.id}_prev");
+              .deleteVariable("_${block.id}_prev");
           if ((value + 1) * 2 < cases.length) {
             ref.read(variablesProvider.notifier).setVariable(
                 block.fields[0].value as String, value + 1, BlockTypes.number);
