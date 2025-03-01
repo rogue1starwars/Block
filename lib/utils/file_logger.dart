@@ -61,9 +61,9 @@ Future<void> _writeLogAsync(dynamic log, WidgetRef ref) async {
 
     final String timestamp = DateTime.now().toString();
     if (log is String) {
-      sink.writeln('$timestamp: $log');
+      sink.writeln('$timestamp, $log');
     } else if (log is num) {
-      sink.writeln('$timestamp: ${log.toString()}');
+      sink.writeln('$timestamp, ${log.toString()}');
     } else {
       throw FormatException('Invalid log type: ${log.runtimeType}');
     }
