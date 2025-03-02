@@ -689,6 +689,16 @@ final List<BlockBluePrint> blockDataSensors = [
       Field(label: 'Min Accel', type: FieldTypes.number, value: 0),
       Field(label: 'Max Accel', type: FieldTypes.number, value: 0),
       Field(label: 'Light Level', type: FieldTypes.number, value: 0),
+      Field(label: 'Angle', type: FieldTypes.number, value: 0),
+      Field(
+        label: 'Or/And',
+        type: FieldTypes.dropdown,
+        value: 0,
+        options: [
+          'Or',
+          'And',
+        ],
+      ),
     ],
     children: [],
     returnType: BlockTypes.boolean,
@@ -696,6 +706,8 @@ final List<BlockBluePrint> blockDataSensors = [
       final minAccelThreshold = block.fields[0].value as num;
       final maxAccelThreshold = block.fields[1].value as num;
       final lightSensorThreshold = block.fields[2].value as num;
+      final angleThreshold = block.fields[3].value as num;
+      final orAnd = block.fields[4].value as int;
 
       final maxAccel = ref
               .read(variablesProvider.notifier)
@@ -709,15 +721,28 @@ final List<BlockBluePrint> blockDataSensors = [
               .read(variablesProvider.notifier)
               .getVariable("_lightLevel") as double? ??
           0;
+
+      final angle = ref
+              .read(variablesProvider.notifier)
+              .getVariable("_pitch")
+              .abs() as double? ??
+          0;
       print("maxAccel: $maxAccel");
       print("minAccel: $minAccel");
       print("light: $lightLevel");
-      if (minAccel < minAccelThreshold &&
-          maxAccel > maxAccelThreshold &&
-          lightLevel > lightSensorThreshold) {
-        return true;
-      }
-      return false;
+      print("angle: $angle");
+
+      final conditions = [
+        (minAccel < minAccelThreshold) &&
+            (maxAccel > maxAccelThreshold) &&
+            ((lightLevel > lightSensorThreshold) ||
+                (angle.abs() < angleThreshold)),
+        (minAccel < minAccelThreshold) &&
+            (maxAccel > maxAccelThreshold) &&
+            ((lightLevel > lightSensorThreshold) &&
+                (angle.abs() < angleThreshold)),
+      ];
+      return conditions[orAnd];
     },
   ),
 /*

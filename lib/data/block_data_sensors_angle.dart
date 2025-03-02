@@ -32,16 +32,15 @@ final List<BlockBluePrint> blockDataSensorsAngle = [
               BlockTypes.number,
             );
         ref.read(variablesProvider.notifier).setVariable(
-          "pitch",
-          formatBearing(event.eulerAngles.pitch * 180/pi),
-          BlockTypes.number,
-        );
+              "_pitch",
+              formatBearing(event.eulerAngles.pitch * 180 / pi),
+              BlockTypes.number,
+            );
         ref.read(variablesProvider.notifier).setVariable(
-          "roll",
-          formatBearing(event.eulerAngles.roll * 180/pi),
-          BlockTypes.number,
-        );
-
+              "_roll",
+              formatBearing(event.eulerAngles.roll * 180 / pi),
+              BlockTypes.number,
+            );
       });
       ref.read(variablesProvider.notifier).setVariable(
             "_orientationStream_",
@@ -72,7 +71,7 @@ final List<BlockBluePrint> blockDataSensorsAngle = [
     children: [],
     returnType: BlockTypes.number,
     originalFunc: (WidgetRef ref, Block block) {
-      final value = ref.read(variablesProvider.notifier).getVariable("pitch");
+      final value = ref.read(variablesProvider.notifier).getVariable("_pitch");
 
       if (value == null) {
         print("Get Pitch: null");
@@ -87,7 +86,7 @@ final List<BlockBluePrint> blockDataSensorsAngle = [
     children: [],
     returnType: BlockTypes.number,
     originalFunc: (WidgetRef ref, Block block) {
-      final value = ref.read(variablesProvider.notifier).getVariable("roll");
+      final value = ref.read(variablesProvider.notifier).getVariable("_roll");
 
       if (value == null) {
         print("Get Roll: null");

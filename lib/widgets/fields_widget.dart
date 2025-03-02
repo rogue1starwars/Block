@@ -184,7 +184,7 @@ class _DropdownFieldWidgetState extends ConsumerState<DropdownFieldWidget> {
   @override
   Widget build(BuildContext context) {
     final List<dynamic> options = widget.parent.fields[widget.index].options;
-    int selectedOption = widget.parent.fields[widget.index].value as int;
+    int selectedOption = widget.parent.fields[widget.index].value as int? ?? 0;
     return DropdownMenu(
       dropdownMenuEntries: [
         for (int i = 0; i < options.length; i++)

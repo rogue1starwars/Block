@@ -9,7 +9,7 @@ class Field {
 
   Field({
     required this.label,
-    required this.value,
+    required this.value, // in case of options, value is the index
     required this.type,
     this.options = const [],
     this.variableType,
