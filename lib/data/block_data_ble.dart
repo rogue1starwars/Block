@@ -24,12 +24,10 @@ final List<BlockBluePrint> blockDataBle = [
         final value = block.children[0] as ValueInput;
 
         final BleInfo bleInfo = ref.read(bleProvider);
-        print("BleInfo: ${bleInfo.characteristics}");
         if (bleInfo.characteristics == null) {
           ref.read(uiProvider.notifier).showMessage(
                 'Please connect to a device first',
               );
-          print("Send Data: null");
           return;
         }
 

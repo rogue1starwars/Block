@@ -651,7 +651,6 @@ final List<BlockBluePrint> blockDataSensors = [
       final orientationCalibrated =
           formatBearing(orientation.toDouble() - orientationError);
       // print('orientation: $orientation');
-      print('orientationCalibrated: $orientationCalibrated');
 
       final bearing = Geolocator.bearingBetween(
         currentLat.toDouble(),
@@ -672,7 +671,6 @@ final List<BlockBluePrint> blockDataSensors = [
       }
 
       final double angle = formatBearing(orientationCalibrated - bearing);
-      print('angle: $angle');
 
       if (angle.abs() < threshold) {
         return 1;
@@ -727,10 +725,6 @@ final List<BlockBluePrint> blockDataSensors = [
               .getVariable("_pitch")
               .abs() as double? ??
           0;
-      print("maxAccel: $maxAccel");
-      print("minAccel: $minAccel");
-      print("light: $lightLevel");
-      print("angle: $angle");
 
       final conditions = [
         (minAccel < minAccelThreshold) &&

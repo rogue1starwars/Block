@@ -350,9 +350,6 @@ List<BlockBluePrint> blockDataLogic = [
 
       final prev =
           ref.read(variablesProvider.notifier).getVariable("_${block.id}_prev");
-      print("Value: $value");
-      print("Timeout List: $timeout");
-      print("Timeout: ${timeout[value]}");
       if (prev is DateTime) {
         if (DateTime.now().difference(prev).inMilliseconds > timeout[value]) {
           ref

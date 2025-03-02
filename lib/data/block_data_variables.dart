@@ -105,10 +105,8 @@ final List<BlockBluePrint> blockDataVariables = [
       final name = block.fields[0].value;
       final value = ref.read(variablesProvider.notifier).getVariable(name);
       if (value == null) {
-        print("Get Variable ($name): null");
         return;
       }
-      print(value);
       return value;
     },
   ),
@@ -128,10 +126,8 @@ final List<BlockBluePrint> blockDataVariables = [
       final name = block.fields[0].value;
       final value = ref.read(variablesProvider.notifier).getVariable(name);
       if (value == null) {
-        print("Get Variable: null");
         return;
       }
-      print(value);
       return value;
     },
   ),
@@ -151,10 +147,8 @@ final List<BlockBluePrint> blockDataVariables = [
       final name = block.fields[0].value;
       final value = ref.read(variablesProvider.notifier).getVariable(name);
       if (value == null) {
-        print("Get Variable: null");
         return;
       }
-      print(value);
       return value;
     },
   ),

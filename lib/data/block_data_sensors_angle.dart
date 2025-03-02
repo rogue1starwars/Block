@@ -59,7 +59,6 @@ final List<BlockBluePrint> blockDataSensorsAngle = [
           ref.read(variablesProvider.notifier).getVariable("_orientation");
 
       if (value == null) {
-        print("Get Orientation: null");
         return;
       }
       return value;
@@ -74,7 +73,6 @@ final List<BlockBluePrint> blockDataSensorsAngle = [
       final value = ref.read(variablesProvider.notifier).getVariable("_pitch");
 
       if (value == null) {
-        print("Get Pitch: null");
         return;
       }
       return value;
@@ -89,7 +87,6 @@ final List<BlockBluePrint> blockDataSensorsAngle = [
       final value = ref.read(variablesProvider.notifier).getVariable("_roll");
 
       if (value == null) {
-        print("Get Roll: null");
         return;
       }
       return value;

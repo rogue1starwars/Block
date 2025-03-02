@@ -65,7 +65,6 @@ final mainBlock = BlockBluePrint(
     final loopStatement = block.children[1] as StatementInput;
     late final int interval;
     if (block.fields[0].value is String) {
-      print(block.fields[0].value);
       interval = int.parse(block.fields[0].value);
     } else if (block.fields[0].value is int) {
       interval = block.fields[0].value;
