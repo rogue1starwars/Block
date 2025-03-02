@@ -46,7 +46,7 @@ List<BlockBluePrint> blockDataStrings = [
         type: FieldTypes.dropdown,
         label: 'Color',
         value: 0,
-        options: ['red', 'green', 'blue', 'yellow', 'purple'],
+        options: ['red', 'green', 'blue', 'yellow', 'purple', 'black'],
       )
     ],
     children: [],
@@ -56,8 +56,7 @@ List<BlockBluePrint> blockDataStrings = [
       final int colorIndex = block.fields[0].value;
       ref.read(uiProvider.notifier).changeColor(
             colorIndex,
-        );
+          );
     },
-    
   )
 ];

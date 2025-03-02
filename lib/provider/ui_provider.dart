@@ -1,12 +1,18 @@
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
 
 class UiState {
   final List<String> messageDequeue;
-  static const List<Color> colors = [Colors.red, Colors.green, Colors.blue, Colors.yellow, Colors.purple];
+  static const List<Color> colors = [
+    Colors.red,
+    Colors.green,
+    Colors.blue,
+    Colors.yellow,
+    Colors.purple,
+    Colors.black
+  ];
   final int? colorIndex;
-  const UiState({this.messageDequeue = const [], this.colorIndex });
+  const UiState({this.messageDequeue = const [], this.colorIndex});
 
   UiState copyWith({List<String>? messageDequeue, int? colorIndex}) {
     return UiState(
@@ -16,7 +22,7 @@ class UiState {
 }
 
 class UiNotifier extends StateNotifier<UiState> {
-  UiNotifier() : super(UiState());
+  UiNotifier() : super(const UiState());
 
   void changeColor(int colorIndex) {
     state = state.copyWith(colorIndex: colorIndex);
@@ -24,13 +30,13 @@ class UiNotifier extends StateNotifier<UiState> {
 
   void showMessage(String message) {
     final newMessages = [message, ...state.messageDequeue];
-    state = state.copyWith(messageDequeue: newMessages.length > 10
-        ? newMessages.sublist(0, 10)
-        : newMessages);
+    state = state.copyWith(
+        messageDequeue:
+            newMessages.length > 10 ? newMessages.sublist(0, 10) : newMessages);
   }
 
   void clearMessage() {
-    state =  UiState();
+    state = const UiState();
   }
 
   void removeMessage() {
