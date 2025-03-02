@@ -242,6 +242,11 @@ List<BlockBluePrint> blockDataLogic = [
         value: 1000,
         type: FieldTypes.number,
       ),
+      Field(
+        label: 'Case 5 (ms)',
+        value: 1000,
+        type: FieldTypes.number,
+      )
     ],
     children: [
       StatementInput(
@@ -285,6 +290,14 @@ List<BlockBluePrint> blockDataLogic = [
         blocks: [],
       ),
       StatementInput(
+        label: 'Case 5',
+        blocks: [],
+      ),
+      StatementInput(
+        label: 'When time out (5)',
+        blocks: [],
+      ),
+      StatementInput(
         label: 'Default',
         blocks: [],
       ),
@@ -302,7 +315,7 @@ List<BlockBluePrint> blockDataLogic = [
         ref.read(uiProvider.notifier).showMessage('Condition is not a number');
         return;
       }
-      if (value < 0 || value >= 5) {
+      if (value < 0 || value >= 6) {
         final defaultStatement = block.children.last as StatementInput;
         for (var block in defaultStatement.blocks) {
           block.execute(ref);
@@ -337,6 +350,9 @@ List<BlockBluePrint> blockDataLogic = [
 
       final prev =
           ref.read(variablesProvider.notifier).getVariable("_${block.id}_prev");
+      print("Value: $value");
+      print("Timeout List: $timeout");
+      print("Timeout: ${timeout[value]}");
       if (prev is DateTime) {
         if (DateTime.now().difference(prev).inMilliseconds > timeout[value]) {
           ref

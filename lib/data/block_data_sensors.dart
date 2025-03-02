@@ -258,6 +258,24 @@ final List<BlockBluePrint> blockDataSensors = [
     },
   ),
   BlockBluePrint(
+    name: 'Reset Accelerometer Max Min',
+    fields: [],
+    children: [],
+    returnType: BlockTypes.none,
+    originalFunc: (WidgetRef ref, Block block) {
+      ref.read(variablesProvider.notifier).setVariable(
+            "_maxAccel",
+            0.0,
+            BlockTypes.number,
+          );
+      ref.read(variablesProvider.notifier).setVariable(
+            "_minAccel",
+            double.infinity,
+            BlockTypes.number,
+          );
+    },
+  ),
+  BlockBluePrint(
     name: 'Activate Magnetometer',
     fields: [],
     children: [],
