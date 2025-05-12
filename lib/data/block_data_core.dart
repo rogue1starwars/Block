@@ -2,11 +2,13 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phoneduino_block/data/block_data_ble.dart';
+import 'package:phoneduino_block/data/block_data_http.dart';
 import 'package:phoneduino_block/data/block_data_logic.dart';
 import 'package:phoneduino_block/data/block_data_logs.dart';
 import 'package:phoneduino_block/data/block_data_loops.dart';
 import 'package:phoneduino_block/data/block_data_math.dart';
 import 'package:phoneduino_block/data/block_data_sensors.dart';
+import 'package:phoneduino_block/data/block_data_sensors_angle.dart';
 import 'package:phoneduino_block/data/block_data_strings.dart';
 import 'package:phoneduino_block/data/block_data_variables.dart';
 import 'package:phoneduino_block/models/block.dart';
@@ -63,7 +65,6 @@ final mainBlock = BlockBluePrint(
     final loopStatement = block.children[1] as StatementInput;
     late final int interval;
     if (block.fields[0].value is String) {
-      print(block.fields[0].value);
       interval = int.parse(block.fields[0].value);
     } else if (block.fields[0].value is int) {
       interval = block.fields[0].value;
@@ -86,8 +87,10 @@ Map<String, List<BlockBluePrint>> blockData = {
   'Logic': blockDataLogic,
   'Loops': blockDataLoops,
   'Logs': blockDataLogs,
+  'Http': blockDataHttp,
   'Bluetooth': blockDataBle,
   'Sensors': blockDataSensors,
+  'Sensors (Angle)': blockDataSensorsAngle,
   'Variables': blockDataVariables,
   'Strings': blockDataStrings,
   'Math': blockDataMath,

@@ -4,15 +4,38 @@ import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:phoneduino_block/provider/ui_provider.dart';
 
 Future<String> get _localPath async {
   try {
-    final directory = await getDownloadsDirectory();
-    if (directory == null) {
-      throw 'Failed to get downloads directory';
+    if (Platform.isAndroid) {
+      var status = await Permission.storage.status;
+      if (!status.isGranted) {
+        await Permission.storage.request();
+        status = await Permission.storage.status;
+        if (!status.isGranted) {
+          final directory = await getDownloadsDirectory();
+          if (directory == null) {
+            throw 'Failed to get downloads directory';
+          }
+          return directory.path;
+        }
+      }
+
+      final directory =
+          await Directory('/storage/emulated/0/Download').create();
+      if (!await directory.exists()) {
+        throw 'Failed to create downloads directory';
+      }
+      return directory.path;
+    } else {
+      final directory = await getDownloadsDirectory();
+      if (directory == null) {
+        throw 'Failed to get downloads directory';
+      }
+      return directory.path;
     }
-    return directory.path;
   } catch (e) {
     throw 'Failed to get local path: $e';
   }
@@ -38,9 +61,9 @@ Future<void> _writeLogAsync(dynamic log, WidgetRef ref) async {
 
     final String timestamp = DateTime.now().toString();
     if (log is String) {
-      sink.writeln('$timestamp: $log');
+      sink.writeln('$timestamp, $log');
     } else if (log is num) {
-      sink.writeln('$timestamp: ${log.toString()}');
+      sink.writeln('$timestamp, ${log.toString()}');
     } else {
       throw FormatException('Invalid log type: ${log.runtimeType}');
     }

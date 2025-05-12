@@ -12,8 +12,9 @@ class LoggerScreen extends ConsumerStatefulWidget {
 
 class _LoggerScreenState extends ConsumerState<LoggerScreen> {
   final ScrollController _scrollController = ScrollController();
-  List<String> _logs = [];
+  final List<String> _logs = [];
   StringBuffer _logContent = StringBuffer('empty');
+  StringBuffer _logContentRaw = StringBuffer('empty');
 
   @override
   void initState() {
@@ -22,42 +23,49 @@ class _LoggerScreenState extends ConsumerState<LoggerScreen> {
   }
 
   Future<void> _loadLogs() async {
-    final logcontentTemp = await readLog(ref);
+    _logContentRaw = await readLog(ref);
+    print(_logContentRaw.length);
+    if (_logContentRaw.length > 10000) {
+      setState(() {
+        _logContent = StringBuffer('Loaded! Truncated to 10000 characters\n\n');
+        _logContent.write(
+            _logContentRaw.toString().substring(_logContentRaw.length - 10000));
+      });
+      return;
+    }
     if (mounted) {
       setState(() {
-        _logContent = logcontentTemp;
+        _logContent = _logContentRaw;
       });
-
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Logs'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _loadLogs,
-          ),
-          IconButton(
-            icon: const Icon(Icons.delete),
-            onPressed: () {
-              clearLog(ref);
-              setState(() => _logs.clear());
-            },
-          ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-        Clipboard.setData(ClipboardData(text: _logContent.toString()));
-      }, 
-      child: const Icon(Icons.copy),
-      ),
-      body: SelectableText(_logContent.toString())
-    );
+        appBar: AppBar(
+          title: const Text('Logs'),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.refresh),
+              onPressed: _loadLogs,
+            ),
+            IconButton(
+              icon: const Icon(Icons.delete),
+              onPressed: () {
+                clearLog(ref);
+                setState(() => _logs.clear());
+              },
+            ),
+          ],
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            Clipboard.setData(ClipboardData(text: _logContentRaw.toString()));
+          },
+          child: const Icon(Icons.copy),
+        ),
+        body: SelectableText(_logContent.toString()));
   }
 
   @override

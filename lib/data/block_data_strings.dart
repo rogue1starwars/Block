@@ -39,4 +39,24 @@ List<BlockBluePrint> blockDataStrings = [
           );
     },
   ),
+  BlockBluePrint(
+    name: 'Color',
+    fields: [
+      Field(
+        type: FieldTypes.dropdown,
+        label: 'Color',
+        value: 0,
+        options: ['red', 'green', 'blue', 'yellow', 'purple', 'black'],
+      )
+    ],
+    children: [],
+    returnType: BlockTypes.none,
+    originalFunc: (WidgetRef ref, Block block) {
+      if (block.fields[0].value is! int) return;
+      final int colorIndex = block.fields[0].value;
+      ref.read(uiProvider.notifier).changeColor(
+            colorIndex,
+          );
+    },
+  )
 ];

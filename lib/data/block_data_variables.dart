@@ -8,6 +8,33 @@ import 'package:phoneduino_block/utils/type.dart';
 
 final List<BlockBluePrint> blockDataVariables = [
   BlockBluePrint(
+    name: 'Set Variable (Bool)',
+    returnType: BlockTypes.none,
+    originalFunc: (WidgetRef ref, Block block) {
+      final value = block.children[0] as ValueInput;
+      ref.read(variablesProvider.notifier).setVariable(
+            block.fields[0].value,
+            value.block!.execute(ref),
+            BlockTypes.boolean,
+          );
+    },
+    fields: [
+      Field(
+        type: FieldTypes.variableNames,
+        label: 'Name',
+        value: '',
+        variableType: BlockTypes.boolean,
+      ),
+    ],
+    children: [
+      ValueInput(
+        label: 'Value',
+        block: null,
+        filter: [BlockTypes.boolean],
+      ),
+    ],
+  ),
+  BlockBluePrint(
     name: 'Set Variable (Number)',
     fields: [
       Field(
@@ -63,6 +90,27 @@ final List<BlockBluePrint> blockDataVariables = [
     },
   ),
   BlockBluePrint(
+    name: 'Get Variable (Bool)',
+    fields: [
+      Field(
+        type: FieldTypes.variableNames,
+        label: 'Name',
+        value: '',
+        variableType: BlockTypes.boolean,
+      ),
+    ],
+    children: [],
+    returnType: BlockTypes.boolean,
+    originalFunc: (WidgetRef ref, Block block) {
+      final name = block.fields[0].value;
+      final value = ref.read(variablesProvider.notifier).getVariable(name);
+      if (value == null) {
+        return;
+      }
+      return value;
+    },
+  ),
+  BlockBluePrint(
     name: 'Get Variable (Number)',
     fields: [
       Field(
@@ -78,10 +126,8 @@ final List<BlockBluePrint> blockDataVariables = [
       final name = block.fields[0].value;
       final value = ref.read(variablesProvider.notifier).getVariable(name);
       if (value == null) {
-        print("Get Variable: null");
         return;
       }
-      print(value);
       return value;
     },
   ),
@@ -101,10 +147,8 @@ final List<BlockBluePrint> blockDataVariables = [
       final name = block.fields[0].value;
       final value = ref.read(variablesProvider.notifier).getVariable(name);
       if (value == null) {
-        print("Get Variable: null");
         return;
       }
-      print(value);
       return value;
     },
   ),

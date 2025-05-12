@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phoneduino_block/models/variables.dart';
 import 'package:phoneduino_block/utils/type.dart';
@@ -12,6 +14,30 @@ class VariablesNotifier extends StateNotifier<Map<String, Variable>> {
 
   void updateAllVariables(Map<String, Variable> newVariables) {
     state = newVariables;
+  }
+
+  void clearAllVariables() {
+    print('Clearing all variables');
+    final Map<String, Variable> newState = {...state};
+    for (var key in newState.keys) {
+      if (newState[key]?.value == null) {
+        continue;
+      }
+      print(newState[key]?.value);
+      if (newState[key]?.value is StreamSubscription) {
+        print(key);
+        newState[key]?.value.cancel();
+      }
+      if (newState[key]?.value is Timer) {
+        print(key);
+        newState[key]?.value.cancel();
+      }
+    }
+    newState.removeWhere((key, value) => key[0] == '_');
+    newState.forEach((key, value) {
+      newState[key] = value.copyWith(delete: true);
+    });
+    state = newState;
   }
 
   void renameVariable(String oldName, String newName) {
