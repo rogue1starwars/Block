@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phoneduino_block/data/block_data_ble.dart';
+import 'package:phoneduino_block/data/block_data_camera.dart';
 import 'package:phoneduino_block/data/block_data_http.dart';
 import 'package:phoneduino_block/data/block_data_logic.dart';
 import 'package:phoneduino_block/data/block_data_logs.dart';
@@ -94,4 +95,5 @@ Map<String, List<BlockBluePrint>> blockData = {
   'Variables': blockDataVariables,
   'Strings': blockDataStrings,
   'Math': blockDataMath,
+  'Cameras': blockDataCamera,
 };

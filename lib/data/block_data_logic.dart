@@ -156,17 +156,17 @@ List<BlockBluePrint> blockDataLogic = [
       StatementInput(
         label: 'Then',
         blocks: [],
-        filter: [],
       ),
     ],
     returnType: BlockTypes.none,
-    originalFunc: (WidgetRef ref, Block block) {
-      final condition = block.children[0] as ValueInput;
+    originalFunc: (WidgetRef ref, Block block) async {
+      final conditionBlock = block.children[0] as ValueInput;
       final thenBlock = block.children[1] as StatementInput;
 
-      if (condition.block!.execute(ref) == true) {
+      final condition = await conditionBlock.block!.execute(ref);
+      if (await condition == true) {
         for (var block in thenBlock.blocks) {
-          block.execute(ref);
+          await block.execute(ref);
         }
       }
     },
@@ -183,27 +183,27 @@ List<BlockBluePrint> blockDataLogic = [
       StatementInput(
         label: 'Then',
         blocks: [],
-        filter: [],
       ),
       StatementInput(
         label: 'Else',
         blocks: [],
-        filter: [],
       ),
     ],
     returnType: BlockTypes.none,
-    originalFunc: (WidgetRef ref, Block block) {
-      final condition = block.children[0] as ValueInput;
+    originalFunc: (WidgetRef ref, Block block) async {
+      final conditionBlock = block.children[0] as ValueInput;
       final thenBlock = block.children[1] as StatementInput;
       final elseBlock = block.children[2] as StatementInput;
 
-      if (condition.block!.execute(ref) == true) {
+      final condition = await conditionBlock.block!.execute(ref);
+
+      if (condition == true) {
         for (var block in thenBlock.blocks) {
-          block.execute(ref);
+          await block.execute(ref);
         }
       } else {
         for (var block in elseBlock.blocks) {
-          block.execute(ref);
+          await block.execute(ref);
         }
       }
     },
