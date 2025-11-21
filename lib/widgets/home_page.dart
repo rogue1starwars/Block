@@ -16,6 +16,7 @@ import 'package:phoneduino_block/widgets/ble/ble_home.dart';
 import 'package:phoneduino_block/widgets/block_tree.dart';
 import 'package:phoneduino_block/widgets/print_board.dart';
 import 'package:phoneduino_block/widgets/import_export_project.dart';
+import 'package:phoneduino_block/widgets/llm_prompt_bar.dart';
 import 'package:phoneduino_block/widgets/variables/variable_list.dart';
 
 class HomePage extends ConsumerWidget {
@@ -43,6 +44,17 @@ class HomePage extends ConsumerWidget {
         });
       }
     });
+    final Widget content = intervals.intervals.isNotEmpty
+        ? const PrintBoard()
+        : SingleChildScrollView(
+            child: Column(
+              children: [
+                const BleHome(),
+                BlockTree(block: root),
+              ],
+            ),
+          );
+
     return Scaffold(
       appBar: AppBar(
         actions: [
@@ -111,17 +123,20 @@ class HomePage extends ConsumerWidget {
           const ImportExportButton(),
         ],
       ),
-      body: intervals.intervals.isNotEmpty
-          ? const PrintBoard()
-          : SingleChildScrollView(
-              child: Column(
-                children: [
-                  const BleHome(),
-                  BlockTree(block: root),
-                ],
-              ),
+      body: Stack(
+        children: [
+          Positioned.fill(child: content),
+          const Positioned(
+            left: 16,
+            bottom: 16,
+            child: SafeArea(
+              child: LlmPromptBar(),
             ),
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.blueAccent,
         onPressed: () {
           if (intervals.intervals.isNotEmpty) {
             ref.read(intervalProvider.notifier).clearInterval();
