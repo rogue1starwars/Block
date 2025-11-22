@@ -7,6 +7,7 @@ import 'package:phoneduino_block/models/block.dart';
 import 'package:phoneduino_block/models/variables.dart';
 import 'package:phoneduino_block/provider/ble_info.dart';
 import 'package:phoneduino_block/provider/block_tree_provider.dart';
+import 'package:phoneduino_block/provider/camera_provider.dart';
 import 'package:phoneduino_block/provider/intervals_provider.dart';
 import 'package:phoneduino_block/provider/ui_provider.dart';
 import 'package:phoneduino_block/provider/variables_provider.dart';
@@ -14,6 +15,7 @@ import 'package:phoneduino_block/screens/logger_screen.dart';
 import 'package:phoneduino_block/utils/encode_decode_project.dart';
 import 'package:phoneduino_block/widgets/ble/ble_home.dart';
 import 'package:phoneduino_block/widgets/block_tree.dart';
+import 'package:phoneduino_block/widgets/camera/camera_home.dart';
 import 'package:phoneduino_block/widgets/print_board.dart';
 import 'package:phoneduino_block/widgets/import_export_project.dart';
 import 'package:phoneduino_block/widgets/variables/variable_list.dart';
@@ -116,7 +118,13 @@ class HomePage extends ConsumerWidget {
           : SingleChildScrollView(
               child: Column(
                 children: [
-                  const BleHome(),
+                  const Row(
+                    children: [
+                      BleHome(),
+                      SizedBox(width: 20),
+                      CameraHome(),
+                    ],
+                  ),
                   BlockTree(block: root),
                 ],
               ),
@@ -127,6 +135,7 @@ class HomePage extends ConsumerWidget {
             ref.read(intervalProvider.notifier).clearInterval();
             ref.read(uiProvider.notifier).clearMessage();
             ref.read(variablesProvider.notifier).clearAllVariables();
+            ref.read(cameraProvider.notifier).deactivateCamera();
             try {
               final BleInfo bleInfo = ref.read(bleProvider);
               if (bleInfo.characteristics != null) {
