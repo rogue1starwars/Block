@@ -1,0 +1,71 @@
+PODS:
+  - ambient_light (0.0.1):
+    - Flutter
+  - Flutter (1.0.0)
+  - flutter_blue_plus (0.0.1):
+    - Flutter
+  - flutter_compass (0.0.1):
+    - Flutter
+  - flutter_rotation_sensor (0.0.1):
+    - Flutter
+  - geolocator_apple (1.2.0):
+    - Flutter
+  - native_device_orientation (0.0.1):
+    - Flutter
+  - path_provider_foundation (0.0.1):
+    - Flutter
+    - FlutterMacOS
+  - permission_handler_apple (9.3.0):
+    - Flutter
+  - sensors_plus (0.0.1):
+    - Flutter
+
+DEPENDENCIES:
+  - ambient_light (from `.symlinks/plugins/ambient_light/ios`)
+  - Flutter (from `Flutter`)
+  - flutter_blue_plus (from `.symlinks/plugins/flutter_blue_plus/ios`)
+  - flutter_compass (from `.symlinks/plugins/flutter_compass/ios`)
+  - flutter_rotation_sensor (from `.symlinks/plugins/flutter_rotation_sensor/ios`)
+  - geolocator_apple (from `.symlinks/plugins/geolocator_apple/ios`)
+  - native_device_orientation (from `.symlinks/plugins/native_device_orientation/ios`)
+  - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
+  - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
+  - sensors_plus (from `.symlinks/plugins/sensors_plus/ios`)
+
+EXTERNAL SOURCES:
+  ambient_light:
+    :path: ".symlinks/plugins/ambient_light/ios"
+  Flutter:
+    :path: Flutter
+  flutter_blue_plus:
+    :path: ".symlinks/plugins/flutter_blue_plus/ios"
+  flutter_compass:
+    :path: ".symlinks/plugins/flutter_compass/ios"
+  flutter_rotation_sensor:
+    :path: ".symlinks/plugins/flutter_rotation_sensor/ios"
+  geolocator_apple:
+    :path: ".symlinks/plugins/geolocator_apple/ios"
+  native_device_orientation:
+    :path: ".symlinks/plugins/native_device_orientation/ios"
+  path_provider_foundation:
+    :path: ".symlinks/plugins/path_provider_foundation/darwin"
+  permission_handler_apple:
+    :path: ".symlinks/plugins/permission_handler_apple/ios"
+  sensors_plus:
+    :path: ".symlinks/plugins/sensors_plus/ios"
+
+SPEC CHECKSUMS:
+  ambient_light: 4257c4811ce099c08f60ac036edd942d46fb2444
+  Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
+  flutter_blue_plus: e5808fc4e5ebc58bb911635f8fdaf5e2b4da2754
+  flutter_compass: b236ab69b61545cce89fd58527f401a7587d5cc1
+  flutter_rotation_sensor: bf55ead3f64f27207dacc5972fe8ebe932f3de0b
+  geolocator_apple: 1560c3c875af2a412242c7a923e15d0d401966ff
+  native_device_orientation: e3580675687d5034770da198f6839ebf2122ef94
+  path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
+  permission_handler_apple: 4ed2196e43d0651e8ff7ca3483a069d469701f2d
+  sensors_plus: 6a11ed0c2e1d0bd0b20b4029d3bad27d96e0c65b
+
+PODFILE CHECKSUM: 4f1c12611da7338d21589c0b2ecd6bd20b109694
+
+COCOAPODS: 1.16.2
