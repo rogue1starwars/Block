@@ -28,14 +28,14 @@
 	<true/>
 	<key>NSBluetoothAlwaysUsageDescription</key>
 	<string>Our app uses bluetooth to find, connect and transfer data between different devices</string>
+	<key>NSCameraUsageDescription</key>
+	<string>This app requires access to the camera.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>To get location and direction</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
+	<key>NSLocationWhonInUseUsageDescription</key>
 	<string>To get location and direction</string>
 	<key>NSMotionUsageDescription</key>
 	<string>This app requires access to the barometer to provide altitude information.</string>
-	<key>NSCameraUsageDescription</key>
-	<string>This app requires access to the camera.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
