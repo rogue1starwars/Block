@@ -21,6 +21,110 @@ List<String> httpMethods = [
 
 List<BlockBluePrint> blockDataHttp = [
   BlockBluePrint(
+    name: 'Gemini API',
+    fields: [
+      Field(
+        label: "Token",
+        type: FieldTypes.string,
+        value: '',
+      ),
+      Field(
+        label: "Item",
+        type: FieldTypes.string,
+        value: '',
+      ),
+    ],
+    children: [
+      ValueInput(
+        label: 'Image',
+        block: null,
+        filter: [BlockTypes.image],
+      )
+    ],
+    returnType: BlockTypes.boolean,
+    originalFunc: (WidgetRef ref, Block block) async {
+      try {
+        final token = block.fields[0].value;
+        final item = block.fields[1].value;
+        final imageInput = block.children[0] as ValueInput;
+        final imageBlock = imageInput.block;
+        if (imageBlock is! Block) {
+          ref.read(uiProvider.notifier).showMessage('Invalid image');
+          return false;
+        }
+        // Execute the image block to get the image file (assume it returns XFile or File)
+        final imageFile = await imageBlock.execute(ref);
+        if (imageFile == null) {
+          ref.read(uiProvider.notifier).showMessage('No image file');
+          return false;
+        }
+
+        // Read image bytes and encode as base64
+        String mimeType = 'image/jpeg';
+        final path = imageFile.path;
+        if (path.endsWith('.png')) {
+          mimeType = 'image/png';
+        } else if (path.endsWith('.jpg') || path.endsWith('.jpeg')) {
+          mimeType = 'image/jpeg';
+        } else {
+          ref.read(uiProvider.notifier).showMessage('Unsupported image format');
+          return false;
+        }
+        final bytes = await imageFile.readAsBytes();
+        final base64Image = base64Encode(bytes);
+
+        // Prompts
+        if (item is! String) {
+          ref.read(uiProvider.notifier).showMessage('Invalid item');
+          return false;
+        }
+        final prompt =
+            "Is there a $item in the image? Respond only with true or false.";
+
+        if (token is! String) {
+          ref.read(uiProvider.notifier).showMessage('Invalid token');
+          return false;
+        }
+        final url = Uri.parse(
+            'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=$token');
+        final response = await http.post(
+          url,
+          headers: {
+            HttpHeaders.contentTypeHeader: 'application/json',
+          },
+          body: jsonEncode({
+            "contents": [
+              {
+                "parts": [
+                  {"text": prompt},
+                  {
+                    "inline_data": {
+                      "mime_type":
+                          mimeType, // or "image/png" depending on your image
+                      "data": base64Image,
+                    }
+                  }
+                ]
+              }
+            ]
+          }),
+        );
+        final Map<String, dynamic> data =
+            jsonDecode(response.body) as Map<String, dynamic>;
+
+        final String result =
+            data['candidates']?[0]['content']?['parts'][0]['text'];
+        print('Result: $result');
+
+        // ref.read(uiProvider.notifier).showMessage('Response: ${response.body}');
+        print('Response: ${response.body}');
+        return result == "True";
+      } catch (e) {
+        ref.read(uiProvider.notifier).showMessage('Error: $e');
+      }
+    },
+  ),
+  BlockBluePrint(
     name: 'Oauth2.0',
     fields: [
       Field(

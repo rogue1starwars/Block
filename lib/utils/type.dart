@@ -5,6 +5,7 @@ enum BlockTypes {
   none,
   intervalList,
   timer,
+  image,
 }
 
 Map<BlockTypes, dynamic> initialValue = {
